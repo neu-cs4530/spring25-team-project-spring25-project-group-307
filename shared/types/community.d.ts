@@ -1,5 +1,4 @@
 import { ObjectId } from 'mongodb';
-import { Request } from 'express';
 
 /**
  * Represents a community.
@@ -9,10 +8,10 @@ import { Request } from 'express';
  * - `questions`: An array of references to 'Question' documents that are part of the community.
  */
 export interface Community {
-    title: string;
-    description: string;
-    members: ObjectId[];
-    questions: ObjectId[];
+  title: string;
+  description: string;
+  members: ObjectId[];
+  questions: ObjectId[];
 }
 
 /**
