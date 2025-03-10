@@ -22,6 +22,7 @@ const mockUserJSONResponse = {
   _id: mockSafeUser._id.toString(),
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
+  interests: [], // Should this be here?
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -38,6 +39,7 @@ describe('Test userController', () => {
         username: mockUser.username,
         password: mockUser.password,
         biography: 'This is a test biography',
+        interests: [],
       };
 
       saveUserSpy.mockResolvedValueOnce({ ...mockSafeUser, biography: mockReqBody.biography });
@@ -45,7 +47,11 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        biography: mockReqBody.biography,
+        interests: [],
+      });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
