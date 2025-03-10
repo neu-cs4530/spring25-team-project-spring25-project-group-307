@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import getCommunities from '../services/communityService';
+import { getCommunities } from '../services/communityService';
 import { DatabaseCommunity } from '../types/types';
 
 /**

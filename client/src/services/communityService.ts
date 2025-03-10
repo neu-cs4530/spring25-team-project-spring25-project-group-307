@@ -1,5 +1,5 @@
 import api from './config';
-import { DatabaseCommunity } from '../types/types';
+import { Community, DatabaseCommunity } from '../types/types';
 
 const COMMUNITY_API_URL = `${process.env.REACT_APP_SERVER_URL}/community`;
 
@@ -16,4 +16,17 @@ const getCommunities = async (): Promise<DatabaseCommunity[]> => {
   return res.data;
 };
 
-export default getCommunities;
+/**
+ * Function to add a new community to the database.
+ * @param community The community to add
+ * @throws Error if there is an issue adding the community.
+ */
+const addCommunity = async (community: Community): Promise<DatabaseCommunity> => {
+  const res = await api.post(`${COMMUNITY_API_URL}/saveCommunity`, community);
+  if (res.status !== 200) {
+    throw new Error('Error when saving community');
+  }
+  return res.data;
+};
+
+export { getCommunities, addCommunity };
