@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { DatabaseQuestion, Interest } from '@fake-stack-overflow/shared';
 import QuestionModel from '../models/questions.model';
 import UserModel from '../models/users.model';
 
@@ -13,7 +14,10 @@ const calculateWeightedQuestions = async (
   userId: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
   try {
-    const user = await UserModel.findById(userId).populate('interests');
+    const user = await UserModel.findById(userId).populate<{ interests: Interest[] }>('interests');
+    if (!user) {
+      throw new Error('User not found');
+    }
     const interests = user.interests.reduce((acc: Record<string, number>, interest: Interest) => {
       acc[interest._id.toString()] = interest.weight;
       return acc;
