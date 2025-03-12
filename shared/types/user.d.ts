@@ -103,3 +103,10 @@ export interface UpdateBiographyRequest extends Request {
     biography: string;
   };
 }
+
+export interface UpdateInterestsRequest extends Request {
+  body: {
+    username: string;
+    interests: Interest[];
+  };
+}

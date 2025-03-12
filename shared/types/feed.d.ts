@@ -10,7 +10,7 @@ import { DatabaseQuestion } from './question';
  */
 export interface FeedItem {
   content: DatabaseQuestion;
-  community: DatabaseCommunity | null;
+  community?: DatabaseCommunity;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,7 +28,7 @@ export interface Feed {
  * - `_id`: Unique identifier for the feed item.
  * - `questions`: An array of ObjectIds referencing questions in the feed.
  */
-export interface DatabaseFeed extends Omit<Feed, 'questions'> {
+export interface DatabaseFeed extends Omit<Feed, 'items'> {
   _id: ObjectId;
-  questions: ObjectId[];
+  items: ObjectId[];
 }

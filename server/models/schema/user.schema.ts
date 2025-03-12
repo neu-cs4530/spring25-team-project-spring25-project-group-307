@@ -7,7 +7,7 @@ const interestSchema: Schema = new Schema(
   {
     _id: {
       type: Schema.Types.ObjectId,
-      ref: 'Tag',
+      ref: 'Interest',
       required: true,
     },
     weight: {
@@ -44,7 +44,10 @@ const userSchema: Schema = new Schema(
       type: String,
       default: '',
     },
-    interests: [interestSchema],
+    interests: {
+      type: [interestSchema],
+      default: [],
+    },
   },
   { collection: 'User' },
 );

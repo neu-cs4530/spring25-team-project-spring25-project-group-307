@@ -14,7 +14,7 @@ const feedItemSchema: Schema = new Schema(
   {
     content: {
       type: Schema.Types.ObjectId,
-      ref: 'Question', // Can be unioned to include other types of content
+      ref: 'Content',
       required: true,
     },
     community: {
@@ -44,7 +44,10 @@ const feedItemSchema: Schema = new Schema(
 
 const feedSchema: Schema = new Schema(
   {
-    items: [feedItemSchema],
+    items: {
+      type: [feedItemSchema],
+      default: [],
+    },
   },
   { collection: 'Feed' },
 );
