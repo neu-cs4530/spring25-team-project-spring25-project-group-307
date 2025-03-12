@@ -8,18 +8,30 @@ const mockUser: User = {
   username: 'user1',
   password: 'password',
   dateJoined: new Date('2024-12-03'),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
   _id: new mongoose.Types.ObjectId(),
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const mockUserJSONResponse = {
   _id: mockSafeUser._id.toString(),
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -43,11 +55,20 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        biography: mockReqBody.biography,
+        achievements: [],
+        ranking: 'Newcomer Newbie',
+        score: 0,
+      });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
+        achievements: [],
+        ranking: 'Newcomer Newbie',
+        score: 0,
       });
     });
 
