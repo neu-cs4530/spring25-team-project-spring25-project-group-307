@@ -60,6 +60,9 @@ const userController = (socket: FakeSOSocket) => {
       ...requestUser,
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
+      ranking: 'Newcomer Newbie',
+      score: 0,
+      achievements: [],
     };
 
     try {

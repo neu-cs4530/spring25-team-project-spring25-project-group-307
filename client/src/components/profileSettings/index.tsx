@@ -98,6 +98,25 @@ const ProfileSettings: React.FC = () => {
               {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
             </p>
 
+            {/* ---- New Grid Section for Rank, Score, and Achievements ---- */}
+            <h4>User Stats</h4>
+            <div className='profile-grid'>
+              <div className='profile-grid-item'>Rank: {userData.ranking}</div>
+              <div className='profile-grid-item'>Score: {userData.score}</div>
+              <div className='profile-grid-item'>
+                Achievements:{' '}
+                {userData.achievements.length > 0 ? (
+                  <ul>
+                    {userData.achievements.map((achievement, index) => (
+                      <li key={index}>{achievement}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  'No achievements yet.'
+                )}
+              </div>
+            </div>
+
             {/* ---- Reset Password Section ---- */}
             {canEditProfile && (
               <>
