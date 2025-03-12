@@ -3,16 +3,8 @@ import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
-
-import { ObjectId } from 'mongodb';
 import Box from '@mui/material/Box';
-
-interface Community {
-  title: string;
-  description: string;
-  members: undefined[];
-  questions: ObjectId[];
-}
+import { Community } from '../../../../../types/community';
 
 const TopCommunityCard = ({ community }: { community: Community }) => (
   <Box sx={{ p: 2, border: '1px dashed grey' }}>

@@ -3,15 +3,21 @@ import Tab from '@mui/material/Tab';
 import TabContext from '@mui/lab/TabContext';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
+import CircularProgress from '@mui/material/CircularProgress';
+
 import { useState } from 'react';
 import TopCommunitiesTab from './topCommunitiesTab';
 import TopUsersTab from './topUsersTab';
+import useLeaderboardPage from '../../../hooks/useLeaderboardPage';
 
 const LeaderboardPage = () => {
   const [tabNumber, setTabNumber] = useState('1');
+  const { communities, isCommunitiesLoading, topUsers, istopUsersLoading } = useLeaderboardPage();
+
   const changeTab = (event: React.SyntheticEvent, newValue: string) => {
     setTabNumber(newValue);
   };
+
   return (
     <Box sx={{ width: '100%', typography: 'body1' }}>
       <TabContext value={tabNumber}>
@@ -22,10 +28,22 @@ const LeaderboardPage = () => {
           </TabList>
         </Box>
         <TabPanel value='1'>
-          <TopCommunitiesTab />
+          {isCommunitiesLoading ? (
+            <Box display='flex' justifyContent='center' alignItems='center'>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TopCommunitiesTab communities={communities} />
+          )}
         </TabPanel>
         <TabPanel value='2'>
-          <TopUsersTab />
+          {istopUsersLoading ? (
+            <Box display='flex' justifyContent='center' alignItems='center'>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <TopUsersTab users={topUsers} />
+          )}
         </TabPanel>
       </TabContext>
     </Box>
