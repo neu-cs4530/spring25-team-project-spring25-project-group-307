@@ -28,11 +28,18 @@ export interface Interest {
  * - `dateJoined`: The date when the user registered.
  * - `biography`: A short description or bio of the user (optional).
  * - `interests`: An array of interests associated with the user.
+ * - `ranking`: The user's ranking based on their activity.
+ * - `score`: The user's score representing their contributions.
+ * - `achievements`: A list of achievements reached by the user.
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
   biography?: string;
   interests: Interest[];
+  // adding the ranking, score and achievements fields
+  ranking: string;
+  score: number;
+  achievements: string[];
 }
 
 /**

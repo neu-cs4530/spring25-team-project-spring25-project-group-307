@@ -196,6 +196,10 @@ describe('updateUser', () => {
     username: user.username,
     dateJoined: user.dateJoined,
     interests: [],
+    biography: user.biography,
+    ranking: user.ranking,
+    score: user.score,
+    achievements: user.achievements,
   };
 
   const updates: Partial<User> = {

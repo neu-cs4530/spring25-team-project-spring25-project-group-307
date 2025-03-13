@@ -9,6 +9,10 @@ const mockUser: User = {
   password: 'password',
   dateJoined: new Date('2024-12-03'),
   interests: [],
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -16,6 +20,10 @@ const mockSafeUser: SafeDatabaseUser = {
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
   interests: [] as mongoose.Types.ObjectId[],
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const mockUserJSONResponse = {
@@ -23,6 +31,10 @@ const mockUserJSONResponse = {
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
   interests: [] as Interest[],
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -51,11 +63,17 @@ describe('Test userController', () => {
         ...mockUserJSONResponse,
         biography: mockReqBody.biography,
         interests: [],
+        achievements: [],
+        ranking: 'Newcomer Newbie',
+        score: 0,
       });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
+        achievements: [],
+        ranking: 'Newcomer Newbie',
+        score: 0,
       });
     });
 
