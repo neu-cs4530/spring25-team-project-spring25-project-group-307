@@ -199,6 +199,7 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
+    interests: []
   };
 
   return await UserModel.create(userDetail);
