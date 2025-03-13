@@ -42,20 +42,7 @@ const useLeaderboardPage = () => {
     new Promise(resolve => {
       setTimeout(resolve, 1000);
     }).then(() => {
-      setTopUsers([
-        {
-          username: 'User1',
-          dateJoined: new Date(2025, 2, 10),
-        },
-        {
-          username: 'User2',
-          dateJoined: new Date(2025, 10, 9),
-        },
-        {
-          username: 'User3',
-          dateJoined: new Date(2025, 7, 16),
-        },
-      ]);
+      setTopUsers([]);
       setIsTopUsersLoading(false);
     });
   }, []);
