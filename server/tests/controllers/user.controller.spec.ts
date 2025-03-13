@@ -2,24 +2,27 @@ import supertest from 'supertest';
 import mongoose from 'mongoose';
 import { app } from '../../app';
 import * as util from '../../services/user.service';
-import { SafeDatabaseUser, User } from '../../types/types';
+import { SafeDatabaseUser, User, Interest } from '../../types/types';
 
 const mockUser: User = {
   username: 'user1',
   password: 'password',
   dateJoined: new Date('2024-12-03'),
+  interests: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
   _id: new mongoose.Types.ObjectId(),
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
+  interests: [] as mongoose.Types.ObjectId[],
 };
 
 const mockUserJSONResponse = {
   _id: mockSafeUser._id.toString(),
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
+  interests: [] as Interest[],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -36,6 +39,7 @@ describe('Test userController', () => {
         username: mockUser.username,
         password: mockUser.password,
         biography: 'This is a test biography',
+        interests: [],
       };
 
       saveUserSpy.mockResolvedValueOnce({ ...mockSafeUser, biography: mockReqBody.biography });
@@ -43,7 +47,11 @@ describe('Test userController', () => {
       const response = await supertest(app).post('/user/signup').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual({ ...mockUserJSONResponse, biography: mockReqBody.biography });
+      expect(response.body).toEqual({
+        ...mockUserJSONResponse,
+        biography: mockReqBody.biography,
+        interests: [],
+      });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
         biography: mockReqBody.biography,
@@ -405,6 +413,96 @@ describe('Test userController', () => {
       expect(response.status).toBe(500);
       expect(response.text).toContain(
         'Error when updating user biography: Error: Error updating user',
+      );
+    });
+  });
+
+  describe('PATCH /updateInterests', () => {
+    it('should successfully update interests given correct arguments', async () => {
+      const mockInterests = [
+        {
+          _id: new mongoose.Types.ObjectId(),
+          weight: 2,
+        },
+      ];
+      const mockReqBody = {
+        username: mockUser.username,
+        interests: mockInterests,
+      };
+
+      // Mock a successful updateUser call
+      updatedUserSpy.mockResolvedValueOnce(mockSafeUser);
+
+      const response = await supertest(app).patch('/user/updateInterests').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserJSONResponse);
+      // Ensure updateUser is called with the correct args
+    });
+
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        interests: [
+          {
+            _id: '123',
+            weight: 2,
+          },
+        ],
+      };
+
+      const response = await supertest(app).patch('/user/updateInterests').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request with empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        interests: [
+          {
+            _id: '123',
+            weight: 2,
+          },
+        ],
+      };
+
+      const response = await supertest(app).patch('/user/updateInterests').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 400 for request missing interests field', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+      };
+
+      const response = await supertest(app).patch('/user/updateInterests').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid user body');
+    });
+
+    it('should return 500 if updateUser returns an error', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        interests: [
+          {
+            _id: '123',
+            weight: 2,
+          },
+        ],
+      };
+
+      // Simulate a DB error
+      updatedUserSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app).patch('/user/updateInterests').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error when updating user interests: Error: Error updating user',
       );
     });
   });

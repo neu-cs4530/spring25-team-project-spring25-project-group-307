@@ -1,6 +1,24 @@
 import { Schema } from 'mongoose';
 
 /**
+ * Mongoose schema for an Interest.
+ */
+const interestSchema: Schema = new Schema(
+  {
+    _id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Interest',
+      required: true,
+    },
+    weight: {
+      type: Number,
+      default: 1,
+    },
+  },
+  { _id: false },
+);
+
+/**
  * Mongoose schema for the User collection.
  *
  * This schema defines the structure for storing users in the database.
@@ -25,6 +43,10 @@ const userSchema: Schema = new Schema(
     biography: {
       type: String,
       default: '',
+    },
+    interests: {
+      type: [interestSchema],
+      default: [],
     },
   },
   { collection: 'User' },
