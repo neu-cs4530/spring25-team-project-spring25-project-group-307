@@ -50,6 +50,7 @@ const userSchema: Schema = new Schema(
     },
     interests: {
       type: [interestSchema],
+    },
     ranking: {
       type: String,
       enum: [
