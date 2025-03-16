@@ -1,6 +1,24 @@
 import { Schema } from 'mongoose';
 
 /**
+ * Mongoose schema for an Interest.
+ */
+const interestSchema: Schema = new Schema(
+  {
+    _id: {
+      type: Schema.Types.ObjectId,
+      ref: 'Interest',
+      required: true,
+    },
+    weight: {
+      type: Number,
+      default: 1,
+    },
+  },
+  { _id: false },
+);
+
+/**
  * Mongoose schema for the User collection.
  *
  * This schema defines the structure for storing users in the database.
@@ -8,6 +26,10 @@ import { Schema } from 'mongoose';
  * - `username`: The username of the user.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `biography`: A brief biography of the user.
+ * - 'ranking': The ranking of the user.
+ * - 'score': The score of the user.
+ * - 'achievements': The achievements of the user.
  */
 const userSchema: Schema = new Schema(
   {
@@ -25,6 +47,30 @@ const userSchema: Schema = new Schema(
     biography: {
       type: String,
       default: '',
+    },
+    interests: {
+      type: [interestSchema],
+    },
+    ranking: {
+      type: String,
+      enum: [
+        'Newcomer Newbie',
+        'Common Contributor',
+        'Skilled Solver',
+        'Expert Explorer',
+        'Mentor Maven',
+        'Master Maverick',
+      ],
+      required: true,
+      default: 'Newcomer Newbie',
+    },
+    score: {
+      type: Number,
+      default: 0,
+    },
+    achievements: {
+      type: [String],
+      default: [],
     },
   },
   { collection: 'User' },

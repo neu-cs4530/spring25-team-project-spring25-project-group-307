@@ -77,6 +77,7 @@ const SideBarNav = () => {
   const links3 = [
     { id: 'menu_users', title: 'Users', path: '/users', icon: <PeopleIcon /> },
     { id: 'menu_games', title: 'Games', path: '/games', icon: <CasinoIcon /> },
+    { id: 'menu_leaderboard', title: 'Leaderboard', path: '/leaderboard', icon: <PeopleIcon /> },
   ];
 
   return (

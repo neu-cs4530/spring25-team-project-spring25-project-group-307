@@ -6,6 +6,7 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
+  UpdateInterestsRequest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -42,6 +43,13 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.biography !== undefined;
 
+  const isUpdateInterestsBodyValid = (req: UpdateInterestsRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username.trim() !== '' &&
+    req.body.interests !== undefined &&
+    Array.isArray(req.body.interests);
+
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -60,6 +68,10 @@ const userController = (socket: FakeSOSocket) => {
       ...requestUser,
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
+      interests: [],
+      ranking: 'Newcomer Newbie',
+      score: 0,
+      achievements: [],
     };
 
     try {
@@ -236,6 +248,41 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Updates a user's interests.
+   * @param req The request containing the username and interests in the body.
+   * @param res The response, either confirming the update or returning an error.
+   * @returns A promise resolving to void.
+   */
+  const updateInterests = async (req: UpdateInterestsRequest, res: Response): Promise<void> => {
+    try {
+      if (!isUpdateInterestsBodyValid(req)) {
+        res.status(400).send('Invalid user body');
+        return;
+      }
+
+      // Validate that request has username and interests
+      const { username, interests } = req.body;
+
+      // Call the same updateUser(...) service used by resetPassword
+      const updatedUser = await updateUser(username, { interests });
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      // Emit socket event for real-time updates
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when updating user interests: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -244,6 +291,7 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.patch('/updateInterests', updateInterests);
   return router;
 };
 
