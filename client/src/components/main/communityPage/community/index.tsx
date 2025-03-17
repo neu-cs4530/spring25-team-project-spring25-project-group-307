@@ -9,6 +9,7 @@ import { DatabaseCommunity } from '../../../../types/types';
  */
 interface CommunityProps {
   community: DatabaseCommunity;
+  handleJoinCommunity: (title: string) => void;
 }
 
 /**
@@ -16,7 +17,7 @@ interface CommunityProps {
  *
  * @param community - The community object containing community details.
  */
-const CommunityView = ({ community }: CommunityProps) => (
+const CommunityView = ({ community, handleJoinCommunity }: CommunityProps) => (
   <div>
     <div>
       <Card>
@@ -32,7 +33,9 @@ const CommunityView = ({ community }: CommunityProps) => (
           <Typography variant='body2'>{community.questions.length} questions</Typography>
         </CardContent>
         <CardActions>
-          <Button size='small'>Join</Button>
+          <Button onClick={() => handleJoinCommunity(community.title)} size='small'>
+            Join
+          </Button>
           <Button size='small'>View</Button>
         </CardActions>
       </Card>

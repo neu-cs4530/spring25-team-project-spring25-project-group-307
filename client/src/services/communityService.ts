@@ -29,4 +29,18 @@ const addCommunity = async (community: Community): Promise<DatabaseCommunity> =>
   return res.data;
 };
 
-export { getCommunities, addCommunity };
+/**
+ * Function to join a new community.
+ * @param title title of community
+ * @param username username of user trying to join
+ * @throws Error if there is an issue joining the community.
+ */
+const joinCommunity = async (title: string, username: string): Promise<DatabaseCommunity> => {
+  const res = await api.post(`${COMMUNITY_API_URL}/joinCommunity`, { username, title });
+  if (res.status !== 200) {
+    throw new Error('Error when saving community');
+  }
+  return res.data;
+};
+
+export { getCommunities, addCommunity, joinCommunity };
