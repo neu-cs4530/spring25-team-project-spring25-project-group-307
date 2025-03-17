@@ -34,7 +34,7 @@ const useCommunityPage = () => {
     };
 
     fetchData();
-  }, [communityList]);
+  }, []);
 
   return { titleText, communityList };
 };
