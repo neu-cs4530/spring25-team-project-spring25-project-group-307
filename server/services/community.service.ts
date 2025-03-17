@@ -1,5 +1,6 @@
 import { Community, DatabaseCommunity } from '../types/types';
 import CommunityModel from '../models/communities.model';
+import { getUserByUsername } from './user.service';
 
 /**
  * Retrieves all communities from the database.
@@ -41,4 +42,38 @@ const addCommunity = async (community: Community): Promise<DatabaseCommunity | n
   }
 };
 
-export { getCommunities, addCommunity };
+const joinCommunity = async (
+  title: string,
+  username: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const user = await getUserByUsername(username);
+    if ('error' in user) {
+      throw new Error(user.error);
+    }
+    const filter = {
+      title,
+    };
+    const communityWithUser: DatabaseCommunity | null = await CommunityModel.findOne({
+      ...filter,
+      members: { $in: user._id },
+    });
+
+    if (communityWithUser) {
+      throw new Error();
+    }
+
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      filter,
+      {
+        $push: { members: user._id },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
+export { getCommunities, addCommunity, joinCommunity };
