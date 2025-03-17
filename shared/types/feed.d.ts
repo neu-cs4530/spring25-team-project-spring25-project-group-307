@@ -1,18 +1,9 @@
 import { ObjectId } from 'mongodb';
 import { DatabaseQuestion } from './question';
 
-/**
- * Represents a feed item.
- * - `content`: The content of the feed item.
- * - `community`: The community that the feed item belongs to.
- * - `createdAt`: The timestamp when the feed item was created.
- * - `updatedAt`: The timestamp when the feed item was last updated.
- */
 export interface FeedItem {
-  content: DatabaseQuestion;
-  community?: DatabaseCommunity;
-  createdAt: Date;
-  updatedAt: Date;
+  question: DatabaseQuestion;
+  viewedRanking: number;
 }
 
 /**

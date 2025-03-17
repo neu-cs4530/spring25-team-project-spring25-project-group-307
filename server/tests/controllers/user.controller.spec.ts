@@ -421,7 +421,7 @@ describe('Test userController', () => {
     it('should successfully update interests given correct arguments', async () => {
       const mockInterests = [
         {
-          _id: new mongoose.Types.ObjectId(),
+          _id: new mongoose.Types.ObjectId().toString(),
           weight: 2,
         },
       ];
@@ -438,6 +438,7 @@ describe('Test userController', () => {
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockUserJSONResponse);
       // Ensure updateUser is called with the correct args
+      expect(updatedUserSpy).toHaveBeenCalledWith(mockUser.username, { interests: mockInterests });
     });
 
     it('should return 400 for request missing username', async () => {

@@ -10,6 +10,7 @@ import {
   DatabaseQuestion,
   DatabaseTag,
   DatabaseUser,
+  Interest,
   Question,
   Tag,
   User,
@@ -189,6 +190,7 @@ async function userCreate(
   password: string,
   dateJoined: Date,
   biography?: string,
+  interests?: Interest[],
 ): Promise<DatabaseUser> {
   if (username === '' || password === '' || dateJoined === null) {
     throw new Error('Invalid User Format');
@@ -199,7 +201,7 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    interests: []
+    interests: interests ?? [],
   };
 
   return await UserModel.create(userDetail);
