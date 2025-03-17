@@ -4,10 +4,15 @@ import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
+import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
 
-const RecommendedQuestionCard = () => {
+const RecommendedQuestionCard = ({
+  question,
+}: {
+  question: Omit<PopulatedDatabaseQuestion, '_id'>;
+}) => {
   const handleClick = () => {
-    console.log('Card clicked!'); // Replace with navigation logic if needed
+    console.log(`View Question: ${question.title}`); // Replace with navigation logic if needed
   };
 
   return (
@@ -19,15 +24,15 @@ const RecommendedQuestionCard = () => {
         p: 2,
       }}>
       <Card
-        onClick={handleClick} // Makes the whole card clickable
+        onClick={handleClick}
         sx={{
           'minWidth': 275,
           'width': '50%',
           'p': 2,
           'border': '1px dashed grey',
-          'cursor': 'pointer', // Shows pointer on hover
-          'transition': 'background-color 0.3s ease', // Smooth transition
-          '&:hover': { backgroundColor: '#f5f5f5' }, // Light gray on hover
+          'cursor': 'pointer',
+          'transition': 'background-color 0.3s ease',
+          '&:hover': { backgroundColor: '#f5f5f5' },
         }}>
         <CardContent>
           {/* Header Section */}
@@ -41,10 +46,10 @@ const RecommendedQuestionCard = () => {
             }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               <Typography variant='subtitle1' fontWeight='bold'>
-                community.title
+                {'question.community'}
               </Typography>
               <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                • 2 hr. ago
+                • {question.askDateTime.toLocaleString()}
               </Typography>
             </Box>
             <Button variant='contained' size='small' sx={{ borderRadius: 20 }}>
@@ -54,11 +59,11 @@ const RecommendedQuestionCard = () => {
 
           {/* Card Content */}
           <Typography sx={{ mt: 1.5 }} variant='h5' component='div'>
-            {'question.title'}
+            {question.title}
           </Typography>
 
           <Typography variant='body2'>
-            {'community.description'}
+            {question.text}
             <br />
           </Typography>
         </CardContent>
