@@ -2,7 +2,7 @@ import Box from '@mui/material/Box';
 
 import CircularProgress from '@mui/material/CircularProgress';
 
-import { Button, Link, Typography } from '@mui/material';
+import { Link, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RecommendedContentPanel from './recommendedContentPanel';
 import useFeedPage from '../../../hooks/useFeedPage';

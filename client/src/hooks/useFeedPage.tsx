@@ -1,10 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import {
-  DatabaseQuestion,
-  PopulatedDatabaseQuestion,
-  SafeDatabaseUser,
-} from '@fake-stack-overflow/shared';
-import { Community } from '../types/community';
+import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
 
 const useFeedPage = () => {
   const [questions, setQuestions] = useState<Omit<PopulatedDatabaseQuestion, '_id'>[]>([]);
@@ -80,14 +75,15 @@ const useFeedPage = () => {
         threshold: 0.5, // Trigger when 50% of the element is visible
       },
     );
+    const targetElement = pageEndElement.current;
 
-    if (pageEndElement.current) {
-      observer.observe(pageEndElement.current);
+    if (targetElement) {
+      observer.observe(targetElement);
     }
 
     return () => {
-      if (pageEndElement.current) {
-        observer.unobserve(pageEndElement.current);
+      if (targetElement) {
+        observer.unobserve(targetElement);
       }
     };
   }, [noMoreContent]);

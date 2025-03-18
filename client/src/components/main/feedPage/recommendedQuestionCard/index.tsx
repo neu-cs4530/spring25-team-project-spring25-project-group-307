@@ -11,9 +11,7 @@ const RecommendedQuestionCard = ({
 }: {
   question: Omit<PopulatedDatabaseQuestion, '_id'>;
 }) => {
-  const handleClick = () => {
-    console.log(`View Question: ${question.title}`); // Replace with navigation logic if needed
-  };
+  const handleClick = () => {};
 
   return (
     <Box
