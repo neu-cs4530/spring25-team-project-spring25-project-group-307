@@ -18,7 +18,7 @@ import useUserContext from './useUserContext';
 const useCommunityPage = () => {
   const [titleText, setTitleText] = useState<string>('All Communities');
   const [communityList, setCommunityList] = useState<DatabaseCommunity[]>([]);
-  const [viewJoined, setViewJoined] = useState<boolean>(false);
+  const [viewJoined, setViewJoined] = useState<boolean>(true);
   const { user: currentUser } = useUserContext();
 
   useEffect(() => {
@@ -58,14 +58,24 @@ const useCommunityPage = () => {
   };
 
   const handleLeaveCommunity = async (title: string) => {
-    leaveCommunity(title, currentUser.username).then(
-      () => getCommunities().then(communities => setCommunityList(communities)),
-      () => {
-        // TODO: in the future should display an error
-        // eslint-disable-next-line no-console
-        console.log("can't leave community");
-      },
-    );
+    if (!viewJoined) {
+      leaveCommunity(title, currentUser.username).then(
+        () =>
+          getCommunitiesByUser(currentUser.username).then(communities =>
+            setCommunityList(communities),
+          ),
+        () => {
+          console.log("can't leave community");
+        },
+      );
+    } else {
+      leaveCommunity(title, currentUser.username).then(
+        () => getCommunities().then(communities => setCommunityList(communities)),
+        () => {
+          console.log("can't leave community");
+        },
+      );
+    }
   };
 
   const isUserInCommunity = (title: string): boolean => {
@@ -75,11 +85,11 @@ const useCommunityPage = () => {
 
   const toggleCommunityView = async () => {
     if (viewJoined) {
-      setTitleText('All Communities');
-      setCommunityList(await getCommunities());
-    } else {
       setTitleText('My Communities');
       setCommunityList(await getCommunitiesByUser(currentUser.username));
+    } else {
+      setTitleText('All Communities');
+      setCommunityList(await getCommunities());
     }
     setViewJoined(!viewJoined);
   };
