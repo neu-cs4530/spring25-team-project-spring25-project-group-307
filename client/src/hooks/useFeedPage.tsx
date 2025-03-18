@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   DatabaseQuestion,
   PopulatedDatabaseQuestion,
@@ -10,54 +10,7 @@ const useFeedPage = () => {
   const [questions, setQuestions] = useState<Omit<PopulatedDatabaseQuestion, '_id'>[]>([]);
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
 
-  useEffect(() => {
-    // api call goes here
-    setIsQuestionsLoading(true);
-    new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    }).then(() => {
-      setQuestions([
-        {
-          title: '',
-          text: '',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-        {
-          title: '',
-          text: '',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-        {
-          title: '',
-          text: '',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-      ]);
-      setIsQuestionsLoading(false);
-    });
-  }, []);
-
+  const pageEndElement = useRef(null);
   const getMoreQuestions = (limit: number) => {
     setIsQuestionsLoading(true);
 
@@ -67,8 +20,32 @@ const useFeedPage = () => {
       setQuestions(prev => [
         ...prev,
         {
-          title: '',
-          text: '',
+          title: 'Title1',
+          text: 'Text1',
+          tags: [],
+          answers: [],
+          comments: [],
+          askedBy: '',
+          askDateTime: new Date(),
+          views: [],
+          upVotes: [],
+          downVotes: [],
+        },
+        {
+          title: 'Title2',
+          text: 'Text2',
+          tags: [],
+          answers: [],
+          comments: [],
+          askedBy: '',
+          askDateTime: new Date(),
+          views: [],
+          upVotes: [],
+          downVotes: [],
+        },
+        {
+          title: 'Title3',
+          text: 'Text3',
           tags: [],
           answers: [],
           comments: [],
@@ -83,7 +60,32 @@ const useFeedPage = () => {
     });
   };
 
-  return { questions, isQuestionsLoading, getMoreQuestions };
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          getMoreQuestions(3);
+        }
+      },
+      {
+        root: null, // Defaults to viewport
+        rootMargin: '0px',
+        threshold: 0.5, // Trigger when 50% of the element is visible
+      },
+    );
+
+    if (pageEndElement.current) {
+      observer.observe(pageEndElement.current);
+    }
+
+    return () => {
+      if (pageEndElement.current) {
+        observer.unobserve(pageEndElement.current);
+      }
+    };
+  }, []);
+
+  return { questions, isQuestionsLoading, pageEndElement };
 };
 
 export default useFeedPage;
