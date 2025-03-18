@@ -1,5 +1,5 @@
 import React from 'react';
-import { TextField } from '@mui/material';
+import { Switch, TextField } from '@mui/material';
 import CreateCommunityButton from '../../createCommunityButton';
 
 /**
@@ -9,8 +9,12 @@ import CreateCommunityButton from '../../createCommunityButton';
  * communityCount - The number of communities to be displayed in the header.
  */
 interface CommunityHeaderProps {
+  val: string;
   titleText: string;
   communityCount: number;
+  toggleCommunityView: () => void;
+  handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 /**
@@ -21,7 +25,14 @@ interface CommunityHeaderProps {
  * @param titleText - The title text to display in the header.
  * @param communityCount - The number of questions displayed in the header.
  */
-const CommunityHeader = ({ titleText, communityCount }: CommunityHeaderProps) => (
+const CommunityHeader = ({
+  val,
+  titleText,
+  communityCount,
+  toggleCommunityView,
+  handleInputChange,
+  handleKeyDown,
+}: CommunityHeaderProps) => (
   <div>
     <div className='space_between right_padding'>
       <div className='bold_title'>{titleText}</div>
@@ -31,11 +42,19 @@ const CommunityHeader = ({ titleText, communityCount }: CommunityHeaderProps) =>
         label='Search for Communities'
         variant='outlined'
         size='small'
+        value={val}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
       />
       <CreateCommunityButton />
     </div>
     <div className='space_between right_padding'>
       <div id='question_count'>{communityCount} communities</div>
+      <div>
+        <span>Joined</span>
+        <Switch defaultChecked onChange={toggleCommunityView} />
+        <span>All</span>
+      </div>
     </div>
   </div>
 );
