@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import { FakeSOSocket } from '../types/types';
 import {
   getCommunities,
+  getCommunitiesBySearch,
   getCommunitiesByUser,
   addCommunity,
   joinCommunity,
@@ -23,6 +24,22 @@ const communityController = (socket: FakeSOSocket) => {
     try {
       // Get all communities from the database
       const communities = await getCommunities();
+      res.json(communities);
+    } catch (error) {
+      res.status(500).send(`Error when fetching communities: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles getting all communities that match a search query.
+   * 
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   */
+  const getCommunitiesBySearchRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Get all communities from the database
+      const communities = await getCommunitiesBySearch(req.params.search);
       res.json(communities);
     } catch (error) {
       res.status(500).send(`Error when fetching communities: ${(error as Error).message}`);
@@ -117,6 +134,7 @@ const communityController = (socket: FakeSOSocket) => {
 
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
+  router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
   router.get('/getCommunitiesByUser/:username', getCommunitiesByUserRoute);
   router.post('/saveCommunity', addCommunityRoute);
   router.post('/joinCommunity', joinCommunityRoute);

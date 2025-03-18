@@ -11,20 +11,26 @@ import CommunityView from './community';
  */
 const CommunityPage = () => {
   const {
+    val,
     titleText,
     communityList,
     handleJoinCommunity,
     handleLeaveCommunity,
     isUserInCommunity,
     toggleCommunityView,
+    handleInputChange,
+    handleKeyDown,
   } = useCommunityPage();
 
   return (
     <div style={{ marginRight: '2%' }}>
       <CommuntiyHeader
+        val={val}
         titleText={titleText}
         communityCount={communityList.length}
         toggleCommunityView={toggleCommunityView}
+        handleInputChange={handleInputChange}
+        handleKeyDown={handleKeyDown}
       />
       <div id='community_list' className='right_padding'>
         <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
@@ -40,6 +46,9 @@ const CommunityPage = () => {
             </Grid2>
           ))}
         </Grid2>
+        {titleText === 'Search Results' && !communityList.length && (
+          <div className='bold_title right_padding'>No Communities Found</div>
+        )}
       </div>
     </div>
   );

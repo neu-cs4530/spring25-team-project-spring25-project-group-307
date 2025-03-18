@@ -44,7 +44,8 @@ const useHeader = () => {
       e.preventDefault();
 
       const searchParams = new URLSearchParams();
-      searchParams.set('search', e.currentTarget.value);
+      const target = e.target as HTMLInputElement;
+      searchParams.set('search', target.value);
 
       navigate(`/home?${searchParams.toString()}`);
     }

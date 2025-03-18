@@ -16,6 +16,22 @@ const getCommunities = async (): Promise<DatabaseCommunity[]> => {
 };
 
 /**
+ * Retrieves all communities that match a search query.
+ * @param {string} search - The search query to match communities against
+ * @returns {Promise<DatabaseCommunity[]>} - An array of communities or an empty array if error occurs.
+ */
+const getCommunitiesBySearch = async (search: string): Promise<DatabaseCommunity[]> => {
+  try {
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
+      title: { $regex: search, $options: 'i' },
+    });
+    return communities;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
  * Retrieves all communities that a user is a member of.
  * @param {string} username - The username of the user to fetch communities for
  * @returns {Promise<DatabaseCommunity[]>} - An array of communities or an empty array if error occurs.
@@ -116,4 +132,4 @@ const leaveCommunity = async (
   }
 };
 
-export { getCommunities, getCommunitiesByUser, addCommunity, joinCommunity, leaveCommunity };
+export { getCommunities, getCommunitiesBySearch, getCommunitiesByUser, addCommunity, joinCommunity, leaveCommunity };

@@ -17,6 +17,19 @@ const getCommunities = async (): Promise<DatabaseCommunity[]> => {
 };
 
 /**
+ * Function to fetch all communities that match a search query.
+ * @param search The search query to match communities against
+ * @throws Error if there is an issue fetching the list of communities.
+ */
+const getCommunitiesBySearch = async (search: string): Promise<DatabaseCommunity[]> => {
+  const res = await api.get(`${COMMUNITY_API_URL}/getCommunitiesBySearch/${search}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching list of communities');
+  }
+  return res.data;
+};
+
+/**
  * Function to fetch all communities that a user is a member of.
  * @param username The user to fetch their communities for
  * @throws Error if there is an issue fetching the list of communities.
@@ -70,4 +83,11 @@ const leaveCommunity = async (title: string, username: string): Promise<Database
   return res.data;
 };
 
-export { getCommunities, addCommunity, joinCommunity, leaveCommunity, getCommunitiesByUser };
+export {
+  getCommunities,
+  addCommunity,
+  joinCommunity,
+  leaveCommunity,
+  getCommunitiesByUser,
+  getCommunitiesBySearch,
+};
