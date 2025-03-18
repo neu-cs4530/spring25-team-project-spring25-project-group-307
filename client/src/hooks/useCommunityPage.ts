@@ -65,6 +65,7 @@ const useCommunityPage = () => {
             setCommunityList(communities),
           ),
         () => {
+          // eslint-disable-next-line no-console
           console.log("can't leave community");
         },
       );
@@ -72,6 +73,7 @@ const useCommunityPage = () => {
       leaveCommunity(title, currentUser.username).then(
         () => getCommunities().then(communities => setCommunityList(communities)),
         () => {
+          // eslint-disable-next-line no-console
           console.log("can't leave community");
         },
       );

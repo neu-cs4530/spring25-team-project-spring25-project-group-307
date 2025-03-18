@@ -6,7 +6,9 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuItem from '@mui/material/MenuItem';
+import Badge from '@mui/material/Badge';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from 'react-router-dom';
 import { TextField } from '@mui/material';
@@ -86,6 +88,11 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
           />
         </Box>
         <Box>
+          <IconButton size='large' aria-label='notifications' color='inherit'>
+            <Badge badgeContent={4} color='error'>
+              <NotificationsIcon />
+            </Badge>
+          </IconButton>
           <IconButton
             size='large'
             aria-label='account of current user'
