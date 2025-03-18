@@ -10,11 +10,22 @@ import CommunityView from './community';
  * It includes a header with order buttons and a button to ask a new question.
  */
 const CommunityPage = () => {
-  const { titleText, communityList, handleJoinCommunity } = useCommunityPage();
+  const {
+    titleText,
+    communityList,
+    handleJoinCommunity,
+    handleLeaveCommunity,
+    isUserInCommunity,
+    toggleCommunityView,
+  } = useCommunityPage();
 
   return (
     <div style={{ marginRight: '2%' }}>
-      <CommuntiyHeader titleText={titleText} communityCount={communityList.length} />
+      <CommuntiyHeader
+        titleText={titleText}
+        communityCount={communityList.length}
+        toggleCommunityView={toggleCommunityView}
+      />
       <div id='community_list' className='right_padding'>
         <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>
           {communityList.map(c => (
@@ -23,6 +34,8 @@ const CommunityPage = () => {
                 community={c}
                 key={String(c._id)}
                 handleJoinCommunity={handleJoinCommunity}
+                handleLeaveCommunity={handleLeaveCommunity}
+                UserInCommunity={isUserInCommunity(c.title)}
               />
             </Grid2>
           ))}
