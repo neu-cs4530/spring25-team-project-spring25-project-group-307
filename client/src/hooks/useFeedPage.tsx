@@ -8,7 +8,6 @@ import { Community } from '../types/community';
 
 const useFeedPage = () => {
   const [questions, setQuestions] = useState<Omit<PopulatedDatabaseQuestion, '_id'>[]>([]);
-  const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
   const [noMoreContent, setNoMoreContent] = useState(true);
 
