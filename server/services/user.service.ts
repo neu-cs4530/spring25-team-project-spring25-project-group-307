@@ -29,6 +29,8 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       dateJoined: result.dateJoined,
       biography: result.biography,
       interests: result.interests,
+      feed: result.feed,
+      lastViewRanking: result.lastViewRanking,
     };
 
     return safeUser;

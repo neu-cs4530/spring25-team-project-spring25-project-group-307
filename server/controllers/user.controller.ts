@@ -69,6 +69,8 @@ const userController = (socket: FakeSOSocket) => {
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
       interests: [],
+      feed: { items: [] },
+      lastViewRanking: 0,
     };
 
     try {
