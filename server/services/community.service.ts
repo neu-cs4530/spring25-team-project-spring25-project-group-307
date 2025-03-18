@@ -132,4 +132,11 @@ const leaveCommunity = async (
   }
 };
 
-export { getCommunities, getCommunitiesBySearch, getCommunitiesByUser, addCommunity, joinCommunity, leaveCommunity };
+export {
+  getCommunities,
+  getCommunitiesBySearch,
+  getCommunitiesByUser,
+  addCommunity,
+  joinCommunity,
+  leaveCommunity,
+};

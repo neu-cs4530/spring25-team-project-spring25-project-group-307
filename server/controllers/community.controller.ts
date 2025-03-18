@@ -32,7 +32,7 @@ const communityController = (socket: FakeSOSocket) => {
 
   /**
    * Handles getting all communities that match a search query.
-   * 
+   *
    * @param req The HTTP request object.
    * @param res The HTTP response object.
    */
