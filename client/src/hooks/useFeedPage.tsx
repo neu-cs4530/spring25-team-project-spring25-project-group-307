@@ -9,61 +9,69 @@ import { Community } from '../types/community';
 const useFeedPage = () => {
   const [questions, setQuestions] = useState<Omit<PopulatedDatabaseQuestion, '_id'>[]>([]);
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
+  const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
+  const [noMoreContent, setNoMoreContent] = useState(true);
 
   const pageEndElement = useRef(null);
-  const getMoreQuestions = (limit: number) => {
+  const getMoreQuestions = async (limit: number) => {
     setIsQuestionsLoading(true);
 
-    new Promise(resolve => {
+    await new Promise(resolve => {
       setTimeout(resolve, 1000);
-    }).then(() => {
-      setQuestions(prev => [
-        ...prev,
-        {
-          title: 'Title1',
-          text: 'Text1',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-        {
-          title: 'Title2',
-          text: 'Text2',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-        {
-          title: 'Title3',
-          text: 'Text3',
-          tags: [],
-          answers: [],
-          comments: [],
-          askedBy: '',
-          askDateTime: new Date(),
-          views: [],
-          upVotes: [],
-          downVotes: [],
-        },
-      ]);
-      setIsQuestionsLoading(false);
     });
+    setQuestions(prev => [
+      ...prev,
+      {
+        title: 'Title1',
+        text: 'Text1',
+        tags: [],
+        answers: [],
+        comments: [],
+        askedBy: '',
+        askDateTime: new Date(),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+      },
+      {
+        title: 'Title2',
+        text: 'Text2',
+        tags: [],
+        answers: [],
+        comments: [],
+        askedBy: '',
+        askDateTime: new Date(),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+      },
+      {
+        title: 'Title3',
+        text: 'Text3',
+        tags: [],
+        answers: [],
+        comments: [],
+        askedBy: '',
+        askDateTime: new Date(),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+      },
+    ]);
+    setIsQuestionsLoading(false);
+    // Todo: make sure we only set this if we know from the api that more content is available
+    setNoMoreContent(false);
+  };
+
+  const resetFeed = () => {
+    setQuestions([]);
+    getMoreQuestions(3);
   };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
+        if (entry.isIntersecting && !noMoreContent) {
           getMoreQuestions(3);
         }
       },
@@ -83,9 +91,9 @@ const useFeedPage = () => {
         observer.unobserve(pageEndElement.current);
       }
     };
-  }, []);
+  }, [noMoreContent]);
 
-  return { questions, isQuestionsLoading, pageEndElement };
+  return { questions, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed };
 };
 
 export default useFeedPage;
