@@ -28,6 +28,10 @@ const userSchema: Schema = new Schema(
     },
     interests: [{ type: Schema.Types.ObjectId, ref: 'Interest' }],
     feed: { type: Schema.Types.ObjectId, ref: 'Feed' },
+    lastViewRanking: {
+      type: Number,
+      default: 0,
+    },
   },
   { collection: 'User' },
 );

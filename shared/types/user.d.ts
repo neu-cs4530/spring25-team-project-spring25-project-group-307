@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { ObjectId } from 'mongodb';
+import { Feed } from './feed';
 
 /**
  * Represents user credentials for authentication.
@@ -33,6 +34,8 @@ export interface User extends UserCredentials {
   dateJoined: Date;
   biography?: string;
   interests: Interest[];
+  feed: Feed;
+  lastViewRanking: number;
 }
 
 /**
@@ -47,6 +50,7 @@ export interface User extends UserCredentials {
 export interface DatabaseUser extends Omit<User, 'interests'> {
   _id: ObjectId;
   interests: ObjectId[];
+  feed: ObjectId;
 }
 
 /**

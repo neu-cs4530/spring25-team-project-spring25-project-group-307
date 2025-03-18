@@ -10,6 +10,7 @@ import {
   DatabaseQuestion,
   DatabaseTag,
   DatabaseUser,
+  FeedItem,
   Interest,
   Question,
   Tag,
@@ -191,6 +192,8 @@ async function userCreate(
   dateJoined: Date,
   biography?: string,
   interests?: Interest[],
+  feed?: {items: FeedItem[]},
+  lastViewRanking?: number,
 ): Promise<DatabaseUser> {
   if (username === '' || password === '' || dateJoined === null) {
     throw new Error('Invalid User Format');
@@ -202,6 +205,8 @@ async function userCreate(
     dateJoined,
     biography: biography ?? '',
     interests: interests ?? [],
+    feed: feed ?? { items: [] },
+    lastViewRanking: lastViewRanking ?? 0,
   };
 
   return await UserModel.create(userDetail);

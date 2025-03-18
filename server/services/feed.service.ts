@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { DatabaseQuestion, Interest } from '@fake-stack-overflow/shared';
+import { DatabaseQuestion, FeedItem, Interest } from '@fake-stack-overflow/shared';
 import QuestionModel from '../models/questions.model';
 import UserModel from '../models/users.model';
 
@@ -37,22 +37,53 @@ const calculateWeightedQuestions = async (
   }
 };
 
-const getQuestionsForInfiniteScroll = async (
+const getAllQuestionsInOrderAndSaveToFeed = async (
   userId: ObjectId,
-  limit: number,
-  lastQuestionId?: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
   try {
-    const questions = await QuestionModel.find(
-      lastQuestionId ? { _id: { $lt: lastQuestionId } } : {},
-    )
-      .limit(limit)
-      .populate('tags');
+    const questions = await QuestionModel.find({}).populate('tags');
+
     const weightedQuestions = await calculateWeightedQuestions(questions, userId);
+
+    const feedItems: FeedItem[] = weightedQuestions.map((question, index) => ({
+      question,
+      viewedRanking: index + 1,
+    }));
+
+    await UserModel.findByIdAndUpdate(userId, { feed: feedItems });
     return weightedQuestions;
   } catch (err) {
     return [];
   }
 };
 
-export { calculateWeightedQuestions, getQuestionsForInfiniteScroll };
+const getQuestionsForInfiniteScroll = async (
+  userId: ObjectId,
+  limit: number,
+): Promise<DatabaseQuestion[]> => {
+  try {
+    const user = await UserModel.findById(userId).populate<{ feed: FeedItem[] }>('feed');
+    if (!user || !user.feed) {
+      throw new Error('User or feed not found');
+    }
+
+    const startIndex = user.lastViewRanking || 0;
+    const endIndex = startIndex + limit;
+
+    const feedItems = user.feed.slice(startIndex, endIndex);
+
+    await UserModel.findByIdAndUpdate(userId, { lastViewRanking: endIndex });
+
+    const questions = feedItems.map(feedItem => feedItem.question);
+
+    return questions;
+  } catch (err) {
+    return [];
+  }
+};
+
+export {
+  calculateWeightedQuestions,
+  getQuestionsForInfiniteScroll,
+  getAllQuestionsInOrderAndSaveToFeed,
+};

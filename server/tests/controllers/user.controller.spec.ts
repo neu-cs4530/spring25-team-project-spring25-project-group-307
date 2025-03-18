@@ -9,6 +9,8 @@ const mockUser: User = {
   password: 'password',
   dateJoined: new Date('2024-12-03'),
   interests: [],
+  feed: { items: [] },
+  lastViewRanking: 0,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -16,6 +18,8 @@ const mockSafeUser: SafeDatabaseUser = {
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
   interests: [] as mongoose.Types.ObjectId[],
+  feed: new mongoose.Types.ObjectId(),
+  lastViewRanking: 0,
 };
 
 const mockUserJSONResponse = {
