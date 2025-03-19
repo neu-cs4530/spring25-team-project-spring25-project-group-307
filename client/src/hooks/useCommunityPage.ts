@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ObjectId } from 'mongodb';
 import {
   getCommunities,
   getCommunitiesByUser,
@@ -103,6 +104,10 @@ const useCommunityPage = () => {
     }
   };
 
+  const handleViewCommunity = (cid: ObjectId) => {
+    navigate(`/community/${cid}`);
+  };
+
   const isUserInCommunity = (title: string): boolean => {
     const community = communityList.find(c => c.title === title);
     return community ? community.members.includes(currentUser._id) : false;
@@ -152,6 +157,7 @@ const useCommunityPage = () => {
     communityList,
     handleJoinCommunity,
     handleLeaveCommunity,
+    handleViewCommunity,
     isUserInCommunity,
     toggleCommunityView,
     handleInputChange,

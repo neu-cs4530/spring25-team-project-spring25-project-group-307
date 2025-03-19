@@ -9,11 +9,12 @@ import CommunityView from './community';
  * based on filters such as order and search terms.
  * It includes a header with order buttons and a button to ask a new question.
  */
-const CommunityPage = () => {
+const CommunityListPage = () => {
   const {
     val,
     titleText,
     communityList,
+    handleViewCommunity,
     handleJoinCommunity,
     handleLeaveCommunity,
     isUserInCommunity,
@@ -39,6 +40,7 @@ const CommunityPage = () => {
               <CommunityView
                 community={c}
                 key={String(c._id)}
+                handleViewCommunity={handleViewCommunity}
                 handleJoinCommunity={handleJoinCommunity}
                 handleLeaveCommunity={handleLeaveCommunity}
                 UserInCommunity={isUserInCommunity(c.title)}
@@ -54,4 +56,4 @@ const CommunityPage = () => {
   );
 };
 
-export default CommunityPage;
+export default CommunityListPage;

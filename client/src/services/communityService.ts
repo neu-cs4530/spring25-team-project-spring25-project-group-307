@@ -83,6 +83,19 @@ const leaveCommunity = async (title: string, username: string): Promise<Database
   return res.data;
 };
 
+/**
+ * Function to retrieve a community by its ID.
+ * @param id The ID of the community to retrieve
+ * @throws Error if there is an issue fetching the community.
+ */
+const getCommunityById = async (id: string): Promise<DatabaseCommunity> => {
+  const res = await api.get(`${COMMUNITY_API_URL}/getCommunityById/${id}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching community');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -90,4 +103,5 @@ export {
   leaveCommunity,
   getCommunitiesByUser,
   getCommunitiesBySearch,
+  getCommunityById,
 };

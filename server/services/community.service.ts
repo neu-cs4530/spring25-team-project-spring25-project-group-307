@@ -53,7 +53,6 @@ const getCommunitiesByUser = async (username: string): Promise<DatabaseCommunity
  * Adds a community to the database if it does not already exist.
  *
  * @param {Community} community - The community to add
- *
  * @returns {Promise<Community | null>} - The added or existing community, or `null` if an error occurred
  */
 const addCommunity = async (community: Community): Promise<DatabaseCommunity | null> => {
@@ -76,6 +75,12 @@ const addCommunity = async (community: Community): Promise<DatabaseCommunity | n
   }
 };
 
+/**
+ * Adds a user to a community if they are not already a member.
+ * @param title the title of the community to join
+ * @param username the username of the user to join the community
+ * @returns the community the user joined or null if an error occurred
+ */
 const joinCommunity = async (
   title: string,
   username: string,
@@ -110,6 +115,12 @@ const joinCommunity = async (
   }
 };
 
+/**
+ * Removes a user from a community
+ * @param title the title of the community to leave
+ * @param username the username of the user to leave the community
+ * @returns the community the user left or null if an error occurred
+ */
 const leaveCommunity = async (
   title: string,
   username: string,
@@ -132,6 +143,20 @@ const leaveCommunity = async (
   }
 };
 
+/**
+ * Retrieves a community by its ID.
+ * @param id the ID of the community to retrieve
+ * @returns the community with the given ID or null if an error occurred
+ */
+const getCommunityById = async (id: string): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOne({ _id: id });
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -139,4 +164,5 @@ export {
   addCommunity,
   joinCommunity,
   leaveCommunity,
+  getCommunityById,
 };

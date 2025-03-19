@@ -7,6 +7,7 @@ import {
   addCommunity,
   joinCommunity,
   leaveCommunity,
+  getCommunityById,
 } from '../services/community.service';
 
 const communityController = (socket: FakeSOSocket) => {
@@ -132,6 +133,24 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles getting a community by its ID.
+   *
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getCommunityByIdRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Get the community by its ID
+      const community = await getCommunityById(req.params.id);
+      res.json(community);
+    } catch (error) {
+      res.status(500).send(`Error when fetching community: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
@@ -139,6 +158,7 @@ const communityController = (socket: FakeSOSocket) => {
   router.post('/saveCommunity', addCommunityRoute);
   router.post('/joinCommunity', joinCommunityRoute);
   router.post('/leaveCommunity', leaveCommunityRoute);
+  router.get('/getCommunityById/:id', getCommunityByIdRoute);
 
   return router;
 };

@@ -18,9 +18,10 @@ import ProfileSettings from './profileSettings';
 import AllGamesPage from './main/games/allGamesPage';
 import GamePage from './main/games/gamePage';
 import LeaderboardPage from './main/leaderboardPage';
-import CommunityPage from './main/communityPage';
+import CommunityPage from './main/communityListPage';
 import NewCommunityPage from './main/newCommunity';
 import FeedPage from './main/feedPage';
+import ViewCommunityPage from './main/viewCommunityPage';
 
 const ProtectedRoute = ({
   user,
@@ -72,6 +73,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/games/:gameID' element={<GamePage />} />
             <Route path='/leaderboard' element={<LeaderboardPage />} />
             <Route path='/communities' element={<CommunityPage />} />
+            <Route path='/community/:cid' element={<ViewCommunityPage />} />
             <Route path='/new/community' element={<NewCommunityPage />} />
             <Route path='/feed' element={<FeedPage />} />
           </Route>
