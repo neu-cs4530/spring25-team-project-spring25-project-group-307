@@ -180,6 +180,30 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity 
   }
 };
 
+/**
+ * Adds a question to a community.
+ * @param communityId the ID of the community to add the question to
+ * @param questionId the ID of the question to add to the community
+ * @returns the community with the added question or null if an error occurred
+ */
+const addQuestionToCommunity = async (
+  communityId: string,
+  questionId: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $push: { questions: questionId },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -188,4 +212,5 @@ export {
   joinCommunity,
   leaveCommunity,
   getCommunityById,
+  addQuestionToCommunity,
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
@@ -31,12 +32,20 @@ const AnswerPage = () => {
   return (
     <>
       {community && (
-        <Button variant='text' sx={{ mx: '12px', mt: '10px' }} onClick={handleReturnToCommunity}>
+        <Button
+          variant='text'
+          startIcon={<ArrowBackIosIcon />}
+          sx={{ mx: '12px', mt: '10px' }}
+          onClick={handleReturnToCommunity}>
           Go to Community
         </Button>
       )}
       <VoteComponent question={question} />
-      <AnswerHeader ansCount={question.answers.length} title={question.title} />
+      <AnswerHeader
+        ansCount={question.answers.length}
+        title={question.title}
+        community={community}
+      />
       <QuestionBody
         views={question.views.length}
         text={question.text}

@@ -28,7 +28,6 @@ const useAnswerPage = () => {
   const [questionID, setQuestionID] = useState<string>(qid || '');
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
   const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
-  const [loadingQuestion, setLoadingQuestion] = useState<boolean>(true);
 
   /**
    * Function to handle navigation to the "New Answer" page.
@@ -90,8 +89,6 @@ const useAnswerPage = () => {
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching question:', error);
-      } finally {
-        setLoadingQuestion(false); // Set loading to false after fetching data
       }
     };
 
@@ -105,8 +102,8 @@ const useAnswerPage = () => {
      */
     const isCommunityQuestion = async (): Promise<void> => {
       try {
-        if (loadingQuestion || !question) {
-          return; // Do not fetch community if question is still loading or does not exist
+        if (!question) {
+          return; // Do not fetch community if question does not exist
         }
         const questionCommunity: DatabaseCommunity | null = await getCommunityQuestion(
           question._id,
@@ -119,7 +116,7 @@ const useAnswerPage = () => {
 
     // eslint-disable-next-line no-console
     isCommunityQuestion().catch(e => console.log(e));
-  }, [loadingQuestion, question]);
+  }, [question]);
 
   useEffect(() => {
     /**

@@ -96,6 +96,26 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity>
   return res.data;
 };
 
+/**
+ * Function to add a new question to the community.
+ * @param communityId The ID of the community to add the question to
+ * @param questionId The ID of the question to add to the community
+ * @throws Error if there is an issue adding the question to the community.
+ */
+const addQuestionToCommunity = async (
+  communityId: string,
+  questionId: string,
+): Promise<DatabaseCommunity> => {
+  const res = await api.post(`${COMMUNITY_API_URL}/addQuestionToCommunity`, {
+    communityId,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding question to community');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -104,4 +124,5 @@ export {
   getCommunitiesByUser,
   getCommunitiesBySearch,
   getCommunityById,
+  addQuestionToCommunity,
 };
