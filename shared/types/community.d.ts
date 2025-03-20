@@ -32,7 +32,8 @@ export interface DatabaseCommunity extends Community {
  * - `members`: An array of populated 'DatabaseUser' objects.
  * - `questions`: An array of populated 'PopulatedDatabaseQuestion' objects.
  */
-export interface PopulatedDatabaseCommunity extends Omit<DatabaseCommunity, 'members' | 'questions'> {
+export interface PopulatedDatabaseCommunity
+  extends Omit<DatabaseCommunity, 'members' | 'questions'> {
   members: SafeDatabaseUser[];
   questions: PopulatedDatabaseQuestion[];
 }
