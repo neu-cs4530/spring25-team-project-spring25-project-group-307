@@ -1,5 +1,10 @@
 import { ObjectId } from 'mongodb';
-import { PopulatedDatabaseQuestion, Question, VoteInterface } from '../types/types';
+import {
+  DatabaseCommunity,
+  PopulatedDatabaseQuestion,
+  Question,
+  VoteInterface,
+} from '../types/types';
 import api from './config';
 
 const QUESTION_API_URL = `${process.env.REACT_APP_SERVER_URL}/question`;
@@ -88,4 +93,24 @@ const downvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteIn
   return res.data;
 };
 
-export { getQuestionsByFilter, getQuestionById, addQuestion, upvoteQuestion, downvoteQuestion };
+/**
+ * Function to determine the community a question is in.
+ * @param qid - The question to determine the community for.
+ * @returns the community the question is in or null if the question is not in a community
+ */
+const getCommunityQuestion = async (qid: ObjectId): Promise<DatabaseCommunity | null> => {
+  const res = await api.get(`${QUESTION_API_URL}/getCommunityQuestion/${qid}`);
+  if (res.status !== 200) {
+    return null;
+  }
+  return res.data;
+};
+
+export {
+  getQuestionsByFilter,
+  getQuestionById,
+  addQuestion,
+  upvoteQuestion,
+  downvoteQuestion,
+  getCommunityQuestion,
+};

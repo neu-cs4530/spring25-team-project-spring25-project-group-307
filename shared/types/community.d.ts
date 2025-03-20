@@ -37,3 +37,8 @@ export interface PopulatedDatabaseCommunity
   members: SafeDatabaseUser[];
   questions: PopulatedDatabaseQuestion[];
 }
+
+/**
+ * Type representing possible responses for a Community-related operation.
+ */
+export type CommunityResponse = DatabaseCommunity | { error: string };
