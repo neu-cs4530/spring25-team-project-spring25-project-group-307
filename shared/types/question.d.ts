@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { Answer, PopulatedDatabaseAnswer } from './answer';
 import { DatabaseTag, Tag } from './tag';
 import { Comment, DatabaseComment } from './comment';
+import { DatabaseCommunity } from './community';
 
 /**
  * Type representing the possible ordering options for questions.
@@ -64,6 +65,7 @@ export interface PopulatedDatabaseQuestion
   tags: DatabaseTag[];
   answers: PopulatedDatabaseAnswer[];
   comments: DatabaseComment[];
+  community?: DatabaseCommunity;
 }
 
 /**

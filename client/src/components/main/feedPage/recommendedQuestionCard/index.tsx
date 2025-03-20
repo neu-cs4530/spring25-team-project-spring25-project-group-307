@@ -5,13 +5,24 @@ import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
+import { useNavigate } from 'react-router-dom';
+
+import useUserContext from '../../../../hooks/useUserContext';
+import { joinCommunity } from '../../../../services/communityService';
 
 const RecommendedQuestionCard = ({
   question,
 }: {
   question: Omit<PopulatedDatabaseQuestion, '_id'>;
 }) => {
-  const handleClick = () => {};
+  const navigate = useNavigate();
+  // todo this should go to view question
+  const viewQuestion = () => {
+    if ('_id' in question) {
+      navigate(`/question/${question._id}`);
+    }
+  };
+  const { user } = useUserContext();
 
   return (
     <Box
@@ -22,7 +33,7 @@ const RecommendedQuestionCard = ({
         p: 2,
       }}>
       <Card
-        onClick={handleClick}
+        onClick={viewQuestion}
         sx={{
           'minWidth': 275,
           'width': '50%',
@@ -34,32 +45,39 @@ const RecommendedQuestionCard = ({
         }}>
         <CardContent>
           {/* Header Section */}
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              p: 2,
-              borderBottom: '1px solid lightgrey',
-            }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant='subtitle1' fontWeight='bold'>
-                {'question.community'}
-              </Typography>
-              <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-                • {question.askDateTime.toLocaleString()}
-              </Typography>
+          {question.community && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                p: 2,
+                borderBottom: '1px solid lightgrey',
+              }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Typography variant='subtitle1' fontWeight='bold'>
+                  {question.community.title}
+                </Typography>
+              </Box>
+              <Button
+                onClick={() => {
+                  if (question.community) joinCommunity(question.community.title, user.username);
+                }}
+                variant='contained'
+                size='small'
+                sx={{ borderRadius: 20 }}>
+                Join
+              </Button>
             </Box>
-            <Button variant='contained' size='small' sx={{ borderRadius: 20 }}>
-              Join
-            </Button>
-          </Box>
+          )}
 
           {/* Card Content */}
           <Typography sx={{ mt: 1.5 }} variant='h5' component='div'>
             {question.title}
           </Typography>
-
+          <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
+            {question.askDateTime.toLocaleString()}
+          </Typography>
           <Typography variant='body2'>
             {question.text}
             <br />
