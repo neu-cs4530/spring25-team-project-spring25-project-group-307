@@ -5,8 +5,12 @@ import {
   deleteUser,
   resetPassword,
   updateBiography,
+  updateInterests,
+  getTagsByInterestIds,
+  getAllTags,
+  getInterestsByInterestIds,
 } from '../services/userService';
-import { SafeDatabaseUser } from '../types/types';
+import { DatabaseTag, Interest, SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -19,11 +23,15 @@ const useProfileSettings = () => {
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
+  const [populatedTags, setPopulatedTags] = useState<DatabaseTag[]>([]);
+  const [allTags, setAllTags] = useState<DatabaseTag[]>([]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
+  const [editInterestsMode, setEditInterestsMode] = useState(false);
+  const [newInterests, setNewInterests] = useState<Interest[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -44,6 +52,19 @@ const useProfileSettings = () => {
         setLoading(true);
         const data = await getUserByUsername(username);
         setUserData(data);
+
+        if (data?.interests?.length) {
+          const tags = await getTagsByInterestIds(data.interests);
+          setPopulatedTags(tags);
+
+          // The user's interests are stored as IDs, so we need to convert them to the full objects.
+          const storedInterests = await getInterestsByInterestIds(data.interests);
+          setNewInterests(storedInterests);
+        }
+
+        // Fetch all tags from the database
+        const allPopulatedTags = await getAllTags();
+        setAllTags(allPopulatedTags);
       } catch (error) {
         setErrorMessage('Error fetching user profile');
         setUserData(null);
@@ -118,6 +139,30 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleUpdateInterests = async () => {
+    if (!username) return;
+    try {
+      // Await the async call to update the interests
+      const updatedUser = await updateInterests(username, newInterests);
+
+      // Ensure state updates occur sequentially after the API call completes
+      await new Promise(resolve => {
+        setUserData(updatedUser); // Update the user data
+        setEditInterestsMode(false); // Exit edit mode
+        resolve(null); // Resolve the promise
+      });
+
+      const newTags = await getTagsByInterestIds(updatedUser.interests);
+      setPopulatedTags(newTags);
+
+      setSuccessMessage('Interests updated!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update interests.');
+      setSuccessMessage(null);
+    }
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -141,6 +186,8 @@ const useProfileSettings = () => {
 
   return {
     userData,
+    populatedTags,
+    allTags,
     newPassword,
     confirmNewPassword,
     setNewPassword,
@@ -150,6 +197,10 @@ const useProfileSettings = () => {
     setEditBioMode,
     newBio,
     setNewBio,
+    editInterestsMode,
+    setEditInterestsMode,
+    newInterests,
+    setNewInterests,
     successMessage,
     errorMessage,
     showConfirmation,
@@ -161,6 +212,7 @@ const useProfileSettings = () => {
     togglePasswordVisibility,
     handleResetPassword,
     handleUpdateBiography,
+    handleUpdateInterests,
     handleDeleteUser,
   };
 };

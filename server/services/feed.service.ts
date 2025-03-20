@@ -1,7 +1,36 @@
 import { ObjectId } from 'mongodb';
-import { DatabaseQuestion, FeedItem, Interest } from '@fake-stack-overflow/shared';
+import {
+  DatabaseFeed,
+  DatabaseQuestion,
+  Feed,
+  FeedItem,
+  FeedResponse,
+  Interest,
+} from '@fake-stack-overflow/shared';
 import QuestionModel from '../models/questions.model';
 import UserModel from '../models/users.model';
+import FeedModel from '../models/feed.model';
+
+/**
+ * Saves a new feed to the database.
+ * @param feed - The feed object to save.
+ * @returns {Promise<FeedItemResponse>} - The saved feed item or an error message.
+ */
+export const saveFeed = async (feed: Feed): Promise<FeedResponse> => {
+  try {
+    const newFeed = await FeedModel.create(feed);
+
+    if (!newFeed) {
+      throw Error('Failed to create feed');
+    }
+
+    const populatedFeed = await newFeed.populate<{ items: FeedItem[] }>('items');
+
+    return populatedFeed;
+  } catch (error) {
+    return { error: `Error occurred when saving feed item: ${error}` };
+  }
+};
 
 /**
  * Calculates the weighted sum of tags for each question based on user interests.
@@ -9,7 +38,7 @@ import UserModel from '../models/users.model';
  * @param {ObjectId} userId - The user ID to retrieve interests from
  * @returns {Promise<PopulatedDatabaseQuestion[]>} - The list of questions with weights
  */
-const calculateWeightedQuestions = async (
+export const calculateWeightedQuestions = async (
   questions: DatabaseQuestion[],
   userId: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
@@ -37,7 +66,7 @@ const calculateWeightedQuestions = async (
   }
 };
 
-const getAllQuestionsInOrderAndSaveToFeed = async (
+export const getAllQuestionsInOrderAndSaveToFeed = async (
   userId: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
   try {
@@ -57,7 +86,7 @@ const getAllQuestionsInOrderAndSaveToFeed = async (
   }
 };
 
-const getQuestionsForInfiniteScroll = async (
+export const getQuestionsForInfiniteScroll = async (
   userId: ObjectId,
   limit: number,
 ): Promise<DatabaseQuestion[]> => {
@@ -80,10 +109,4 @@ const getQuestionsForInfiniteScroll = async (
   } catch (err) {
     return [];
   }
-};
-
-export {
-  calculateWeightedQuestions,
-  getQuestionsForInfiniteScroll,
-  getAllQuestionsInOrderAndSaveToFeed,
 };

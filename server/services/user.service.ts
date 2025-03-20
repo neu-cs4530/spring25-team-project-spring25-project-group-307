@@ -1,12 +1,18 @@
+import { ObjectId } from 'mongodb';
 import UserModel from '../models/users.model';
 import {
   DatabaseUser,
+  InterestResponse,
+  FeedItemResponse,
   SafeDatabaseUser,
   User,
   UserCredentials,
   UserResponse,
   UsersResponse,
 } from '../types/types';
+import { saveInterest } from './interest.service';
+import { saveFeedItem } from './feedItem.service';
+import { saveFeed } from './feed.service';
 
 /**
  * Saves a new user to the database.
@@ -16,7 +22,42 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    const result: DatabaseUser = await UserModel.create(user);
+    // Save the interests provided in the argument to the database
+    const interestIds: ObjectId[] = await Promise.all(
+      user.interests.map(async interest => {
+        const savedInterest: InterestResponse = await saveInterest(interest);
+
+        if ('error' in savedInterest) {
+          throw new Error(savedInterest.error);
+        }
+
+        return savedInterest._id;
+      }),
+    );
+
+    // Save the feed items provided in the argument to the database
+    await Promise.all(
+      user.feed.items.map(async feedItem => {
+        const savedFeedItem: FeedItemResponse = await saveFeedItem(feedItem);
+
+        if ('error' in savedFeedItem) {
+          throw new Error(savedFeedItem.error);
+        }
+
+        return savedFeedItem._id;
+      }),
+    );
+
+    // Save the feed itself to the database
+    const feedId: FeedItemResponse = await saveFeed({
+      items: user.feed.items,
+    });
+
+    const result: DatabaseUser = await UserModel.create({
+      ...user,
+      interests: interestIds,
+      feed: feedId._id,
+    });
 
     if (!result) {
       throw Error('Failed to create user');
