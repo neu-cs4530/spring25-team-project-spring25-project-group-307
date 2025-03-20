@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { DatabaseCommunity } from '@fake-stack-overflow/shared';
+import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
 import { getCommunityById } from '../services/communityService';
 
 /**
@@ -15,7 +15,7 @@ const useViewCommunityPage = () => {
   const { cid } = useParams();
   const navigate = useNavigate();
 
-  const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
+  const [community, setCommunity] = useState<PopulatedDatabaseCommunity | null>(null);
 
   useEffect(() => {
     if (!cid) {
@@ -23,7 +23,7 @@ const useViewCommunityPage = () => {
       return;
     }
 
-    const fetchData = async () => {
+    const fetchCommunity = async () => {
       try {
         const res = await getCommunityById(cid);
         setCommunity(res || null);
@@ -33,7 +33,7 @@ const useViewCommunityPage = () => {
       }
     };
 
-    fetchData();
+    fetchCommunity();
   }, [cid, navigate]);
 
   return { community };

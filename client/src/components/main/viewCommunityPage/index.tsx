@@ -3,6 +3,7 @@ import { Box, Tab } from '@mui/material';
 import { useState } from 'react';
 import CommunityHome from './communityHome';
 import useViewCommunityPage from '../../../hooks/useViewCommunityPage';
+import CommunityUsers from './communityUsers';
 
 const ViewCommunityPage = () => {
   const { community } = useViewCommunityPage();
@@ -23,7 +24,9 @@ const ViewCommunityPage = () => {
         <TabPanel value='1'>
           <CommunityHome community={community} />
         </TabPanel>
-        <TabPanel value='2'>Users</TabPanel>
+        <TabPanel value='2'>
+          <CommunityUsers users={community?.members || []} />
+        </TabPanel>
       </TabContext>
     </Box>
   );

@@ -1,4 +1,10 @@
-import { Community, DatabaseCommunity } from '../types/types';
+import {
+  Community,
+  DatabaseCommunity,
+  PopulatedDatabaseCommunity,
+  PopulatedDatabaseQuestion,
+  SafeDatabaseUser,
+} from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
 
@@ -148,9 +154,26 @@ const leaveCommunity = async (
  * @param id the ID of the community to retrieve
  * @returns the community with the given ID or null if an error occurred
  */
-const getCommunityById = async (id: string): Promise<DatabaseCommunity | null> => {
+const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity | null> => {
   try {
-    const community: DatabaseCommunity | null = await CommunityModel.findOne({ _id: id });
+    const community: PopulatedDatabaseCommunity | null = await CommunityModel.findOne({
+      _id: id,
+    }).populate<{
+      members: SafeDatabaseUser[];
+      questions: PopulatedDatabaseQuestion[];
+    }>([
+      { path: 'members', model: 'User', select: '-password' },
+      {
+        path: 'questions',
+        model: 'Question',
+        populate: [
+          { path: 'tags', model: 'Tag' },
+          { path: 'answers', model: 'Answer', populate: { path: 'comments', model: 'Comment' } },
+          { path: 'comments', model: 'Comment' },
+        ],
+      },
+    ]);
+
     return community;
   } catch (error) {
     return null;

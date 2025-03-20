@@ -1,5 +1,5 @@
 import api from './config';
-import { Community, DatabaseCommunity } from '../types/types';
+import { Community, DatabaseCommunity, PopulatedDatabaseCommunity } from '../types/types';
 
 const COMMUNITY_API_URL = `${process.env.REACT_APP_SERVER_URL}/community`;
 
@@ -88,7 +88,7 @@ const leaveCommunity = async (title: string, username: string): Promise<Database
  * @param id The ID of the community to retrieve
  * @throws Error if there is an issue fetching the community.
  */
-const getCommunityById = async (id: string): Promise<DatabaseCommunity> => {
+const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity> => {
   const res = await api.get(`${COMMUNITY_API_URL}/getCommunityById/${id}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching community');

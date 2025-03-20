@@ -1,7 +1,7 @@
-import { DatabaseCommunity } from '@fake-stack-overflow/shared';
+import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
 
 interface CommunityHomeProps {
-  community: DatabaseCommunity | null;
+  community: PopulatedDatabaseCommunity | null;
 }
 
 const CommunityHome = ({ community }: CommunityHomeProps) => (
