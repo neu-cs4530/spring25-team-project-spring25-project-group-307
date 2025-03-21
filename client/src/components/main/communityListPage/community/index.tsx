@@ -1,7 +1,8 @@
 import Card from '@mui/material/Card';
-import { Button, CardActions, CardContent, Typography } from '@mui/material';
+import { Box, Button, CardActions, CardContent, Typography } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import { DatabaseCommunity } from '../../../../types/types';
+import OptionsMenu from './optionsMenu';
 
 /**
  * Interface representing the props for the Community component.
@@ -32,9 +33,17 @@ const CommunityView = ({
     <div>
       <Card>
         <CardContent>
-          <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
-            Community
-          </Typography>
+          <Box
+            display='flex'
+            flexDirection='row'
+            alignItems='center'
+            justifyContent='space-between'>
+            <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+              Community
+            </Typography>
+            {UserInCommunity && <OptionsMenu />}
+          </Box>
+
           <Typography variant='h5' component='div'>
             {community.title}
           </Typography>
