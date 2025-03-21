@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './index.css';
-import { DatabaseMessage } from '../../../types/types';
+import { DatabaseMessage, PopulatedDatabaseQuestion } from '../../../types/types';
 import { getMetaData } from '../../../tool';
+import { getQuestionById } from '../../../services/questionService';
+import useUserContext from '../../../hooks/useUserContext';
+import EmbededQuestionView from './embededQuestionView';
 
 /**
  * MessageCard component displays a single message with its sender and timestamp.
@@ -10,7 +13,8 @@ import { getMetaData } from '../../../tool';
  */
 
 const MessageCard = ({ message }: { message: DatabaseMessage }) => {
-  const [questionId, setQuestionId] = useState('');
+  const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
+  const { user } = useUserContext();
 
   useEffect(() => {
     const isValidUrl = (input: string) => {
@@ -35,7 +39,9 @@ const MessageCard = ({ message }: { message: DatabaseMessage }) => {
         const parts = maybeUrl.pathname.replace(/\/$/, '').split('/');
         parts.shift();
         if (parts.length === 2 && parts[0] === 'question') {
-          setQuestionId(parts[1]);
+          getQuestionById(parts[1], user.username)
+            .then(res => setQuestion(res || null))
+            .catch(() => setQuestion(null));
         }
       }
     }
@@ -47,8 +53,11 @@ const MessageCard = ({ message }: { message: DatabaseMessage }) => {
         <div className='message-sender'>{message.msgFrom}</div>
         <div className='message-time'>{getMetaData(new Date(message.msgDateTime))}</div>
       </div>
-      <div className='message-body'>{message.msg}</div>
-      {questionId && 'this is a question'}
+      {question ? (
+        <EmbededQuestionView question={question} />
+      ) : (
+        <div className='message-body'>{message.msg}</div>
+      )}
     </div>
   );
 };
