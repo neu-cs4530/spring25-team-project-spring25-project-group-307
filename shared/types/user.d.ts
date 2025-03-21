@@ -20,6 +20,7 @@ export interface UserCredentials {
 export interface Interest {
   _id: ObjectId;
   weight: number;
+  priority: string;
 }
 
 /**

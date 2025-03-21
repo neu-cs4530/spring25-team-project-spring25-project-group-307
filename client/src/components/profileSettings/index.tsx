@@ -31,6 +31,7 @@ const ProfileSettings: React.FC = () => {
     setNewInterests,
     populatedTags,
     allTags,
+    getTagColor,
 
     handleResetPassword,
     handleUpdateBiography,
@@ -140,19 +141,26 @@ const ProfileSettings: React.FC = () => {
                       <Chip
                         label={tag.name}
                         clickable
-                        color={
-                          newInterests.some(interest => interest._id === tag._id)
-                            ? 'primary'
-                            : 'default'
-                        }
+                        color={getTagColor(tag)}
                         onClick={() => {
                           if (newInterests.some(interest => interest._id === tag._id)) {
                             setNewInterests(
                               newInterests.filter(interest => interest._id !== tag._id),
                             );
                           } else {
-                            setNewInterests([...newInterests, { _id: tag._id, weight: 1 }]);
+                            setNewInterests([
+                              ...newInterests,
+                              { _id: tag._id, weight: 1, priority: 'moderate' },
+                            ]);
                           }
+                        }}
+                        onContextMenu={e => {
+                          e.preventDefault();
+                          setNewInterests(
+                            newInterests.some(interest => interest._id === tag._id)
+                              ? newInterests.filter(interest => interest._id !== tag._id)
+                              : [...newInterests, { _id: tag._id, weight: 2, priority: 'high' }],
+                          );
                         }}
                       />
                     </Grid2>

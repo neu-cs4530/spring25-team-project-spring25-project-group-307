@@ -304,7 +304,15 @@ const userController = (socket: FakeSOSocket) => {
           try {
             const existingInterests = await getInterestsByIds([interest._id]);
             if (existingInterests.length === 1) {
-              return existingInterests[0]._id;
+              const updatedInterest = await InterestModel.findByIdAndUpdate(
+                interest._id,
+                { $set: interest },
+                { new: true },
+              );
+              if (!updatedInterest) {
+                throw new Error('Failed to update interest');
+              }
+              return updatedInterest._id;
             }
             const newInterest = await saveInterest(interest);
             if ('error' in newInterest) {

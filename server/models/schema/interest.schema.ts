@@ -10,6 +10,11 @@ const interestSchema: Schema = new Schema(
       type: Number,
       default: 1,
     },
+    priority: {
+      type: String,
+      enum: ['moderate', 'high'],
+      default: 'moderate',
+    },
   },
   { collection: 'Interest' },
 );

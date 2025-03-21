@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ChipProps } from '@mui/material';
 import {
   getUserByUsername,
   deleteUser,
@@ -184,10 +185,20 @@ const useProfileSettings = () => {
     });
   };
 
+  const getTagColor = (tag: DatabaseTag): ChipProps['color'] => {
+    const matchingInterest = newInterests.find(interest => interest._id === tag._id);
+    let color: ChipProps['color'] = 'default';
+    if (matchingInterest) {
+      color = matchingInterest.priority === 'high' ? 'secondary' : 'primary';
+    }
+    return color;
+  };
+
   return {
     userData,
     populatedTags,
     allTags,
+    getTagColor,
     newPassword,
     confirmNewPassword,
     setNewPassword,
