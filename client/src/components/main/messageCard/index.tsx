@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import './index.css';
 import { DatabaseMessage, PopulatedDatabaseQuestion } from '../../../types/types';
 import { getMetaData } from '../../../tool';
@@ -45,7 +45,7 @@ const MessageCard = ({ message }: { message: DatabaseMessage }) => {
         }
       }
     }
-  }, []);
+  }, [message.msg, user.username]);
 
   return (
     <div className='message'>
