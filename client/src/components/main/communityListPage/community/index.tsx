@@ -1,5 +1,6 @@
 import Card from '@mui/material/Card';
 import { Button, CardActions, CardContent, Typography } from '@mui/material';
+import { ObjectId } from 'mongodb';
 import { DatabaseCommunity } from '../../../../types/types';
 
 /**
@@ -9,6 +10,7 @@ import { DatabaseCommunity } from '../../../../types/types';
  */
 interface CommunityProps {
   community: DatabaseCommunity;
+  handleViewCommunity: (cid: ObjectId) => void;
   handleJoinCommunity: (title: string) => void;
   handleLeaveCommunity: (title: string) => void;
   UserInCommunity: boolean;
@@ -21,6 +23,7 @@ interface CommunityProps {
  */
 const CommunityView = ({
   community,
+  handleViewCommunity,
   handleJoinCommunity,
   handleLeaveCommunity,
   UserInCommunity,
@@ -55,7 +58,7 @@ const CommunityView = ({
               Join
             </Button>
           )}
-          <Button size='small' color='primary'>
+          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
             View
           </Button>
         </CardActions>

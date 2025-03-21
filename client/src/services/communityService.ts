@@ -1,5 +1,5 @@
 import api from './config';
-import { Community, DatabaseCommunity } from '../types/types';
+import { Community, DatabaseCommunity, PopulatedDatabaseCommunity } from '../types/types';
 
 const COMMUNITY_API_URL = `${process.env.REACT_APP_SERVER_URL}/community`;
 
@@ -83,6 +83,39 @@ const leaveCommunity = async (title: string, username: string): Promise<Database
   return res.data;
 };
 
+/**
+ * Function to retrieve a community by its ID.
+ * @param id The ID of the community to retrieve
+ * @throws Error if there is an issue fetching the community.
+ */
+const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity> => {
+  const res = await api.get(`${COMMUNITY_API_URL}/getCommunityById/${id}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching community');
+  }
+  return res.data;
+};
+
+/**
+ * Function to add a new question to the community.
+ * @param communityId The ID of the community to add the question to
+ * @param questionId The ID of the question to add to the community
+ * @throws Error if there is an issue adding the question to the community.
+ */
+const addQuestionToCommunity = async (
+  communityId: string,
+  questionId: string,
+): Promise<DatabaseCommunity> => {
+  const res = await api.post(`${COMMUNITY_API_URL}/addQuestionToCommunity`, {
+    communityId,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding question to community');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -90,4 +123,6 @@ export {
   leaveCommunity,
   getCommunitiesByUser,
   getCommunitiesBySearch,
+  getCommunityById,
+  addQuestionToCommunity,
 };

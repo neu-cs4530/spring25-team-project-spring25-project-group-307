@@ -8,6 +8,8 @@ import {
   VoteRequest,
   FakeSOSocket,
   PopulatedDatabaseQuestion,
+  GetCommunityQuestionRequest,
+  CommunityResponse,
 } from '../types/types';
 import {
   addVoteToQuestion,
@@ -16,6 +18,7 @@ import {
   filterQuestionsBySearch,
   getQuestionsByOrder,
   saveQuestion,
+  getCommunityQuestion,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
@@ -236,12 +239,32 @@ const questionController = (socket: FakeSOSocket) => {
     voteQuestion(req, res, 'downvote');
   };
 
+  /**
+   * Handles retrieving the community a question is part of.
+   * If the question is not part of a community, `null` is returned.
+   */
+  const getCommunityQuestionRoute = async (
+    req: GetCommunityQuestionRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const community: CommunityResponse = await getCommunityQuestion(req.params.qid);
+      if ('error' in community) {
+        throw new Error(community.error);
+      }
+      res.json(community);
+    } catch (error) {
+      res.status(500).send(`Error when getting community question: ${(error as Error).message}`);
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
   router.post('/addQuestion', addQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
+  router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);
 
   return router;
 };

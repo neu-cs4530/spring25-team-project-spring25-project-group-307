@@ -6,10 +6,11 @@ import {
   VoteUpdatePayload,
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
+  DatabaseCommunity,
 } from '../types/types';
 import useUserContext from './useUserContext';
 import addComment from '../services/commentService';
-import { getQuestionById } from '../services/questionService';
+import { getQuestionById, getCommunityQuestion } from '../services/questionService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -26,6 +27,7 @@ const useAnswerPage = () => {
   const { user, socket } = useUserContext();
   const [questionID, setQuestionID] = useState<string>(qid || '');
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
+  const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
 
   /**
    * Function to handle navigation to the "New Answer" page.
@@ -67,6 +69,15 @@ const useAnswerPage = () => {
     }
   };
 
+  /**
+   * Function to handle navigating to the community the question is from.
+   */
+  const handleReturnToCommunity = () => {
+    if (community) {
+      navigate(`/community/${community._id}`);
+    }
+  };
+
   useEffect(() => {
     /**
      * Function to fetch the question data based on the question ID.
@@ -84,6 +95,28 @@ const useAnswerPage = () => {
     // eslint-disable-next-line no-console
     fetchData().catch(e => console.log(e));
   }, [questionID, user.username]);
+
+  useEffect(() => {
+    /**
+     * Function to determine if the question is part of a community.
+     */
+    const isCommunityQuestion = async (): Promise<void> => {
+      try {
+        if (!question) {
+          return; // Do not fetch community if question does not exist
+        }
+        const questionCommunity: DatabaseCommunity | null = await getCommunityQuestion(
+          question._id,
+        );
+        setCommunity(questionCommunity || null);
+      } catch (error) {
+        setCommunity(null);
+      }
+    };
+
+    // eslint-disable-next-line no-console
+    isCommunityQuestion().catch(e => console.log(e));
+  }, [question]);
 
   useEffect(() => {
     /**
@@ -190,6 +223,8 @@ const useAnswerPage = () => {
     question,
     handleNewComment,
     handleNewAnswer,
+    community,
+    handleReturnToCommunity,
   };
 };
 

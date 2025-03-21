@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import UserModel from '../models/users.model';
 import {
   DatabaseUser,
@@ -151,5 +152,23 @@ export const updateUser = async (
     return updatedUser;
   } catch (error) {
     return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+/**
+ * Retrieves a user by their ID.
+ * @param id The ID of the user to retrieve
+ * @returns the user with the given ID or null if an error occurred
+ *
+ */
+export const getUserById = async (id: ObjectId): Promise<UserResponse> => {
+  try {
+    const user: DatabaseUser | null = await UserModel.findOne({ _id: id });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  } catch (error) {
+    return { error: `Error occurred when finding user: ${error}` };
   }
 };

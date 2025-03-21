@@ -1,4 +1,10 @@
-import { Community, DatabaseCommunity } from '../types/types';
+import {
+  Community,
+  DatabaseCommunity,
+  PopulatedDatabaseCommunity,
+  PopulatedDatabaseQuestion,
+  SafeDatabaseUser,
+} from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
 
@@ -53,7 +59,6 @@ const getCommunitiesByUser = async (username: string): Promise<DatabaseCommunity
  * Adds a community to the database if it does not already exist.
  *
  * @param {Community} community - The community to add
- *
  * @returns {Promise<Community | null>} - The added or existing community, or `null` if an error occurred
  */
 const addCommunity = async (community: Community): Promise<DatabaseCommunity | null> => {
@@ -76,6 +81,12 @@ const addCommunity = async (community: Community): Promise<DatabaseCommunity | n
   }
 };
 
+/**
+ * Adds a user to a community if they are not already a member.
+ * @param title the title of the community to join
+ * @param username the username of the user to join the community
+ * @returns the community the user joined or null if an error occurred
+ */
 const joinCommunity = async (
   title: string,
   username: string,
@@ -110,6 +121,12 @@ const joinCommunity = async (
   }
 };
 
+/**
+ * Removes a user from a community
+ * @param title the title of the community to leave
+ * @param username the username of the user to leave the community
+ * @returns the community the user left or null if an error occurred
+ */
 const leaveCommunity = async (
   title: string,
   username: string,
@@ -132,6 +149,61 @@ const leaveCommunity = async (
   }
 };
 
+/**
+ * Retrieves a community by its ID.
+ * @param id the ID of the community to retrieve
+ * @returns the community with the given ID or null if an error occurred
+ */
+const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity | null> => {
+  try {
+    const community: PopulatedDatabaseCommunity | null = await CommunityModel.findOne({
+      _id: id,
+    }).populate<{
+      members: SafeDatabaseUser[];
+      questions: PopulatedDatabaseQuestion[];
+    }>([
+      { path: 'members', model: 'User', select: '-password' },
+      {
+        path: 'questions',
+        model: 'Question',
+        populate: [
+          { path: 'tags', model: 'Tag' },
+          { path: 'answers', model: 'Answer', populate: { path: 'comments', model: 'Comment' } },
+          { path: 'comments', model: 'Comment' },
+        ],
+      },
+    ]);
+
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Adds a question to a community.
+ * @param communityId the ID of the community to add the question to
+ * @param questionId the ID of the question to add to the community
+ * @returns the community with the added question or null if an error occurred
+ */
+const addQuestionToCommunity = async (
+  communityId: string,
+  questionId: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $push: { questions: questionId },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -139,4 +211,6 @@ export {
   addCommunity,
   joinCommunity,
   leaveCommunity,
+  getCommunityById,
+  addQuestionToCommunity,
 };

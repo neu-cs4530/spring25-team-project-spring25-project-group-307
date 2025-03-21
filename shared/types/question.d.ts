@@ -114,6 +114,12 @@ export interface FindQuestionByIdRequest extends Request {
   };
 }
 
+export interface GetCommunityQuestionRequest extends Request {
+  params: {
+    qid: string;
+  };
+}
+
 /**
  * Interface for the request body when adding a new question.
  * - `body`: The question being added.
