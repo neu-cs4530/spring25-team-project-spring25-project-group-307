@@ -26,6 +26,7 @@ const ViewCommunityPage = () => {
         </TabPanel>
         <TabPanel value='2'>
           <CommunityUsers
+            communityID={community?._id}
             admins={community?.admins}
             moderators={community?.moderators}
             members={community?.members}

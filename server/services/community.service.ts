@@ -7,6 +7,7 @@ import {
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
+import { ObjectId } from 'mongodb';
 
 /**
  * Retrieves all communities from the database.
@@ -208,6 +209,64 @@ const addQuestionToCommunity = async (
   }
 };
 
+/**
+ * Updates the role of a user in a community.
+ * @param communityId the ID of the community to update the role in
+ * @param username the username of the user to update the role for
+ * @param role the new role for the user
+ * @returns the community with the updated role or null if an error occurred
+ */
+const updateUserRole = async (
+  communityId: ObjectId,
+  username: string,
+  role: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    // Fetch the user by username
+    const user = await getUserByUsername(username);
+    if ('error' in user) {
+      throw new Error(user.error);
+    }
+
+    // Validate the role
+    const validRoles = ['admins', 'moderators', 'members'];
+    if (!validRoles.includes(role.toLowerCase())) {
+      throw new Error(`Invalid role: ${role}`);
+    }
+
+    // Remove the user from all roles before adding them to the new role
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $pull: {
+          admins: user._id,
+          moderators: user._id,
+          members: user._id,
+        },
+      },
+      { new: true },
+    );
+
+    if (!community) {
+      throw new Error('Community not found');
+    }
+
+    // Add the user to the specified role
+    const updatedCommunity: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $addToSet: { [role.toLowerCase()]: user._id }, // Dynamically update the role field
+      },
+      { new: true },
+    );
+
+    return updatedCommunity;
+  } catch (error) {
+    console.error('Error updating user role:', error);
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -217,4 +276,5 @@ export {
   leaveCommunity,
   getCommunityById,
   addQuestionToCommunity,
+  updateUserRole,
 };

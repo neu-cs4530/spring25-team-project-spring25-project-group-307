@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import api from './config';
 import { Community, DatabaseCommunity, PopulatedDatabaseCommunity } from '../types/types';
 
@@ -116,6 +117,28 @@ const addQuestionToCommunity = async (
   return res.data;
 };
 
+/**
+ * Function to update the users role in the community.
+ * @param communityId The ID of the community to update the role in
+ * @param username The username of the user to update the role for
+ * @param role The new role for the user
+ */
+const updateUserRole = async (
+  communityId: ObjectId,
+  username: string,
+  role: string,
+): Promise<DatabaseCommunity> => {
+  const res = await api.patch(`${COMMUNITY_API_URL}/updateCommunityRole`, {
+    communityId,
+    username,
+    role,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when updating community role');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -125,4 +148,5 @@ export {
   getCommunitiesBySearch,
   getCommunityById,
   addQuestionToCommunity,
+  updateUserRole,
 };

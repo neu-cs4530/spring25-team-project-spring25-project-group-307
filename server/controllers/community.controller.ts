@@ -9,6 +9,7 @@ import {
   leaveCommunity,
   getCommunityById,
   addQuestionToCommunity,
+  updateUserRole,
 } from '../services/community.service';
 
 const communityController = (socket: FakeSOSocket) => {
@@ -170,6 +171,27 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles updating a user role in a community.
+   * 
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * 
+   * @returns A Promise that resolves to void.
+   */
+  const updateRoleInCommunityRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Update the user role in the community
+      const community = await updateUserRole(req.body.communityId, req.body.username, req.body.role);
+      if (!community) {
+        throw new Error('Failed to update user role in community');
+      }
+      res.json(community);
+    } catch (error) {
+      res.status(500).send(`Error when updating user role in community: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
@@ -179,6 +201,7 @@ const communityController = (socket: FakeSOSocket) => {
   router.post('/leaveCommunity', leaveCommunityRoute);
   router.get('/getCommunityById/:id', getCommunityByIdRoute);
   router.post('/addQuestionToCommunity', addQuestionToCommunityRoute);
+  router.patch('/updateCommunityRole', updateRoleInCommunityRoute);
 
   return router;
 };

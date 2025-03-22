@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
+import { PopulatedDatabaseCommunity, SafeDatabaseUser } from '@fake-stack-overflow/shared';
 import { getCommunityById } from '../services/communityService';
 import useUserContext from './useUserContext';
 
