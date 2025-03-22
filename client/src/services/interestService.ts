@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { ObjectId } from 'mongodb';
 import { Interest } from '../types/types';
 import api from './config';
