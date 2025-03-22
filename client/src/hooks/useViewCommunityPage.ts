@@ -37,7 +37,7 @@ const useViewCommunityPage = () => {
     };
 
     fetchCommunity();
-  }, [cid, navigate]);
+  }, [cid, navigate, community]);
 
   useEffect(() => {
     const setCurrentUserRole = () => {

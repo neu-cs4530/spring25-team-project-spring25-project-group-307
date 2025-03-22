@@ -10,6 +10,7 @@ import {
   getCommunityById,
   addQuestionToCommunity,
   updateUserRole,
+  addUserToCommunity,
 } from '../services/community.service';
 
 const communityController = (socket: FakeSOSocket) => {
@@ -198,6 +199,22 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles adding a user to a community.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const addUserToCommunityRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Add the user to the community
+      const community = await addUserToCommunity(req.body.communityId, req.body.username);
+      res.json(community);
+    } catch (error) {
+      res.status(500).send(`Error when adding user to community: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
@@ -208,6 +225,7 @@ const communityController = (socket: FakeSOSocket) => {
   router.get('/getCommunityById/:id', getCommunityByIdRoute);
   router.post('/addQuestionToCommunity', addQuestionToCommunityRoute);
   router.patch('/updateCommunityRole', updateRoleInCommunityRoute);
+  router.patch('/addUserToCommunity', addUserToCommunityRoute);
 
   return router;
 };

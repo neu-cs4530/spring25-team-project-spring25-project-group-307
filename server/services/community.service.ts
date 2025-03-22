@@ -266,6 +266,34 @@ const updateUserRole = async (
   }
 };
 
+/**
+ * Adds a user to a community by username.
+ * @param communityId the ID of the community to add the user to
+ * @param username the username of the user to add to the community
+ * @returns the community with the added user or null if an error occurred
+ */
+const addUserToCommunity = async (
+  communityId: ObjectId,
+  username: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const user = await getUserByUsername(username);
+    if ('error' in user) {
+      throw new Error(user.error);
+    }
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $addToSet: { members: user._id },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -276,4 +304,5 @@ export {
   getCommunityById,
   addQuestionToCommunity,
   updateUserRole,
+  addUserToCommunity,
 };

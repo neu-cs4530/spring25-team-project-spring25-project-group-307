@@ -139,6 +139,25 @@ const updateUserRole = async (
   return res.data;
 };
 
+/**
+ * Function to add a user to a community.
+ * @param communityId The ID of the community to add the user to
+ * @param username The username of the user to add to the community
+ */
+const addUserToCommunity = async (
+  communityId: ObjectId,
+  username: string,
+): Promise<DatabaseCommunity> => {
+  const res = await api.patch(`${COMMUNITY_API_URL}/addUserToCommunity`, {
+    communityId,
+    username,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding user to community');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -149,4 +168,5 @@ export {
   getCommunityById,
   addQuestionToCommunity,
   updateUserRole,
+  addUserToCommunity,
 };

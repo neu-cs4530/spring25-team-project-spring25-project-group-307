@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import useCommunityUsers from '../../../../hooks/useCommunityUsers';
+import HeaderCommunityUsers from '../headerCommunityUsers';
 
 /**
  * Props for the CommunityUsers component.
@@ -33,14 +34,29 @@ const CommunityUsers = ({
   userRole,
   communityID,
 }: CommunityUsersProps) => {
-  const { handleRoleChange } = useCommunityUsers({ communityID });
+  const {
+    handleRoleChange,
+    handleAddUser,
+    open,
+    handleOpen,
+    handleClose,
+    userToAdd,
+    handleSetUsername,
+  } = useCommunityUsers({
+    communityID,
+  });
   return (
     <div>
-      <h2>Community Members</h2>
-      <TableContainer
-        component={Paper}
-        sx={{ display: 'inline-block', width: 'auto', margin: '0 auto' }}>
-        <Table sx={{ width: 'auto' }} aria-label='simple table'>
+      <TableContainer component={Paper} sx={{ display: 'inline-block' }}>
+        <HeaderCommunityUsers
+          handleAddUser={handleAddUser}
+          open={open}
+          handleOpen={handleOpen}
+          handleClose={handleClose}
+          userToAdd={userToAdd}
+          handleSetUsername={handleSetUsername}
+        />
+        <Table aria-label='simple table'>
           <TableHead>
             <TableRow>
               <TableCell>Username</TableCell>
