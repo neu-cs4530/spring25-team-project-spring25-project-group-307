@@ -6,9 +6,7 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
-  UpdateInterestsRequest,
   FeedItem,
-  Interest,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -18,9 +16,6 @@ import {
   saveUser,
   updateUser,
 } from '../services/user.service';
-import InterestModel from '../models/interest.model';
-import TagModel from '../models/tags.model';
-import { getInterestsByIds, saveInterest } from '../services/interest.service';
 
 const userController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
@@ -48,13 +43,6 @@ const userController = (socket: FakeSOSocket) => {
     req.body.username.trim() !== '' &&
     req.body.biography !== undefined;
 
-  const isUpdateInterestsBodyValid = (req: UpdateInterestsRequest): boolean =>
-    req.body !== undefined &&
-    req.body.username !== undefined &&
-    req.body.username.trim() !== '' &&
-    req.body.interests !== undefined &&
-    Array.isArray(req.body.interests);
-
   /**
    * Handles the creation of a new user account.
    * @param req The request containing username, email, and password in the body.
@@ -74,7 +62,6 @@ const userController = (socket: FakeSOSocket) => {
         ...requestUser,
         dateJoined: new Date(),
         biography: requestUser.biography ?? '',
-        interests: [],
         feed: {
           items: [] as FeedItem[],
         },
@@ -146,35 +133,6 @@ const userController = (socket: FakeSOSocket) => {
       res.status(200).json(user);
     } catch (error) {
       res.status(500).send(`Error when getting user by username: ${error}`);
-    }
-  };
-
-  const getInterestsByInterestIds = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { interestIds } = req.body;
-      const interests = await InterestModel.find({ _id: { $in: interestIds } });
-      res.json(interests);
-    } catch (error) {
-      res.status(500).send(`Error when getting interests by IDs: ${error}`);
-    }
-  };
-
-  const getInterestRelatedTags = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const { interestIds } = req.body;
-      const tags = await TagModel.find({ _id: { $in: interestIds } });
-      res.json(tags);
-    } catch (error) {
-      res.status(500).send(`Error when getting interests: ${error}`);
-    }
-  };
-
-  const getAllTags = async (req: Request, res: Response): Promise<void> => {
-    try {
-      const tags = await TagModel.find();
-      res.json(tags);
-    } catch (error) {
-      res.status(500).send(`Error when getting tags: ${error}`);
     }
   };
 
@@ -283,67 +241,6 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
-  /**
-   * Updates a user's interests.
-   * @param req The request containing the username and interests in the body.
-   * @param res The response, either confirming the update or returning an error.
-   * @returns A promise resolving to void.
-   */
-  const updateInterests = async (req: UpdateInterestsRequest, res: Response): Promise<void> => {
-    try {
-      if (!isUpdateInterestsBodyValid(req)) {
-        res.status(400).send('Invalid user body');
-        return;
-      }
-
-      // Validate that request has username and interests
-      const { username, interests } = req.body;
-
-      await Promise.all(
-        interests.map(async (interest: Interest) => {
-          try {
-            const existingInterests = await getInterestsByIds([interest._id]);
-            if (existingInterests.length === 1) {
-              const updatedInterest = await InterestModel.findByIdAndUpdate(
-                interest._id,
-                { $set: interest },
-                { new: true },
-              );
-              if (!updatedInterest) {
-                throw new Error('Failed to update interest');
-              }
-              return updatedInterest._id;
-            }
-            const newInterest = await saveInterest(interest);
-            if ('error' in newInterest) {
-              throw new Error(newInterest.error);
-            }
-            return newInterest._id;
-          } catch (error) {
-            throw new Error(`Error when saving interest: ${error}`);
-          }
-        }),
-      );
-
-      // Call the same updateUser(...) service used by resetPassword
-      const updatedUser = await updateUser(username, { interests });
-
-      if ('error' in updatedUser) {
-        throw new Error(updatedUser.error);
-      }
-
-      // Emit socket event for real-time updates
-      socket.emit('userUpdate', {
-        user: updatedUser,
-        type: 'updated',
-      });
-
-      res.status(200).json(updatedUser);
-    } catch (error) {
-      res.status(500).send(`Error when updating user interests: ${error}`);
-    }
-  };
-
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -352,10 +249,6 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
-  router.patch('/updateInterests', updateInterests);
-  router.post('/getInterestsByInterestIds', getInterestsByInterestIds);
-  router.post('/getInterestRelatedTags', getInterestRelatedTags);
-  router.get('/getAllTags', getAllTags);
   return router;
 };
 

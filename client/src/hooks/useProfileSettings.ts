@@ -6,13 +6,11 @@ import {
   deleteUser,
   resetPassword,
   updateBiography,
-  updateInterests,
-  getTagsByInterestIds,
-  getAllTags,
-  getInterestsByInterestIds,
 } from '../services/userService';
 import { DatabaseTag, Interest, SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
+import { getInterestsByUser, updateInterests } from '../services/interestService';
+import { getAllTags, getTagsByIds } from '../services/tagService';
 
 /**
  * A custom hook to encapsulate all logic/state for the ProfileSettings component.
@@ -54,13 +52,12 @@ const useProfileSettings = () => {
         const data = await getUserByUsername(username);
         setUserData(data);
 
-        if (data?.interests?.length) {
-          const tags = await getTagsByInterestIds(data.interests);
+        // If the user has interests, fetch them
+        const userInterests = await getInterestsByUser(data._id);
+        if (userInterests.length > 0) {
+          const tags = await getTagsByIds(userInterests.map(interest => interest.tagId));
           setPopulatedTags(tags);
-
-          // The user's interests are stored as IDs, so we need to convert them to the full objects.
-          const storedInterests = await getInterestsByInterestIds(data.interests);
-          setNewInterests(storedInterests);
+          setNewInterests(userInterests);
         }
 
         // Fetch all tags from the database
@@ -144,16 +141,15 @@ const useProfileSettings = () => {
     if (!username) return;
     try {
       // Await the async call to update the interests
-      const updatedUser = await updateInterests(username, newInterests);
+      await updateInterests(username, newInterests);
 
       // Ensure state updates occur sequentially after the API call completes
       await new Promise(resolve => {
-        setUserData(updatedUser); // Update the user data
         setEditInterestsMode(false); // Exit edit mode
         resolve(null); // Resolve the promise
       });
 
-      const newTags = await getTagsByInterestIds(updatedUser.interests);
+      const newTags = await getTagsByIds(newInterests.map(interest => interest.tagId));
       setPopulatedTags(newTags);
 
       setSuccessMessage('Interests updated!');
@@ -186,7 +182,9 @@ const useProfileSettings = () => {
   };
 
   const getTagColor = (tag: DatabaseTag): ChipProps['color'] => {
-    const matchingInterest = newInterests.find(interest => interest._id === tag._id);
+    const matchingInterest = newInterests.find(
+      interest => interest.userId === currentUser._id && interest.tagId === tag._id,
+    );
     let color: ChipProps['color'] = 'default';
     if (matchingInterest) {
       color = matchingInterest.priority === 'high' ? 'secondary' : 'primary';

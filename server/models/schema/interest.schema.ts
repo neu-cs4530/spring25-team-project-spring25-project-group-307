@@ -2,7 +2,11 @@ import { Schema } from 'mongoose';
 
 const interestSchema: Schema = new Schema(
   {
-    _id: {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    tagId: {
       type: Schema.Types.ObjectId,
       ref: 'Tag',
     },

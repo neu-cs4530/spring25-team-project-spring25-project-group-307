@@ -195,7 +195,6 @@ describe('updateUser', () => {
     _id: new mongoose.Types.ObjectId(),
     username: user.username,
     dateJoined: user.dateJoined,
-    interests: [],
     feed: new mongoose.Types.ObjectId(),
     lastViewRanking: 0,
   };

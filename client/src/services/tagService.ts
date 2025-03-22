@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { DatabaseTag, TagData } from '../types/types';
 import api from './config';
 
@@ -30,4 +31,20 @@ const getTagByName = async (name: string): Promise<DatabaseTag> => {
   return res.data;
 };
 
-export { getTagsWithQuestionNumber, getTagByName };
+const getTagsByIds = async (tagIds: ObjectId[]): Promise<DatabaseTag[]> => {
+  const res = await api.post(`${TAG_API_URL}/getTagsByIds`, { tagIds });
+  if (res.status !== 200) {
+    throw new Error('Error when fetching tags by IDs');
+  }
+  return res.data;
+};
+
+const getAllTags = async (): Promise<DatabaseTag[]> => {
+  const res = await api.get(`${TAG_API_URL}/getAllTags`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching tags');
+  }
+  return res.data;
+};
+
+export { getTagsWithQuestionNumber, getTagByName, getTagsByIds, getAllTags };

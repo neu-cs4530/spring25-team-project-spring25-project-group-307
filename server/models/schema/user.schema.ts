@@ -26,7 +26,6 @@ const userSchema: Schema = new Schema(
       type: String,
       default: '',
     },
-    interests: [{ type: Schema.Types.ObjectId, ref: 'Interest' }],
     feed: { type: Schema.Types.ObjectId, ref: 'Feed' },
     lastViewRanking: {
       type: Number,

@@ -22,19 +22,6 @@ import { saveFeed } from './feed.service';
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    // Save the interests provided in the argument to the database
-    const interestIds: ObjectId[] = await Promise.all(
-      user.interests.map(async interest => {
-        const savedInterest: InterestResponse = await saveInterest(interest);
-
-        if ('error' in savedInterest) {
-          throw new Error(savedInterest.error);
-        }
-
-        return savedInterest._id;
-      }),
-    );
-
     // Save the feed items provided in the argument to the database
     await Promise.all(
       user.feed.items.map(async feedItem => {
@@ -55,7 +42,6 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
 
     const result: DatabaseUser = await UserModel.create({
       ...user,
-      interests: interestIds,
       feed: feedId._id,
     });
 
@@ -69,7 +55,6 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       username: result.username,
       dateJoined: result.dateJoined,
       biography: result.biography,
-      interests: result.interests,
       feed: result.feed,
       lastViewRanking: result.lastViewRanking,
     };

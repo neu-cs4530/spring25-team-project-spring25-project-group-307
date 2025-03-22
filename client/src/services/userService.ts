@@ -1,6 +1,5 @@
 import axios from 'axios';
-import { ObjectId } from 'mongodb';
-import { UserCredentials, SafeDatabaseUser, Interest, DatabaseTag } from '../types/types';
+import { UserCredentials, SafeDatabaseUser } from '../types/types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
@@ -27,30 +26,6 @@ const getUserByUsername = async (username: string): Promise<SafeDatabaseUser> =>
   const res = await api.get(`${USER_API_URL}/getUser/${username}`);
   if (res.status !== 200) {
     throw new Error('Error when fetching user');
-  }
-  return res.data;
-};
-
-const getInterestsByInterestIds = async (interestIds: ObjectId[]): Promise<Interest[]> => {
-  const res = await api.post(`${USER_API_URL}/getInterestsByInterestIds`, { interestIds });
-  if (res.status !== 200) {
-    throw new Error('Error when fetching interests by IDs');
-  }
-  return res.data;
-};
-
-const getTagsByInterestIds = async (interestIds: ObjectId[]): Promise<DatabaseTag[]> => {
-  const res = await api.post(`${USER_API_URL}/getInterestRelatedTags`, { interestIds });
-  if (res.status !== 200) {
-    throw new Error('Error when fetching interest-coroelated tags');
-  }
-  return res.data;
-};
-
-const getAllTags = async (): Promise<DatabaseTag[]> => {
-  const res = await api.get(`${USER_API_URL}/getAllTags`);
-  if (res.status !== 200) {
-    throw new Error('Error when fetching all tags');
   }
   return res.data;
 };
@@ -148,30 +123,12 @@ const updateBiography = async (
   return res.data;
 };
 
-const updateInterests = async (
-  username: string,
-  interests: Interest[],
-): Promise<SafeDatabaseUser> => {
-  const res = await api.patch(`${USER_API_URL}/updateInterests`, {
-    username,
-    interests,
-  });
-  if (res.status !== 200) {
-    throw new Error('Error when updating interests');
-  }
-  return res.data;
-};
-
 export {
   getUsers,
   getUserByUsername,
-  getTagsByInterestIds,
-  getInterestsByInterestIds,
-  getAllTags,
   loginUser,
   createUser,
   deleteUser,
   resetPassword,
   updateBiography,
-  updateInterests,
 };

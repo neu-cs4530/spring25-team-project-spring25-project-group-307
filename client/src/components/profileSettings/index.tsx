@@ -125,7 +125,6 @@ const ProfileSettings: React.FC = () => {
                     style={{ marginLeft: '1rem' }}
                     onClick={() => {
                       setEditInterestsMode(true);
-                      // setNewInterests(populatedInterests || []);
                     }}>
                     Edit
                   </button>
@@ -143,23 +142,50 @@ const ProfileSettings: React.FC = () => {
                         clickable
                         color={getTagColor(tag)}
                         onClick={() => {
-                          if (newInterests.some(interest => interest._id === tag._id)) {
+                          if (
+                            newInterests.some(
+                              interest =>
+                                interest.userId === userData._id && interest.tagId === tag._id,
+                            )
+                          ) {
                             setNewInterests(
-                              newInterests.filter(interest => interest._id !== tag._id),
+                              newInterests.filter(
+                                interest =>
+                                  interest.userId === userData._id && interest.tagId !== tag._id,
+                              ),
                             );
                           } else {
                             setNewInterests([
                               ...newInterests,
-                              { _id: tag._id, weight: 1, priority: 'moderate' },
+                              {
+                                userId: userData._id,
+                                tagId: tag._id,
+                                weight: 1,
+                                priority: 'moderate',
+                              },
                             ]);
                           }
                         }}
                         onContextMenu={e => {
                           e.preventDefault();
                           setNewInterests(
-                            newInterests.some(interest => interest._id === tag._id)
-                              ? newInterests.filter(interest => interest._id !== tag._id)
-                              : [...newInterests, { _id: tag._id, weight: 2, priority: 'high' }],
+                            newInterests.some(
+                              interest =>
+                                interest.userId === userData._id && interest.tagId === tag._id,
+                            )
+                              ? newInterests.filter(
+                                  interest =>
+                                    interest.userId === userData._id && interest.tagId !== tag._id,
+                                )
+                              : [
+                                  ...newInterests,
+                                  {
+                                    userId: userData._id,
+                                    tagId: tag._id,
+                                    weight: 2,
+                                    priority: 'high',
+                                  },
+                                ],
                           );
                         }}
                       />

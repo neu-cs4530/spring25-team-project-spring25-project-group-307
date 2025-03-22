@@ -48,7 +48,7 @@ export const calculateWeightedQuestions = async (
       throw new Error('User not found');
     }
     const interests = user.interests.reduce((acc: Record<string, number>, interest: Interest) => {
-      acc[interest._id.toString()] = interest.weight;
+      acc[interest.userId.toString()] = interest.weight;
       return acc;
     }, {});
 

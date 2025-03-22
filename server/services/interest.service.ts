@@ -1,7 +1,6 @@
 import { ObjectId } from 'mongodb';
 import InterestModel from '../models/interest.model';
-import UserModel from '../models/users.model';
-import { DatabaseUser, Interest, InterestResponse } from '../types/types';
+import { DeleteResultResponse, Interest, InterestResponse } from '../types/types';
 
 /**
  * Saves a new interest to the database.
@@ -22,9 +21,56 @@ export const saveInterest = async (interest: Interest): Promise<InterestResponse
   }
 };
 
-export const getInterestsByIds = async (interestIds: ObjectId[]): Promise<Interest[]> => {
+export const deleteInterest = async (interest: Interest): Promise<InterestResponse> => {
   try {
-    return await InterestModel.find({ _id: { $in: interestIds } });
+    const result = await InterestModel.findOneAndDelete(interest);
+
+    if (!result) {
+      throw Error('Failed to delete interest');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting interest: ${error}` };
+  }
+};
+
+export const deleteInterestsByUserId = async (aUserId: ObjectId): Promise<DeleteResultResponse> => {
+  try {
+    const result = await InterestModel.deleteMany({ userId: aUserId });
+
+    if (!result) {
+      throw Error('Failed to delete interests');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting interests: ${error}` };
+  }
+};
+
+export const getInterestsByUserId = async (aUserId: ObjectId): Promise<Interest[]> => {
+  try {
+    return await InterestModel.find({ userId: aUserId });
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getInterestsByTagIds = async (tagIds: ObjectId[]): Promise<Interest[]> => {
+  try {
+    return await InterestModel.find({ tagId: { $in: tagIds } });
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getInterestsByUserIdAndTagIds = async (
+  aUserId: ObjectId,
+  tagIds: ObjectId[],
+): Promise<Interest[]> => {
+  try {
+    return await InterestModel.find({ userId: aUserId, tagId: { $in: tagIds } });
   } catch (error) {
     return [];
   }

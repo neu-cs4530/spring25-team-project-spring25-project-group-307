@@ -191,7 +191,6 @@ async function userCreate(
   password: string,
   dateJoined: Date,
   biography?: string,
-  interests?: Interest[],
   feed?: {items: FeedItem[]},
   lastViewRanking?: number,
 ): Promise<DatabaseUser> {
@@ -204,7 +203,6 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    interests: interests ?? [],
     feed: feed ?? { items: [] },
     lastViewRanking: lastViewRanking ?? 0,
   };
