@@ -1,6 +1,8 @@
 import { SafeDatabaseUser } from '@fake-stack-overflow/shared';
 import {
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -15,10 +17,13 @@ import {
  * @param users - The list of users to display.
  */
 interface CommunityUsersProps {
-  users: SafeDatabaseUser[];
+  admins: SafeDatabaseUser[] | undefined;
+  moderators: SafeDatabaseUser[] | undefined;
+  members: SafeDatabaseUser[] | undefined;
+  userRole: string;
 }
 
-const CommunityUsers = ({ users }: CommunityUsersProps) => (
+const CommunityUsers = ({ admins, moderators, members, userRole }: CommunityUsersProps) => (
   <div>
     <h2>Community Members</h2>
     <TableContainer
@@ -28,18 +33,60 @@ const CommunityUsers = ({ users }: CommunityUsersProps) => (
         <TableHead>
           <TableRow>
             <TableCell>Username</TableCell>
-            <TableCell align='right'>User ID</TableCell>
+            <TableCell align='right'>Role</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {users.map(user => (
+          {admins?.map(admin => (
             <TableRow
-              key={user._id.toString()}
+              key={admin.username}
               sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell component='th' scope='row'>
-                {user.username}
+                {admin.username}
               </TableCell>
-              <TableCell align='right'>{user._id.toString()}</TableCell>
+              <TableCell component='th' scope='row' align='right'>
+                Admin
+              </TableCell>
+            </TableRow>
+          ))}
+          {moderators?.map(moderator => (
+            <TableRow
+              key={moderator.username}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component='th' scope='row'>
+                {moderator.username}
+              </TableCell>
+              {userRole === 'ADMIN' ? (
+                <TableCell component='th' scope='row' align='right'>
+                  <Select label='Role' defaultValue='MODERATOR' size='small'>
+                    <MenuItem value='ADMIN'>Admin</MenuItem>
+                    <MenuItem value='MODERATOR'>Moderator</MenuItem>
+                    <MenuItem value='MEMBER'>Member</MenuItem>
+                  </Select>
+                </TableCell>
+              ) : (
+                <TableCell align='right'>Moderator</TableCell>
+              )}
+            </TableRow>
+          ))}
+          {members?.map(member => (
+            <TableRow
+              key={member.username}
+              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              <TableCell component='th' scope='row'>
+                {member.username}
+              </TableCell>
+              {userRole === 'ADMIN' ? (
+                <TableCell component='th' scope='row' align='right'>
+                  <Select label='Role' defaultValue='MEMBER' size='small'>
+                    <MenuItem value='ADMIN'>Admin</MenuItem>
+                    <MenuItem value='MODERATOR'>Moderator</MenuItem>
+                    <MenuItem value='MEMBER'>Member</MenuItem>
+                  </Select>
+                </TableCell>
+              ) : (
+                <TableCell align='right'>Member</TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

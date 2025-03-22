@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
 import { getCommunityById } from '../services/communityService';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -13,9 +14,11 @@ import { getCommunityById } from '../services/communityService';
  */
 const useViewCommunityPage = () => {
   const { cid } = useParams();
+  const { user } = useUserContext();
   const navigate = useNavigate();
 
   const [community, setCommunity] = useState<PopulatedDatabaseCommunity | null>(null);
+  const [currentRole, setCurrentRole] = useState<string>('None');
 
   useEffect(() => {
     if (!cid) {
@@ -36,7 +39,23 @@ const useViewCommunityPage = () => {
     fetchCommunity();
   }, [cid, navigate]);
 
-  return { community };
+  useEffect(() => {
+    const setCurrentUserRole = () => {
+      if (community) {
+        if (community.admins.some(admin => admin._id === user?._id)) {
+          setCurrentRole('ADMIN');
+        } else if (community.moderators.some(moderator => moderator._id === user?._id)) {
+          setCurrentRole('MODERATOR');
+        } else {
+          setCurrentRole('MEMBER');
+        }
+      }
+    };
+
+    setCurrentUserRole();
+  }, [community, user, currentRole]);
+
+  return { community, currentRole };
 };
 
 export default useViewCommunityPage;

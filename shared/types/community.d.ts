@@ -11,6 +11,8 @@ import { SafeDatabaseUser } from './user';
 export interface Community {
   title: string;
   description: string;
+  admins: ObjectId[];
+  moderators: ObjectId[];
   members: ObjectId[];
   questions: ObjectId[];
 }
@@ -33,7 +35,9 @@ export interface DatabaseCommunity extends Community {
  * - `questions`: An array of populated 'PopulatedDatabaseQuestion' objects.
  */
 export interface PopulatedDatabaseCommunity
-  extends Omit<DatabaseCommunity, 'members' | 'questions'> {
+  extends Omit<DatabaseCommunity, 'members' | 'admins' | 'moderators' | 'questions'> {
+  admins: SafeDatabaseUser[];
+  moderators: SafeDatabaseUser[];
   members: SafeDatabaseUser[];
   questions: PopulatedDatabaseQuestion[];
 }

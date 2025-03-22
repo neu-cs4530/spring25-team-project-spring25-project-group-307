@@ -159,10 +159,14 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity 
     const community: PopulatedDatabaseCommunity | null = await CommunityModel.findOne({
       _id: id,
     }).populate<{
+      admins: SafeDatabaseUser[];
+      moderators: SafeDatabaseUser[];
       members: SafeDatabaseUser[];
       questions: PopulatedDatabaseQuestion[];
     }>([
       { path: 'members', model: 'User', select: '-password' },
+      { path: 'admins', model: 'User', select: '-password' },
+      { path: 'moderators', model: 'User', select: '-password' },
       {
         path: 'questions',
         model: 'Question',

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addCommunity } from '../services/communityService';
 import { Community } from '../types/types';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to handle adding communities and form validation.
@@ -16,6 +17,7 @@ import { Community } from '../types/types';
  */
 const useNewCommunity = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
   const [titleErr, setTitleErr] = useState<string>('');
@@ -53,6 +55,8 @@ const useNewCommunity = () => {
         const community: Community = {
           title,
           description,
+          admins: [user._id],
+          moderators: [],
           members: [],
           questions: [],
         };

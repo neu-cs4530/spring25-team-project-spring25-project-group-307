@@ -19,6 +19,8 @@ const communitySchema: Schema = new Schema(
     description: {
       type: String,
     },
+    admins: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    moderators: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
   },

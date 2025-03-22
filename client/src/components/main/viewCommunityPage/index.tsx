@@ -6,7 +6,7 @@ import useViewCommunityPage from '../../../hooks/useViewCommunityPage';
 import CommunityUsers from './communityUsers';
 
 const ViewCommunityPage = () => {
-  const { community } = useViewCommunityPage();
+  const { community, currentRole } = useViewCommunityPage();
   const [value, setValue] = useState('1');
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -25,7 +25,12 @@ const ViewCommunityPage = () => {
           <CommunityHome community={community} />
         </TabPanel>
         <TabPanel value='2'>
-          <CommunityUsers users={community?.members || []} />
+          <CommunityUsers
+            admins={community?.admins}
+            moderators={community?.moderators}
+            members={community?.members}
+            userRole={currentRole.toString()}
+          />
         </TabPanel>
       </TabContext>
     </Box>
