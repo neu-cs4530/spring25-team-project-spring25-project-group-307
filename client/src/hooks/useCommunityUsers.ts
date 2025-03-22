@@ -20,8 +20,6 @@ const useCommunityUsers = ({ communityID }: UseCommunityUsersProps) => {
         throw new Error('Community ID not provided');
       }
 
-      console.log('Updating role', username, newRole, 'in community', communityID);
-
       const res = await updateUserRole(communityID, username, newRole);
 
       if (!res) {

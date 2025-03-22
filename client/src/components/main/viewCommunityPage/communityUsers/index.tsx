@@ -33,7 +33,7 @@ const CommunityUsers = ({
   userRole,
   communityID,
 }: CommunityUsersProps) => {
-  const { loading, error, handleRoleChange } = useCommunityUsers({ communityID });
+  const { handleRoleChange } = useCommunityUsers({ communityID });
   return (
     <div>
       <h2>Community Members</h2>
@@ -74,7 +74,6 @@ const CommunityUsers = ({
                       value='moderators'
                       size='small'
                       onChange={e => {
-                        console.log('Role change triggered:', moderator.username, e.target.value);
                         handleRoleChange(moderator.username, e.target.value as string);
                       }}>
                       <MenuItem value='admins'>Admin</MenuItem>
@@ -101,7 +100,6 @@ const CommunityUsers = ({
                       defaultValue='members'
                       size='small'
                       onChange={e => {
-                        console.log('Role change triggered:', member.username, e.target.value);
                         handleRoleChange(member.username, e.target.value as string);
                       }}>
                       <MenuItem value='admins'>Admin</MenuItem>

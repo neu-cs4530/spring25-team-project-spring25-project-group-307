@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import {
   Community,
   DatabaseCommunity,
@@ -7,7 +8,6 @@ import {
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
-import { ObjectId } from 'mongodb';
 
 /**
  * Retrieves all communities from the database.
@@ -262,7 +262,6 @@ const updateUserRole = async (
 
     return updatedCommunity;
   } catch (error) {
-    console.error('Error updating user role:', error);
     return null;
   }
 };

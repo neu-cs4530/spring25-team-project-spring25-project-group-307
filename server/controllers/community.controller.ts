@@ -173,22 +173,28 @@ const communityController = (socket: FakeSOSocket) => {
 
   /**
    * Handles updating a user role in a community.
-   * 
+   *
    * @param req The HTTP request object.
    * @param res The HTTP response object.
-   * 
+   *
    * @returns A Promise that resolves to void.
    */
   const updateRoleInCommunityRoute = async (req: Request, res: Response): Promise<void> => {
     try {
       // Update the user role in the community
-      const community = await updateUserRole(req.body.communityId, req.body.username, req.body.role);
+      const community = await updateUserRole(
+        req.body.communityId,
+        req.body.username,
+        req.body.role,
+      );
       if (!community) {
         throw new Error('Failed to update user role in community');
       }
       res.json(community);
     } catch (error) {
-      res.status(500).send(`Error when updating user role in community: ${(error as Error).message}`);
+      res
+        .status(500)
+        .send(`Error when updating user role in community: ${(error as Error).message}`);
     }
   };
 
