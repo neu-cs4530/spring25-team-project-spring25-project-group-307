@@ -9,7 +9,7 @@ import {
   DatabaseCommunity,
 } from '../types/types';
 import useUserContext from './useUserContext';
-import addComment from '../services/commentService';
+import { addComment } from '../services/commentService';
 import { getQuestionById, getCommunityQuestion, deleteQuestion } from '../services/questionService';
 import { deleteQuestionFromCommunity } from '../services/communityService';
 
@@ -29,6 +29,7 @@ const useAnswerPage = () => {
   const [questionID, setQuestionID] = useState<string>(qid || '');
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
   const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
+  const [currentRole, setCurrentRole] = useState<string>('None');
 
   /**
    * Function to handle navigation to the "New Answer" page.
@@ -120,6 +121,22 @@ const useAnswerPage = () => {
     // eslint-disable-next-line no-console
     fetchData().catch(e => console.log(e));
   }, [questionID, user.username]);
+
+  useEffect(() => {
+    const setCurrentUserRole = () => {
+      if (community) {
+        if (community.admins.some(admin => admin === user?._id)) {
+          setCurrentRole('ADMIN');
+        } else if (community.moderators.some(moderator => moderator === user?._id)) {
+          setCurrentRole('MODERATOR');
+        } else {
+          setCurrentRole('MEMBER');
+        }
+      }
+    };
+
+    setCurrentUserRole();
+  }, [community, user, currentRole]);
 
   useEffect(() => {
     /**
@@ -252,6 +269,7 @@ const useAnswerPage = () => {
     handleReturnToCommunity,
     handleDeleteQuestionFromCommunity,
     handleDeleteQuestionGlobal,
+    currentRole,
   };
 };
 

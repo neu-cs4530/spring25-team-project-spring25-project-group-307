@@ -39,7 +39,9 @@ const CommunityView = ({
             {community.title}
           </Typography>
           <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
-          <Typography variant='body2'>{community.members.length} members</Typography>
+          <Typography variant='body2'>
+            {`${community.members.length + community.admins.length + community.moderators.length} members`}
+          </Typography>
           <Typography variant='body2'>{community.questions.length} questions</Typography>
         </CardContent>
         <CardActions>

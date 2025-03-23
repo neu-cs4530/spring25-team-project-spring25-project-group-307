@@ -26,6 +26,7 @@ const AnswerPage = () => {
     handleReturnToCommunity,
     handleDeleteQuestionFromCommunity,
     handleDeleteQuestionGlobal,
+    currentRole,
   } = useAnswerPage();
 
   if (!question) {
@@ -45,10 +46,12 @@ const AnswerPage = () => {
       )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <VoteComponent question={question} />
-        <DeleteQuestionComponent
-          deleteQuestionFromCommunity={handleDeleteQuestionFromCommunity}
-          deleteQuestionGlobal={handleDeleteQuestionGlobal}
-        />
+        {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
+          <DeleteQuestionComponent
+            deleteQuestionFromCommunity={handleDeleteQuestionFromCommunity}
+            deleteQuestionGlobal={handleDeleteQuestionGlobal}
+          />
+        )}
       </Box>
       <AnswerHeader
         ansCount={question.answers.length}
