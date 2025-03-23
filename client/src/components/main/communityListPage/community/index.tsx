@@ -38,7 +38,7 @@ const CommunityView = ({
             flexDirection='row'
             alignItems='center'
             justifyContent='space-between'>
-            <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+            <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14, pt: 1, pb: 1 }}>
               Community
             </Typography>
             {UserInCommunity && <OptionsMenu />}
