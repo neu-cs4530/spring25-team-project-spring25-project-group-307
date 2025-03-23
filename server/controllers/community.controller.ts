@@ -11,6 +11,7 @@ import {
   addQuestionToCommunity,
   updateUserRole,
   addUserToCommunity,
+  removeQuestionFromCommunity,
 } from '../services/community.service';
 
 const communityController = (socket: FakeSOSocket) => {
@@ -173,6 +174,25 @@ const communityController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Handles removing a question from a community.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const deleteQuestionFromCommunityRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { communityId, questionId } = req.params;
+      // Remove the question from the community
+      const community = await removeQuestionFromCommunity(communityId, questionId);
+      res.json(community);
+    } catch (error) {
+      res
+        .status(500)
+        .send(`Error when deleting question from community: ${(error as Error).message}`);
+    }
+  };
+
+  /**
    * Handles updating a user role in a community.
    *
    * @param req The HTTP request object.
@@ -226,6 +246,10 @@ const communityController = (socket: FakeSOSocket) => {
   router.post('/addQuestionToCommunity', addQuestionToCommunityRoute);
   router.patch('/updateCommunityRole', updateRoleInCommunityRoute);
   router.patch('/addUserToCommunity', addUserToCommunityRoute);
+  router.delete(
+    '/deleteQuestionFromCommunity/:communityId/:questionId',
+    deleteQuestionFromCommunityRoute,
+  );
 
   return router;
 };

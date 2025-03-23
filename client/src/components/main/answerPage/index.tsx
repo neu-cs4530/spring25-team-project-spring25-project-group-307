@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@mui/material';
+import { Box, Button } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
@@ -10,6 +10,7 @@ import QuestionBody from './questionBody';
 import VoteComponent from '../voteComponent';
 import CommentSection from '../commentSection';
 import useAnswerPage from '../../../hooks/useAnswerPage';
+import DeleteQuestionComponent from '../deleteQuestionComponent';
 
 /**
  * AnswerPage component that displays the full content of a question along with its answers.
@@ -23,6 +24,8 @@ const AnswerPage = () => {
     handleNewAnswer,
     community,
     handleReturnToCommunity,
+    handleDeleteQuestionFromCommunity,
+    handleDeleteQuestionGlobal,
   } = useAnswerPage();
 
   if (!question) {
@@ -40,7 +43,13 @@ const AnswerPage = () => {
           Go to Community
         </Button>
       )}
-      <VoteComponent question={question} />
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <VoteComponent question={question} />
+        <DeleteQuestionComponent
+          deleteQuestionFromCommunity={handleDeleteQuestionFromCommunity}
+          deleteQuestionGlobal={handleDeleteQuestionGlobal}
+        />
+      </Box>
       <AnswerHeader
         ansCount={question.answers.length}
         title={question.title}

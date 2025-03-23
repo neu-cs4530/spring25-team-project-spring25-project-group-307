@@ -118,6 +118,25 @@ const addQuestionToCommunity = async (
 };
 
 /**
+ * Function to delete a question from a community.
+ * @param communityId The ID of the community to delete the question from
+ * @param questionId The ID of the question to delete from the community
+ * @throws Error if there is an issue deleting the question from the community.
+ */
+const deleteQuestionFromCommunity = async (
+  communityId: ObjectId,
+  questionId: ObjectId,
+): Promise<DatabaseCommunity> => {
+  const res = await api.delete(
+    `${COMMUNITY_API_URL}/deleteQuestionFromCommunity/${communityId}/${questionId}`,
+  );
+  if (res.status !== 200) {
+    throw new Error('Error when deleting question from community');
+  }
+  return res.data;
+};
+
+/**
  * Function to update the users role in the community.
  * @param communityId The ID of the community to update the role in
  * @param username The username of the user to update the role for
@@ -167,6 +186,7 @@ export {
   getCommunitiesBySearch,
   getCommunityById,
   addQuestionToCommunity,
+  deleteQuestionFromCommunity,
   updateUserRole,
   addUserToCommunity,
 };

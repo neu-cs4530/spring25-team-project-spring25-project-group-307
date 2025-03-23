@@ -21,7 +21,7 @@ const HeaderCommunityUsers = ({
   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
     <Typography variant='h3'>Community Members</Typography>
     <Button variant='contained' color='primary' onClick={handleOpen}>
-      Add User
+      Add Member
     </Button>
     <Modal
       open={open}

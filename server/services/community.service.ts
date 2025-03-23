@@ -210,6 +210,30 @@ const addQuestionToCommunity = async (
 };
 
 /**
+ * Removes a question from a community.
+ * @param communityId the ID of the community to remove the question from
+ * @param questionId the ID of the question to remove from the community
+ * @returns the community with the removed question or null if an error occurred
+ */
+const removeQuestionFromCommunity = async (
+  communityId: string,
+  questionId: string,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $pull: { questions: questionId },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
  * Updates the role of a user in a community.
  * @param communityId the ID of the community to update the role in
  * @param username the username of the user to update the role for
@@ -303,6 +327,7 @@ export {
   leaveCommunity,
   getCommunityById,
   addQuestionToCommunity,
+  removeQuestionFromCommunity,
   updateUserRole,
   addUserToCommunity,
 };

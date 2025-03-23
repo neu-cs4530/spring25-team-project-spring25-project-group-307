@@ -13,7 +13,7 @@ const AskCommunityQuestion = ({ communityID }: AskCommunityQuestionProps) => {
   };
 
   return (
-    <Button variant='contained' color='primary' onClick={handleClick}>
+    <Button variant='contained' color='primary' onClick={handleClick} sx={{ mr: 2 }}>
       Ask Question
     </Button>
   );

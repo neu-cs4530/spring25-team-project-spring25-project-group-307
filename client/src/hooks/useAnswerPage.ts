@@ -10,7 +10,8 @@ import {
 } from '../types/types';
 import useUserContext from './useUserContext';
 import addComment from '../services/commentService';
-import { getQuestionById, getCommunityQuestion } from '../services/questionService';
+import { getQuestionById, getCommunityQuestion, deleteQuestion } from '../services/questionService';
+import { deleteQuestionFromCommunity } from '../services/communityService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -75,6 +76,30 @@ const useAnswerPage = () => {
   const handleReturnToCommunity = () => {
     if (community) {
       navigate(`/community/${community._id}`);
+    }
+  };
+
+  /**
+   * Function to delete a question from a community.
+   */
+  const handleDeleteQuestionFromCommunity = async () => {
+    if (community && question) {
+      const res = await deleteQuestionFromCommunity(community._id, question._id);
+      if (res) {
+        navigate(`/community/${community._id}`);
+      }
+    }
+  };
+
+  /**
+   * Function to delete a question globally.
+   */
+  const handleDeleteQuestionGlobal = async () => {
+    if (question) {
+      const res = await deleteQuestion(question._id);
+      if (res) {
+        navigate('/home');
+      }
     }
   };
 
@@ -225,6 +250,8 @@ const useAnswerPage = () => {
     handleNewAnswer,
     community,
     handleReturnToCommunity,
+    handleDeleteQuestionFromCommunity,
+    handleDeleteQuestionGlobal,
   };
 };
 

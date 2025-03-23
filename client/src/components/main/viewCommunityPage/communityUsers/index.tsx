@@ -1,5 +1,6 @@
 import { SafeDatabaseUser } from '@fake-stack-overflow/shared';
 import {
+  Box,
   MenuItem,
   Paper,
   Select,
@@ -9,6 +10,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import useCommunityUsers from '../../../../hooks/useCommunityUsers';
@@ -46,21 +48,29 @@ const CommunityUsers = ({
     communityID,
   });
   return (
-    <div>
-      <TableContainer component={Paper} sx={{ display: 'inline-block' }}>
-        <HeaderCommunityUsers
-          handleAddUser={handleAddUser}
-          open={open}
-          handleOpen={handleOpen}
-          handleClose={handleClose}
-          userToAdd={userToAdd}
-          handleSetUsername={handleSetUsername}
-        />
+    <Box sx={{ maxWidth: '800px' }}>
+      <HeaderCommunityUsers
+        handleAddUser={handleAddUser}
+        open={open}
+        handleOpen={handleOpen}
+        handleClose={handleClose}
+        userToAdd={userToAdd}
+        handleSetUsername={handleSetUsername}
+      />
+      <TableContainer component={Paper}>
         <Table aria-label='simple table'>
           <TableHead>
             <TableRow>
-              <TableCell>Username</TableCell>
-              <TableCell align='right'>Role</TableCell>
+              <TableCell>
+                <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+                  Username
+                </Typography>
+              </TableCell>
+              <TableCell align='right'>
+                <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+                  Role
+                </Typography>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -131,7 +141,7 @@ const CommunityUsers = ({
           </TableBody>
         </Table>
       </TableContainer>
-    </div>
+    </Box>
   );
 };
 
