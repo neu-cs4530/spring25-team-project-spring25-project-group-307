@@ -1,5 +1,24 @@
 import React from 'react';
 import './index.css';
+import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
+import StarIcon from '@mui/icons-material/Star';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
+import CommentIcon from '@mui/icons-material/Comment';
+import {
+  List,
+  ListItem,
+  ListItemAvatar,
+  ListItemText,
+  Avatar,
+  Box,
+  Typography,
+  Grid,
+  Card,
+  CardContent,
+  Button,
+  TextField,
+} from '@mui/material';
 import useProfileSettings from '../../hooks/useProfileSettings';
 
 const ProfileSettings: React.FC = () => {
@@ -31,155 +50,201 @@ const ProfileSettings: React.FC = () => {
 
   if (loading) {
     return (
-      <div className='page-container'>
-        <div className='profile-card'>
-          <h2>Loading user data...</h2>
-        </div>
-      </div>
+      <Box className='page-container'>
+        <Card className='profile-card'>
+          <Typography variant='h6'>Loading user data...</Typography>
+        </Card>
+      </Box>
     );
   }
 
   return (
-    <div className='page-container'>
-      <div className='profile-card'>
-        <h2>Profile</h2>
-        {successMessage && <p className='success-message'>{successMessage}</p>}
-        {errorMessage && <p className='error-message'>{errorMessage}</p>}
-        {userData ? (
-          <>
-            <h4>General Information</h4>
-            <p>
-              <strong>Username:</strong> {userData.username}
-            </p>
+    <Box
+      className='page-container'
+      sx={{ display: 'flex', justifyContent: 'center', mt: 4, px: 3 }}>
+      <Grid container spacing={3} maxWidth='900px'>
+        <Grid item xs={12}>
+          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
+            <CardContent>
+              <Typography variant='h5' gutterBottom>
+                Profile Settings
+              </Typography>
 
-            {/* ---- Biography Section ---- */}
-            {!editBioMode && (
-              <p>
-                <strong>Biography:</strong> {userData.biography || 'No biography yet.'}
-                {canEditProfile && (
-                  <button
-                    className='login-button'
-                    style={{ marginLeft: '1rem' }}
-                    onClick={() => {
-                      setEditBioMode(true);
-                      setNewBio(userData.biography || '');
-                    }}>
-                    Edit
-                  </button>
-                )}
-              </p>
-            )}
+              {successMessage && <Typography color='success.main'>{successMessage}</Typography>}
+              {errorMessage && <Typography color='error.main'>{errorMessage}</Typography>}
 
-            {editBioMode && canEditProfile && (
-              <div style={{ margin: '1rem 0' }}>
-                <input
-                  className='input-text'
-                  type='text'
-                  value={newBio}
-                  onChange={e => setNewBio(e.target.value)}
-                />
-                <button
-                  className='login-button'
-                  style={{ marginLeft: '1rem' }}
-                  onClick={handleUpdateBiography}>
-                  Save
-                </button>
-                <button
-                  className='delete-button'
-                  style={{ marginLeft: '1rem' }}
-                  onClick={() => setEditBioMode(false)}>
-                  Cancel
-                </button>
-              </div>
-            )}
+              {userData ? (
+                <>
+                  {/* ---- General Information ---- */}
+                  <Typography variant='h6' mt={2}>
+                    General Information
+                  </Typography>
+                  <Typography>
+                    <strong>Username:</strong> {userData.username}
+                  </Typography>
+                  <Typography>
+                    <strong>Date Joined:</strong>{' '}
+                    {userData.dateJoined
+                      ? new Date(userData.dateJoined).toLocaleDateString()
+                      : 'N/A'}
+                  </Typography>
 
-            <p>
-              <strong>Date Joined:</strong>{' '}
-              {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
-            </p>
+                  {/* ---- Biography Section ---- */}
+                  <Box mt={2}>
+                    <Typography variant='h6'>Biography</Typography>
+                    {!editBioMode ? (
+                      <Typography>
+                        {userData.biography || 'No biography yet.'}
+                        {canEditProfile && (
+                          <Button
+                            sx={{ ml: 2 }}
+                            variant='outlined'
+                            size='small'
+                            onClick={() => setEditBioMode(true)}>
+                            Edit
+                          </Button>
+                        )}
+                      </Typography>
+                    ) : (
+                      <Box mt={1} display='flex'>
+                        <TextField
+                          fullWidth
+                          variant='outlined'
+                          size='small'
+                          value={newBio}
+                          onChange={e => setNewBio(e.target.value)}
+                        />
+                        <Button
+                          sx={{ ml: 2 }}
+                          variant='contained'
+                          color='primary'
+                          onClick={handleUpdateBiography}>
+                          Save
+                        </Button>
+                        <Button
+                          sx={{ ml: 1 }}
+                          variant='outlined'
+                          color='secondary'
+                          onClick={() => setEditBioMode(false)}>
+                          Cancel
+                        </Button>
+                      </Box>
+                    )}
+                  </Box>
 
-            {/* ---- Reset Password Section ---- */}
-            {canEditProfile && (
-              <>
-                <h4>Reset Password</h4>
-                <input
-                  className='input-text'
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='New Password'
-                  value={newPassword}
-                  onChange={e => setNewPassword(e.target.value)}
-                />
-                <input
-                  className='input-text'
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder='Confirm New Password'
-                  value={confirmNewPassword}
-                  onChange={e => setConfirmNewPassword(e.target.value)}
-                />
-                <button className='toggle-password-button' onClick={togglePasswordVisibility}>
-                  {showPassword ? 'Hide Passwords' : 'Show Passwords'}
-                </button>
-                <button className='login-button' onClick={handleResetPassword}>
-                  Reset
-                </button>
-              </>
-            )}
+                  {/* ---- User Statistics ---- */}
+                  <Box mt={3}>
+                    <Typography variant='h6'>{userData?.username} statistics</Typography>
+                    <List>
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>
+                            <MilitaryTechIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText primary='Rank' secondary={userData.ranking} />
+                      </ListItem>
 
-            {/* ---- Danger Zone (Delete User) ---- */}
-            {canEditProfile && (
-              <>
-                <h4>Danger Zone</h4>
-                <button className='delete-button' onClick={handleDeleteUser}>
-                  Delete This User
-                </button>
-              </>
-            )}
-          </>
-        ) : (
-          <p>No user data found. Make sure the username parameter is correct.</p>
-        )}
+                      <ListItem>
+                        <ListItemAvatar>
+                          <Avatar>
+                            <EmojiEventsIcon />
+                          </Avatar>
+                        </ListItemAvatar>
+                        <ListItemText
+                          primary='Achievements'
+                          secondary={
+                            userData.achievements.length > 0
+                              ? userData.achievements.join(', ')
+                              : 'No achievements found.'
+                          }
+                        />
+                      </ListItem>
+                    </List>
+                  </Box>
 
-        {/* ---- Confirmation Modal for Delete ---- */}
-        {showConfirmation && (
-          <div className='modal'>
-            <div className='modal-content'>
-              <p>
-                Are you sure you want to delete user <strong>{userData?.username}</strong>? This
-                action cannot be undone.
-              </p>
-              <button className='delete-button' onClick={() => pendingAction && pendingAction()}>
-                Confirm
-              </button>
-              <button className='cancel-button' onClick={() => setShowConfirmation(false)}>
-                Cancel
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
-      {userData && (
-        <div className='profile-card'>
-          {/* ---- New Grid Section for Rank, Score, and Achievements ---- */}
-          <h2>User Statistics</h2>
-          <div className='profile-grid'>
-            <div className='profile-grid-item'>Rank: {userData.ranking}</div>
-            <div className='profile-grid-item'>Score: {userData.score}</div>
-            <div className='profile-grid-item'>
-              Achievements:{' '}
-              {userData.achievements.length > 0 ? (
-                <ul>
-                  {userData.achievements.map((achievement, index) => (
-                    <li key={index}>{achievement}</li>
-                  ))}
-                </ul>
+                  {/* ---- Reset Password Section ---- */}
+                  {canEditProfile && (
+                    <Box mt={3}>
+                      <Typography variant='h6'>Reset Password</Typography>
+                      <TextField
+                        fullWidth
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder='New Password'
+                        variant='outlined'
+                        size='small'
+                        sx={{ my: 1 }}
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                      />
+                      <TextField
+                        fullWidth
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder='Confirm New Password'
+                        variant='outlined'
+                        size='small'
+                        sx={{ my: 1 }}
+                        value={confirmNewPassword}
+                        onChange={e => setConfirmNewPassword(e.target.value)}
+                      />
+                      <Button variant='outlined' sx={{ mr: 1 }} onClick={togglePasswordVisibility}>
+                        {showPassword ? 'Hide Passwords' : 'Show Passwords'}
+                      </Button>
+                      <Button variant='contained' color='primary' onClick={handleResetPassword}>
+                        Reset
+                      </Button>
+                    </Box>
+                  )}
+
+                  {/* ---- Danger Zone (Delete User) ---- */}
+                  {canEditProfile && (
+                    <Box mt={4}>
+                      <Typography variant='h6' color='error'>
+                        Danger Zone
+                      </Typography>
+                      <Button variant='contained' color='error' onClick={handleDeleteUser}>
+                        Delete This User
+                      </Button>
+                    </Box>
+                  )}
+                </>
               ) : (
-                'No achievements yet.'
+                <Typography>
+                  No user data found. Make sure the username parameter is correct.
+                </Typography>
               )}
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+
+              {/* ---- Confirmation Modal for Delete ---- */}
+              {showConfirmation && (
+                <Box className='modal'>
+                  <Box
+                    className='modal-content'
+                    p={3}
+                    boxShadow={3}
+                    bgcolor='white'
+                    borderRadius={2}>
+                    <Typography>
+                      Are you sure you want to delete user <strong>{userData?.username}</strong>?
+                      This action cannot be undone.
+                    </Typography>
+                    <Button
+                      sx={{ mt: 2, mr: 1 }}
+                      variant='contained'
+                      color='error'
+                      onClick={() => pendingAction && pendingAction()}>
+                      Confirm
+                    </Button>
+                    <Button variant='outlined' onClick={() => setShowConfirmation(false)}>
+                      Cancel
+                    </Button>
+                  </Box>
+                </Box>
+              )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 };
 

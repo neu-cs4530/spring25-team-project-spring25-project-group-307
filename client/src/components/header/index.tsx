@@ -10,8 +10,11 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import { useNavigate } from 'react-router-dom';
 import { TextField } from '@mui/material';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import { grey } from '@mui/material/colors';
 import useHeader from '../../hooks/useHeader';
 import useUserContext from '../../hooks/useUserContext';
+
 import './index.css';
 
 /**
@@ -44,6 +47,11 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
 
   const handleViewProfile = () => {
     navigate(`/user/${currentUser.username}`);
+    handleClose();
+  };
+
+  const handleViewStatistics = () => {
+    navigate(`/statistics/${currentUser.username}`);
     handleClose();
   };
 
@@ -86,6 +94,9 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
           />
         </Box>
         <Box>
+          <IconButton aria-label='leaderboard' onClick={handleViewStatistics}>
+            <LeaderboardIcon sx={{ color: grey[100] }} />
+          </IconButton>
           <IconButton
             size='large'
             aria-label='account of current user'

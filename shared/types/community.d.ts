@@ -25,3 +25,15 @@ export interface Community {
 export interface DatabaseCommunity extends Community {
   _id: ObjectId;
 }
+
+/**
+ * Represents an achievement.
+ * - `_id`: Unique identifier for the achievement.
+ * - `name`: The name of the achievement.
+ * - `description`: A brief description of the achievement.
+ */
+export interface DatabaseAchievement {
+  _id: ObjectId;
+  name: string;
+  description: string;
+}

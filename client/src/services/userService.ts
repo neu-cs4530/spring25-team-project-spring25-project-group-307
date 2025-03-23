@@ -123,6 +123,21 @@ const updateBiography = async (
   return res.data;
 };
 
+/**
+ * Fetches user statistics such as questions asked and responses given.
+ *
+ * @param username - The username of the user whose statistics are to be fetched.
+ * @returns {Promise<{ questionsAsked: number; responsesGiven: number }>} The user's statistics.
+ */
+const getUserStatistics = async (username: string) => {
+  try {
+    const res = await api.get(`/user/statistics/${username}`);
+    return res.data; // Expected to return { questionsAsked, responsesGiven }
+  } catch (error) {
+    throw new Error('Error when getting statistics.');
+  }
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -131,4 +146,5 @@ export {
   deleteUser,
   resetPassword,
   updateBiography,
+  getUserStatistics,
 };
