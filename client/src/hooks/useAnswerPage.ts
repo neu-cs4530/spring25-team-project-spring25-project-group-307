@@ -9,9 +9,10 @@ import {
   DatabaseCommunity,
 } from '../types/types';
 import useUserContext from './useUserContext';
-import { addComment } from '../services/commentService';
+import { addComment, deleteComment } from '../services/commentService';
 import { getQuestionById, getCommunityQuestion, deleteQuestion } from '../services/questionService';
 import { deleteQuestionFromCommunity } from '../services/communityService';
+import { deleteAnswer } from '../services/answerService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -72,6 +73,19 @@ const useAnswerPage = () => {
   };
 
   /**
+   * Function to handle deleting a comment from a question or answer.
+   */
+  const handleDeleteComment = async (commentID: ObjectId) => {
+    if (question) {
+      const res = await deleteComment(commentID);
+      if (res) {
+        const updatedComments = question.comments.filter(comment => comment._id !== commentID);
+        setQuestion({ ...question, comments: updatedComments });
+      }
+    }
+  };
+
+  /**
    * Function to handle navigating to the community the question is from.
    */
   const handleReturnToCommunity = () => {
@@ -100,6 +114,19 @@ const useAnswerPage = () => {
       const res = await deleteQuestion(question._id);
       if (res) {
         navigate('/home');
+      }
+    }
+  };
+
+  /**
+   * Function to delete an answer from a question.
+   */
+  const handleDeleteAnswer = async (answerID: ObjectId) => {
+    if (question) {
+      const res = await deleteAnswer(answerID);
+      if (res) {
+        const updatedAnswers = question.answers.filter(answer => answer._id !== answerID);
+        setQuestion({ ...question, answers: updatedAnswers });
       }
     }
   };
@@ -264,7 +291,9 @@ const useAnswerPage = () => {
     questionID,
     question,
     handleNewComment,
+    handleDeleteComment,
     handleNewAnswer,
+    handleDeleteAnswer,
     community,
     handleReturnToCommunity,
     handleDeleteQuestionFromCommunity,

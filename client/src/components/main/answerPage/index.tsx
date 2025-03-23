@@ -1,6 +1,7 @@
 import React from 'react';
 import { Box, Button } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
+import { ObjectId } from 'mongodb';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
@@ -21,7 +22,9 @@ const AnswerPage = () => {
     questionID,
     question,
     handleNewComment,
+    handleDeleteComment,
     handleNewAnswer,
+    handleDeleteAnswer,
     community,
     handleReturnToCommunity,
     handleDeleteQuestionFromCommunity,
@@ -67,6 +70,8 @@ const AnswerPage = () => {
       <CommentSection
         comments={question.comments}
         handleAddComment={(comment: Comment) => handleNewComment(comment, 'question', questionID)}
+        handleDeleteComment={(commentId: ObjectId) => handleDeleteComment(commentId)}
+        currentRole={currentRole}
       />
       {question.answers.map(a => (
         <AnswerView
@@ -78,6 +83,9 @@ const AnswerPage = () => {
           handleAddComment={(comment: Comment) =>
             handleNewComment(comment, 'answer', String(a._id))
           }
+          handleDeleteComment={(commentId: ObjectId) => handleDeleteComment(commentId)}
+          handleDeleteAnswer={() => handleDeleteAnswer(a._id)}
+          currentRole={currentRole}
         />
       ))}
       <button
