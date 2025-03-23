@@ -1,10 +1,5 @@
 import express, { Request, Response, Router } from 'express';
-import {
-  FakeSOSocket,
-  UpdateInterestsRequest,
-  Interest,
-  InterestByUserIdRequest,
-} from '../types/types';
+import { FakeSOSocket, UpdateInterestsRequest, InterestByUserIdRequest } from '../types/types';
 import {
   deleteInterestsByUserId,
   getInterestsByTagIds,
@@ -17,11 +12,33 @@ import { getUserByUsername } from '../services/user.service';
 const interestController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
 
-  const updateInterests = async (req: UpdateInterestsRequest, res: Response): Promise<void> => {
-    try {
-      const { username, interests } = req.body;
+  /**
+   * Validates that the request body contains all required fields for updating interests.
+   * @param req The incoming request containing user and interest data.
+   * @returns `true` if the body contains valid fields; otherwise, `false`.
+   */
+  const isUpdateInterestsBodyValid = (req: UpdateInterestsRequest): boolean =>
+    req.body !== undefined &&
+    req.body.username !== undefined &&
+    req.body.username !== '' &&
+    req.body.interests !== undefined &&
+    req.body.interests.length >= 0;
 
-      // Get user object by its username
+  /**
+   * Handles the update of a user's interests.
+   * @param req The request containing username and interests in the body.
+   * @param res The response, either returning a success message or an error.
+   * @returns A promise resolving to void.
+   */
+  const updateInterests = async (req: UpdateInterestsRequest, res: Response): Promise<void> => {
+    if (!isUpdateInterestsBodyValid(req)) {
+      res.status(400).send('Invalid updateInterests body');
+      return;
+    }
+
+    const { username, interests } = req.body;
+
+    try {
       const user = await getUserByUsername(username);
 
       if ('error' in user) {
@@ -45,9 +62,21 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves interests based on a list of tag IDs.
+   * @param req The request containing tag IDs in the body.
+   * @param res The response, either returning a list of interests or an error.
+   * @returns A promise resolving to void.
+   */
   const getInterestsByTags = async (req: Request, res: Response): Promise<void> => {
+    if (req.body === undefined || req.body.tagIds === undefined || req.body.tagIds.length < 0) {
+      res.status(400).send('Invalid getInterestsByTags body');
+      return;
+    }
+
+    const { tagIds } = req.body;
+
     try {
-      const { tagIds } = req.body;
       const interests = await getInterestsByTagIds(tagIds);
 
       res.status(200).json(interests);
@@ -56,6 +85,12 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves interests based on a user ID.
+   * @param req The request containing the user ID as a route parameter.
+   * @param res The response, either returning a list of interests or an error.
+   * @returns A promise resolving to void.
+   */
   const getInterestsByUser = async (req: InterestByUserIdRequest, res: Response): Promise<void> => {
     try {
       const { userId } = req.params;
@@ -67,9 +102,26 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves interests based on a user ID and a list of tag IDs.
+   * @param req The request containing the user ID and tag IDs in the body.
+   * @param res The response, either returning a list of interests or an error.
+   * @returns A promise resolving to void.
+   */
   const getInterestsByUserAndTags = async (req: Request, res: Response): Promise<void> => {
+    if (
+      req.body === undefined ||
+      req.body.userId === undefined ||
+      req.body.tagIds === undefined ||
+      req.body.tagIds.length < 0
+    ) {
+      res.status(400).send('Invalid getInterestsByUserAndTags body');
+      return;
+    }
+
+    const { userId, tagIds } = req.body;
+
     try {
-      const { userId, tagIds } = req.body;
       const interests = await getInterestsByUserIdAndTagIds(userId, tagIds);
 
       res.status(200).json(interests);
@@ -78,6 +130,7 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  // Define routes for the interest-related operations.
   router.post('/updateInterests', updateInterests);
   router.post('/getInterestsByTags', getInterestsByTags);
   router.get('/getInterestsByUser/:userId', getInterestsByUser);

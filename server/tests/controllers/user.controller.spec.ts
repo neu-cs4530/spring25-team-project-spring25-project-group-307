@@ -8,24 +8,18 @@ const mockUser: User = {
   username: 'user1',
   password: 'password',
   dateJoined: new Date('2024-12-03'),
-  feed: { items: [] },
-  lastViewRanking: 0,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
   _id: new mongoose.Types.ObjectId(),
   username: 'user1',
   dateJoined: new Date('2024-12-03'),
-  feed: new mongoose.Types.ObjectId(),
-  lastViewRanking: 0,
 };
 
 const mockUserJSONResponse = {
   _id: mockSafeUser._id.toString(),
   username: 'user1',
   dateJoined: new Date('2024-12-03').toISOString(),
-  feed: mockSafeUser.feed.toString(),
-  lastViewRanking: 0,
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -57,8 +51,6 @@ describe('Test userController', () => {
         ...mockReqBody,
         biography: mockReqBody.biography,
         dateJoined: expect.any(Date),
-        feed: { items: [] },
-        lastViewRanking: 0,
       });
     });
 

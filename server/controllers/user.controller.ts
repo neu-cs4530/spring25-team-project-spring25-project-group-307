@@ -6,7 +6,6 @@ import {
   UserByUsernameRequest,
   FakeSOSocket,
   UpdateBiographyRequest,
-  FeedItem,
 } from '../types/types';
 import {
   deleteUserByUsername,
@@ -62,10 +61,6 @@ const userController = (socket: FakeSOSocket) => {
         ...requestUser,
         dateJoined: new Date(),
         biography: requestUser.biography ?? '',
-        feed: {
-          items: [] as FeedItem[],
-        },
-        lastViewRanking: 0,
       };
 
       const result = await saveUser(user);

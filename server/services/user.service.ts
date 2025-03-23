@@ -1,18 +1,15 @@
-import { ObjectId } from 'mongodb';
 import UserModel from '../models/users.model';
 import {
   DatabaseUser,
-  InterestResponse,
-  FeedItemResponse,
   SafeDatabaseUser,
   User,
   UserCredentials,
   UserResponse,
   UsersResponse,
 } from '../types/types';
-import { saveInterest } from './interest.service';
-import { saveFeedItem } from './feedItem.service';
-import { saveFeed } from './feed.service';
+import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
+import { deleteFeedItemsByFeedId } from './feedItem.service';
+import { deleteInterestsByUserId } from './interest.service';
 
 /**
  * Saves a new user to the database.
@@ -22,31 +19,18 @@ import { saveFeed } from './feed.service';
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    // Save the feed items provided in the argument to the database
-    await Promise.all(
-      user.feed.items.map(async feedItem => {
-        const savedFeedItem: FeedItemResponse = await saveFeedItem(feedItem);
-
-        if ('error' in savedFeedItem) {
-          throw new Error(savedFeedItem.error);
-        }
-
-        return savedFeedItem._id;
-      }),
-    );
-
-    // Save the feed itself to the database
-    const feedId: FeedItemResponse = await saveFeed({
-      items: user.feed.items,
-    });
-
     const result: DatabaseUser = await UserModel.create({
       ...user,
-      feed: feedId._id,
     });
 
     if (!result) {
       throw Error('Failed to create user');
+    }
+
+    const feed = await saveFeed({ userId: result._id, lastViewedRanking: 0 });
+
+    if ('error' in feed) {
+      throw Error('Failed to create feed for new user');
     }
 
     // Remove password field from returned object
@@ -55,8 +39,6 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       username: result.username,
       dateJoined: result.dateJoined,
       biography: result.biography,
-      feed: result.feed,
-      lastViewRanking: result.lastViewRanking,
     };
 
     return safeUser;
@@ -143,6 +125,30 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
 
     if (!deletedUser) {
       throw Error('Error deleting user');
+    }
+
+    const deletedFeedId = await getFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeedId) {
+      throw Error('Failed to find feed for user');
+    }
+
+    const deletedFeedItems = await deleteFeedItemsByFeedId(deletedFeedId._id);
+
+    if ('error' in deletedFeedItems) {
+      throw Error('Failed to delete feed items for user');
+    }
+
+    const deletedFeed = await deleteFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeed) {
+      throw Error('Failed to delete feed for user');
+    }
+
+    const deletedInterests = await deleteInterestsByUserId(deletedUser._id);
+
+    if ('error' in deletedInterests) {
+      throw Error('Failed to delete interests for user');
     }
 
     return deletedUser;

@@ -1,7 +1,11 @@
 import { ObjectId } from 'mongodb';
 import FeedItemModel from '../models/feedItem.model';
-import UserModel from '../models/users.model';
-import { DatabaseUser, FeedItem, FeedItemResponse } from '../types/types';
+import {
+  DeleteResultResponse,
+  FeedItem,
+  FeedItemResponse,
+  FeedItemsResponse,
+} from '../types/types';
 
 /**
  * Saves a new feed item to the database.
@@ -22,29 +26,51 @@ export const saveFeedItem = async (feedItem: FeedItem): Promise<FeedItemResponse
   }
 };
 
-/**
- * Adds a feed item ID to a user's feed.
- * @param userId - The ID of the user to update.
- * @param feedItemId - The ID of the feed item to add.
- * @returns {Promise<FeedItemResponse>} - The updated user or an error message.
- */
-export const addFeedItemToUser = async (
-  userId: string,
-  feedItemId: string,
-): Promise<FeedItemResponse> => {
+export const getFeedItemsByFeedId = async (aFeedId: ObjectId): Promise<FeedItemsResponse> => {
   try {
-    const updatedUser: DatabaseUser | null = await UserModel.findByIdAndUpdate(
-      userId,
-      { $push: { feed: feedItemId } },
-      { new: true },
-    );
+    const feedItems = await FeedItemModel.find({ feed: aFeedId });
 
-    if (!updatedUser) {
-      throw new Error('User not found');
+    if (!feedItems) {
+      throw Error('Feed items not found');
     }
 
-    return updatedUser;
+    return feedItems;
   } catch (error) {
-    return { error: `Error adding feed item to user: ${error}` };
+    return { error: `Error occurred when finding feed items: ${error}` };
+  }
+};
+
+export const deleteFeedItemsByFeedId = async (aFeedId: ObjectId): Promise<DeleteResultResponse> => {
+  try {
+    const result = await FeedItemModel.deleteMany({ feed: aFeedId });
+
+    if (!result) {
+      throw Error('Failed to delete feed items');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting feed items: ${error}` };
+  }
+};
+
+export const getFeedItemsByFeedIdAndRankingRange = async (
+  feedId: ObjectId,
+  startRanking: number,
+  endRanking: number,
+): Promise<FeedItemsResponse> => {
+  try {
+    const feedItems = await FeedItemModel.find({
+      feed: feedId,
+      viewedRanking: { $gte: startRanking, $lt: endRanking },
+    }).sort({ viewedRanking: 1 });
+
+    if (!feedItems) {
+      throw Error('Feed items not found');
+    }
+
+    return feedItems;
+  } catch (error) {
+    return { error: `Error occurred when finding feed items: ${error}` };
   }
 };

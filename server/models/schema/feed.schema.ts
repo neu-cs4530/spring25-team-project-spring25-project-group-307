@@ -10,7 +10,15 @@ import { Schema } from 'mongoose';
 
 const feedSchema: Schema = new Schema(
   {
-    items: [{ type: Schema.Types.ObjectId, ref: 'FeedItem' }],
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    lastViewedRanking: {
+      type: Number,
+      required: true,
+    },
   },
   { collection: 'Feed' },
 );

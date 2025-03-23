@@ -11,6 +11,7 @@ import { DatabaseTag, Interest, SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
 import { getInterestsByUser, updateInterests } from '../services/interestService';
 import { getAllTags, getTagsByIds } from '../services/tagService';
+import { refresh } from '../services/feedService';
 
 /**
  * A custom hook to encapsulate all logic/state for the ProfileSettings component.
@@ -151,6 +152,8 @@ const useProfileSettings = () => {
 
       const newTags = await getTagsByIds(newInterests.map(interest => interest.tagId));
       setPopulatedTags(newTags);
+
+      await refresh(currentUser._id);
 
       setSuccessMessage('Interests updated!');
       setErrorMessage(null);

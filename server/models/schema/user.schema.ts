@@ -26,11 +26,6 @@ const userSchema: Schema = new Schema(
       type: String,
       default: '',
     },
-    feed: { type: Schema.Types.ObjectId, ref: 'Feed' },
-    lastViewRanking: {
-      type: Number,
-      default: 0,
-    },
   },
   { collection: 'User' },
 );

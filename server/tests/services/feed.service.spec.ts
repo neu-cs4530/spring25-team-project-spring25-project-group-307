@@ -20,7 +20,8 @@ describe('Feed model', () => {
     it('should return the saved feed', async () => {
       const feed: DatabaseFeed = {
         _id: new ObjectId(),
-        items: [new ObjectId()],
+        userId: new ObjectId(),
+        lastViewedRanking: 0,
       };
 
       mockingoose(FeedModel).toReturn(feed, 'create');
@@ -28,7 +29,8 @@ describe('Feed model', () => {
       const savedFeed = (await FeedModel.create(feed)) as DatabaseFeed;
 
       expect(savedFeed._id).toEqual(feed._id);
-      expect(savedFeed.items).toEqual(feed.items);
+      expect(savedFeed.userId).toEqual(feed.userId);
+      expect(savedFeed.lastViewedRanking).toEqual(feed.lastViewedRanking);
     });
 
     it('should throw an error if error when saving to database', async () => {
@@ -52,7 +54,8 @@ describe('Feed model', () => {
     it('should return the matching feed', async () => {
       const feed: DatabaseFeed = {
         _id: new ObjectId(),
-        items: [new ObjectId()],
+        userId: new ObjectId(),
+        lastViewedRanking: 0,
       };
 
       mockingoose(FeedModel).toReturn(feed, 'findOne');
@@ -60,7 +63,8 @@ describe('Feed model', () => {
       const retrievedFeed = (await FeedModel.findOne({ _id: feed._id })) as DatabaseFeed;
 
       expect(retrievedFeed._id).toEqual(feed._id);
-      expect(retrievedFeed.items).toEqual(feed.items);
+      expect(retrievedFeed.userId).toEqual(feed.userId);
+      expect(retrievedFeed.lastViewedRanking).toEqual(feed.lastViewedRanking);
     });
   });
 
@@ -72,7 +76,8 @@ describe('Feed model', () => {
     it('should return the updated feed', async () => {
       const feed: DatabaseFeed = {
         _id: new ObjectId(),
-        items: [new ObjectId()],
+        userId: new ObjectId(),
+        lastViewedRanking: 0,
       };
 
       mockingoose(FeedModel).toReturn(feed, 'findOneAndUpdate');
@@ -82,7 +87,8 @@ describe('Feed model', () => {
       })) as DatabaseFeed;
 
       expect(updatedFeed._id).toEqual(feed._id);
-      expect(updatedFeed.items).toEqual(feed.items);
+      expect(updatedFeed.userId).toEqual(feed.userId);
+      expect(updatedFeed.lastViewedRanking).toEqual(feed.lastViewedRanking);
     });
 
     it('should throw an error if error when updating the database', async () => {

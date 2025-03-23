@@ -203,8 +203,6 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    feed: feed ?? { items: [] },
-    lastViewRanking: lastViewRanking ?? 0,
   };
 
   return await UserModel.create(userDetail);
