@@ -22,7 +22,7 @@ const ViewCommunityPage = () => {
           </TabList>
         </Box>
         <TabPanel value='1'>
-          <CommunityHome community={community} />
+          <CommunityHome community={community} currentRole={currentRole} />
         </TabPanel>
         <TabPanel value='2'>
           <CommunityUsers

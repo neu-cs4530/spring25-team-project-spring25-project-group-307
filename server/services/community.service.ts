@@ -166,12 +166,22 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity 
       moderators: SafeDatabaseUser[];
       members: SafeDatabaseUser[];
       questions: PopulatedDatabaseQuestion[];
+      pinnedQuestions: PopulatedDatabaseQuestion[];
     }>([
       { path: 'members', model: 'User', select: '-password' },
       { path: 'admins', model: 'User', select: '-password' },
       { path: 'moderators', model: 'User', select: '-password' },
       {
         path: 'questions',
+        model: 'Question',
+        populate: [
+          { path: 'tags', model: 'Tag' },
+          { path: 'answers', model: 'Answer', populate: { path: 'comments', model: 'Comment' } },
+          { path: 'comments', model: 'Comment' },
+        ],
+      },
+      {
+        path: 'pinnedQuestions',
         model: 'Question',
         populate: [
           { path: 'tags', model: 'Tag' },
