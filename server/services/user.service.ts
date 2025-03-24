@@ -8,6 +8,9 @@ import {
   UserResponse,
   UsersResponse,
 } from '../types/types';
+import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
+import { deleteFeedItemsByFeedId } from './feedItem.service';
+import { deleteInterestsByUserId } from './interest.service';
 
 /**
  * Saves a new user to the database.
@@ -17,10 +20,18 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    const result: DatabaseUser = await UserModel.create(user);
+    const result: DatabaseUser = await UserModel.create({
+      ...user,
+    });
 
     if (!result) {
       throw Error('Failed to create user');
+    }
+
+    const feed = await saveFeed({ userId: result._id, lastViewedRanking: 0 });
+
+    if ('error' in feed) {
+      throw Error('Failed to create feed for new user');
     }
 
     // Remove password field from returned object
@@ -29,7 +40,6 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       username: result.username,
       dateJoined: result.dateJoined,
       biography: result.biography,
-      interests: result.interests,
       ranking: result.ranking,
       score: result.score,
       achievements: result.achievements,
@@ -119,6 +129,30 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
 
     if (!deletedUser) {
       throw Error('Error deleting user');
+    }
+
+    const deletedFeedId = await getFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeedId) {
+      throw Error('Failed to find feed for user');
+    }
+
+    const deletedFeedItems = await deleteFeedItemsByFeedId(deletedFeedId._id);
+
+    if ('error' in deletedFeedItems) {
+      throw Error('Failed to delete feed items for user');
+    }
+
+    const deletedFeed = await deleteFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeed) {
+      throw Error('Failed to delete feed for user');
+    }
+
+    const deletedInterests = await deleteInterestsByUserId(deletedUser._id);
+
+    if ('error' in deletedInterests) {
+      throw Error('Failed to delete interests for user');
     }
 
     return deletedUser;

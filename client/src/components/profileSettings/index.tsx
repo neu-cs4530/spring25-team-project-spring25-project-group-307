@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { Chip, Grid2 } from '@mui/material';
 import useProfileSettings from '../../hooks/useProfileSettings';
 
 const ProfileSettings: React.FC = () => {
@@ -8,6 +9,8 @@ const ProfileSettings: React.FC = () => {
     loading,
     editBioMode,
     newBio,
+    editInterestsMode,
+    newInterests,
     newPassword,
     confirmNewPassword,
     successMessage,
@@ -24,8 +27,15 @@ const ProfileSettings: React.FC = () => {
     setConfirmNewPassword,
     setShowConfirmation,
 
+    setEditInterestsMode,
+    setNewInterests,
+    populatedTags,
+    allTags,
+    getTagColor,
+
     handleResetPassword,
     handleUpdateBiography,
+    handleUpdateInterests,
     handleDeleteUser,
   } = useProfileSettings();
 
@@ -97,6 +107,104 @@ const ProfileSettings: React.FC = () => {
               <strong>Date Joined:</strong>{' '}
               {userData.dateJoined ? new Date(userData.dateJoined).toLocaleDateString() : 'N/A'}
             </p>
+
+            {/* ---- Interests Section ---- */}
+            {!editInterestsMode && (
+              <div>
+                <h4>Interests</h4>
+                <Grid2 container spacing={1}>
+                  {populatedTags.map(tag => (
+                    <Grid2 key={tag._id.toString()}>
+                      <Chip label={tag.name} />
+                    </Grid2>
+                  ))}
+                </Grid2>
+                {canEditProfile && (
+                  <button
+                    className='login-button'
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => {
+                      setEditInterestsMode(true);
+                    }}>
+                    Edit
+                  </button>
+                )}
+              </div>
+            )}
+            {editInterestsMode && canEditProfile && (
+              <div>
+                <h4>Edit Interests</h4>
+                <Grid2 container spacing={1}>
+                  {allTags.map(tag => (
+                    <Grid2 key={tag._id.toString()}>
+                      <Chip
+                        label={tag.name}
+                        clickable
+                        color={getTagColor(tag)}
+                        onClick={() => {
+                          if (
+                            newInterests.some(
+                              interest =>
+                                interest.userId === userData._id && interest.tagId === tag._id,
+                            )
+                          ) {
+                            setNewInterests(
+                              newInterests.filter(
+                                interest =>
+                                  interest.userId === userData._id && interest.tagId !== tag._id,
+                              ),
+                            );
+                          } else {
+                            setNewInterests([
+                              ...newInterests,
+                              {
+                                userId: userData._id,
+                                tagId: tag._id,
+                                weight: 1,
+                                priority: 'moderate',
+                              },
+                            ]);
+                          }
+                        }}
+                        onContextMenu={e => {
+                          e.preventDefault();
+                          setNewInterests(
+                            newInterests.some(
+                              interest =>
+                                interest.userId === userData._id && interest.tagId === tag._id,
+                            )
+                              ? newInterests.filter(
+                                  interest =>
+                                    interest.userId === userData._id && interest.tagId !== tag._id,
+                                )
+                              : [
+                                  ...newInterests,
+                                  {
+                                    userId: userData._id,
+                                    tagId: tag._id,
+                                    weight: 2,
+                                    priority: 'high',
+                                  },
+                                ],
+                          );
+                        }}
+                      />
+                    </Grid2>
+                  ))}
+                </Grid2>
+                <div style={{ marginTop: '1rem' }}>
+                  <button className='login-button' onClick={handleUpdateInterests}>
+                    Save
+                  </button>
+                  <button
+                    className='delete-button'
+                    style={{ marginLeft: '1rem' }}
+                    onClick={() => setEditInterestsMode(false)}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* ---- Reset Password Section ---- */}
             {canEditProfile && (
