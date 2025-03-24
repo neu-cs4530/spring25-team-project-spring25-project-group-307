@@ -12,6 +12,8 @@ import {
   updateUserRole,
   addUserToCommunity,
   removeQuestionFromCommunity,
+  pinQuestion,
+  unpinQuestion,
 } from '../services/community.service';
 
 const communityController = (socket: FakeSOSocket) => {
@@ -235,6 +237,40 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles pinning a question in a community.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const pinQuestionRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Pin the question in the community
+      const community = await pinQuestion(req.body.communityId, req.body.questionId);
+      res.json(community);
+    } catch (error) {
+      res.status(500).send(`Error when pinning question in community: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles unpinning a question in a community.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const unpinQuestionRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Unpin the question in the community
+      const community = await unpinQuestion(req.body.communityId, req.body.questionId);
+      res.json(community);
+    } catch (error) {
+      res
+        .status(500)
+        .send(`Error when unpinning question in community: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
@@ -250,6 +286,8 @@ const communityController = (socket: FakeSOSocket) => {
     '/deleteQuestionFromCommunity/:communityId/:questionId',
     deleteQuestionFromCommunityRoute,
   );
+  router.patch('/pinQuestion', pinQuestionRoute);
+  router.patch('/unpinQuestion', unpinQuestionRoute);
 
   return router;
 };

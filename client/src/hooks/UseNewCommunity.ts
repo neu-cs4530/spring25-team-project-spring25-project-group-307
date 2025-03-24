@@ -61,6 +61,7 @@ const useNewCommunity = () => {
           moderators: [],
           members: [],
           questions: [],
+          pinnedQuestions: [],
         };
 
         const res = await addCommunity(community);

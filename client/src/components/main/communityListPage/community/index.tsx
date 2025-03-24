@@ -36,7 +36,7 @@ const CommunityView = ({
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
-          {community.isPrivate && !UserInCommunity ? <LockIcon /> : null}
+          {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
         </Box>
         <Typography variant='h5' component='div'>
           {community.title}
@@ -64,9 +64,11 @@ const CommunityView = ({
               Join
             </Button>
           )}
-          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
-            View
-          </Button>
+          {UserInCommunity ? (
+            <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
+              View
+            </Button>
+          ) : null}
         </CardActions>
       ) : null}
     </Card>

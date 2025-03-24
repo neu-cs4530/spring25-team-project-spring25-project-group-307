@@ -177,6 +177,44 @@ const addUserToCommunity = async (
   return res.data;
 };
 
+/**
+ * Function to pin a question to a community.
+ * @param communityId The ID of the community to pin the question in
+ * @param questionId The ID of the question to pin in the community
+ */
+const pinQuestion = async (
+  communityId: ObjectId,
+  questionId: ObjectId,
+): Promise<DatabaseCommunity> => {
+  const res = await api.patch(`${COMMUNITY_API_URL}/pinQuestion`, {
+    communityId,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when pinning question in community');
+  }
+  return res.data;
+};
+
+/**
+ * Function to unpin a question from a community.
+ * @param communityId The ID of the community to unpin the question in
+ * @param questionId The ID of the question to unpin in the community
+ */
+const unpinQuestion = async (
+  communityId: ObjectId,
+  questionId: ObjectId,
+): Promise<DatabaseCommunity> => {
+  const res = await api.patch(`${COMMUNITY_API_URL}/unpinQuestion`, {
+    communityId,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when unpinning question in community');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -189,4 +227,6 @@ export {
   deleteQuestionFromCommunity,
   updateUserRole,
   addUserToCommunity,
+  pinQuestion,
+  unpinQuestion,
 };

@@ -16,6 +16,7 @@ export interface Community {
   moderators: ObjectId[];
   members: ObjectId[];
   questions: ObjectId[];
+  pinnedQuestions: ObjectId[];
 }
 
 /**
@@ -41,6 +42,7 @@ export interface PopulatedDatabaseCommunity
   moderators: SafeDatabaseUser[];
   members: SafeDatabaseUser[];
   questions: PopulatedDatabaseQuestion[];
+  pinnedQuestions: PopulatedDatabaseQuestion[];
 }
 
 /**

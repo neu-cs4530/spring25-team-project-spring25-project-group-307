@@ -31,6 +31,7 @@ const communitySchema: Schema = new Schema(
     moderators: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
+    pinnedQuestions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
   },
   { collection: 'Community' },
 );

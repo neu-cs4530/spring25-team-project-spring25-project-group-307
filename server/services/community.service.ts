@@ -320,6 +320,54 @@ const addUserToCommunity = async (
   }
 };
 
+/**
+ * Pins a question to the top of a community.
+ * @param communityId the ID of the community to pin the question in
+ * @param questionId the ID of the question to pin
+ * @returns the community with the pinned question or null if an error occurred
+ */
+const pinQuestion = async (
+  communityId: ObjectId,
+  questionId: ObjectId,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $addToSet: { pinnedQuestions: questionId },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
+/**
+ * Unpins a question from the top of a community.
+ * @param communityId the ID of the community to unpin the question in
+ * @param questionId the ID of the question to unpin
+ * @returns the community with the unpinned question or null if an error occurred
+ */
+const unpinQuestion = async (
+  communityId: ObjectId,
+  questionId: ObjectId,
+): Promise<DatabaseCommunity | null> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
+      { _id: communityId },
+      {
+        $pull: { pinnedQuestions: questionId },
+      },
+      { new: true },
+    );
+    return community;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -332,4 +380,6 @@ export {
   removeQuestionFromCommunity,
   updateUserRole,
   addUserToCommunity,
+  pinQuestion,
+  unpinQuestion,
 };
