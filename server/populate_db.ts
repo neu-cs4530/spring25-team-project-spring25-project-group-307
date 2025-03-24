@@ -191,8 +191,6 @@ async function userCreate(
   password: string,
   dateJoined: Date,
   biography?: string,
-  feed?: {items: FeedItem[]},
-  lastViewRanking?: number,
 ): Promise<DatabaseUser> {
   if (username === '' || password === '' || dateJoined === null) {
     throw new Error('Invalid User Format');
@@ -203,7 +201,6 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    interests: [],
     ranking: '',
     score: 0,
     achievements: [],

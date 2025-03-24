@@ -7,7 +7,6 @@ export * from './question';
 export * from './socket';
 export * from './tag';
 export * from './user';
-export * from './feed';
 export * from './community';
 export * from './interest';
 export * from './feedItem';
