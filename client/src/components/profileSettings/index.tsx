@@ -1,10 +1,8 @@
 import React from 'react';
 import './index.css';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
-import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
-import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
-import CommentIcon from '@mui/icons-material/Comment';
+
 import {
   List,
   ListItem,
@@ -87,6 +85,10 @@ const ProfileSettings: React.FC = () => {
                     {userData.dateJoined
                       ? new Date(userData.dateJoined).toLocaleDateString()
                       : 'N/A'}
+                  </Typography>
+                  <Typography>
+                    <strong>Last Online:</strong>{' '}
+                    {userData.lastLogin ? new Date(userData.lastLogin).toLocaleString() : 'N/A'}
                   </Typography>
 
                   {/* ---- Biography Section ---- */}

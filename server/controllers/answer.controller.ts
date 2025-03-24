@@ -3,42 +3,20 @@ import { ObjectId } from 'mongodb';
 import { Answer, AddAnswerRequest, FakeSOSocket, PopulatedDatabaseAnswer } from '../types/types';
 import { addAnswerToQuestion, saveAnswer } from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
+import UserModel from '../models/users.model';
+import getUpdatedRank from '../utils/user.util';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
 
-  /**
-   * Checks if the provided answer request contains the required fields.
-   *
-   * @param req The request object containing the answer data.
-   *
-   * @returns `true` if the request is valid, otherwise `false`.
-   */
   function isRequestValid(req: AddAnswerRequest): boolean {
     return !!req.body.qid && !!req.body.ans;
   }
 
-  /**
-   * Checks if the provided answer contains the required fields.
-   *
-   * @param ans The answer object to validate.
-   *
-   * @returns `true` if the answer is valid, otherwise `false`.
-   */
   function isAnswerValid(ans: Answer): boolean {
     return !!ans.text && !!ans.ansBy && !!ans.ansDateTime;
   }
 
-  /**
-   * Adds a new answer to a question in the database. The answer request and answer are
-   * validated and then saved. If successful, the answer is associated with the corresponding
-   * question. If there is an error, the HTTP response's status is updated.
-   *
-   * @param req The AnswerRequest object containing the question ID and answer data.
-   * @param res The HTTP response object used to send back the result of the operation.
-   *
-   * @returns A Promise that resolves to void.
-   */
   const addAnswer = async (req: AddAnswerRequest, res: Response): Promise<void> => {
     if (!isRequestValid(req)) {
       res.status(400).send('Invalid request');
@@ -71,18 +49,47 @@ const answerController = (socket: FakeSOSocket) => {
         throw new Error(populatedAns.error);
       }
 
-      // Populates the fields of the answer that was added and emits the new object
+      const user = await UserModel.findOne({ username: ansInfo.ansBy });
+      let updatedRank: string | undefined;
+
+      if (user) {
+        const oldRank = user.ranking;
+        const newScore = user.score + 10;
+        const newRank = getUpdatedRank(newScore);
+        const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
+
+        await UserModel.updateOne(
+          { username: ansInfo.ansBy },
+          {
+            $set: {
+              score: newScore,
+              ranking: newRank,
+              responsesGiven: newResponsesGiven,
+            },
+          },
+        );
+
+        if (oldRank !== newRank) {
+          updatedRank = newRank;
+        }
+      }
+
+      // Emit socket update
       socket.emit('answerUpdate', {
         qid: new ObjectId(qid),
         answer: populatedAns as PopulatedDatabaseAnswer,
       });
-      res.json(ansFromDb);
+
+      // Respond with the answer + optional updated rank
+      res.json({
+        ...ansFromDb,
+        ...(updatedRank && { updatedRank }),
+      });
     } catch (err) {
       res.status(500).send(`Error when adding answer: ${(err as Error).message}`);
     }
   };
 
-  // add appropriate HTTP verbs and their endpoints to the router.
   router.post('/addAnswer', addAnswer);
 
   return router;

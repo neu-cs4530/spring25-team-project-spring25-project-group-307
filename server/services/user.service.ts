@@ -32,6 +32,9 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       ranking: result.ranking,
       score: result.score,
       achievements: result.achievements,
+      questionsAsked: result.questionsAsked,
+      responsesGiven: result.responsesGiven,
+      lastLogin: result.lastLogin,
     };
 
     return safeUser;
@@ -90,9 +93,10 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
   const { username, password } = loginCredentials;
 
   try {
-    const user: SafeDatabaseUser | null = await UserModel.findOne({ username, password }).select(
-      '-password',
-    );
+    const user: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username, password },
+      { lastLogin: new Date() },
+    ).select('-password');
 
     if (!user) {
       throw Error('Authentication failed');

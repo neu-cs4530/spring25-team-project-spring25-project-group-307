@@ -40,6 +40,9 @@ export interface User extends UserCredentials {
   ranking: string;
   score: number;
   achievements: string[];
+  questionsAsked: number;
+  responsesGiven: number;
+  lastLogin?: Date;
 }
 
 /**

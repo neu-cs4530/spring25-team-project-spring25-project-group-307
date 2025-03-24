@@ -68,6 +68,18 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    questionsAsked: {
+      type: Number,
+      default: 0,
+    },
+    responsesGiven: {
+      type: Number,
+      default: 0,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
     achievements: [
       {
         type: Schema.Types.ObjectId,

@@ -53,9 +53,6 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Ascension III', requirement: 'Reached Expert Explorer' },
   { name: 'Ascension IV', requirement: 'Reached Mentor Maven' },
   { name: 'Ascension V', requirement: 'Reached Master Maverick' },
-  { name: 'Blackjack Beginner', requirement: 'Win one game of blackjack' },
-  { name: 'Blackjack Novice', requirement: 'Win 5 games of blackjack' },
-  { name: 'Blackjack King', requirement: 'Win 25 games of blackjack' },
   { name: 'Nim Beginner', requirement: 'Win one game of Nim' },
   { name: 'Nim Novice', requirement: 'Win 5 games of Nim' },
   { name: 'Nim King', requirement: 'Win 25 games of Nim' },
@@ -72,7 +69,7 @@ const getProgress = (score: number) => {
 };
 
 const StatisticsSettings: React.FC = () => {
-  const { userData, loading, questionsAsked, responsesGiven } = useStatistics();
+  const { userData, loading } = useStatistics();
 
   if (loading) {
     return (
@@ -118,7 +115,7 @@ const StatisticsSettings: React.FC = () => {
                     <QuestionAnswerIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Questions Asked' secondary={questionsAsked} />
+                <ListItemText primary='Questions Asked' secondary={userData?.questionsAsked} />
               </ListItem>
 
               <ListItem>
@@ -127,7 +124,7 @@ const StatisticsSettings: React.FC = () => {
                     <CommentIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Responses Given' secondary={responsesGiven} />
+                <ListItemText primary='Responses Given' secondary={userData?.responsesGiven} />
               </ListItem>
             </List>
 

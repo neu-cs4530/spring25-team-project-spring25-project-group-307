@@ -19,6 +19,8 @@ import {
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
+import UserModel from '../models/users.model';
+import getUpdatedRank from '../utils/user.util';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -159,6 +161,17 @@ const questionController = (socket: FakeSOSocket) => {
 
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
       res.json(populatedQuestion);
+      // Award score and update rank
+      const user = await UserModel.findOne({ username: question.askedBy });
+      if (user) {
+        const newScore = user.score + 5;
+        const newRank = getUpdatedRank(newScore);
+        const newQuestionsAsked = user.questionsAsked + 1;
+        await UserModel.updateOne(
+          { username: question.askedBy },
+          { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
+        );
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         res.status(500).send(`Error when saving question: ${err.message}`);
