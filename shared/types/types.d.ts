@@ -9,3 +9,4 @@ export * from './tag';
 export * from './user';
 export * from './feed';
 export * from './community';
+export * from './preferences';
