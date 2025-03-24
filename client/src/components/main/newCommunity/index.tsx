@@ -14,9 +14,12 @@ const NewCommunityPage = () => {
     setTitle,
     description,
     setDescription,
+    tagNames,
+    setTagNames,
     setPrivateCommunity,
     titleErr,
     descriptionErr,
+    tagErr,
     postCommunity,
   } = useNewCommunity();
 
@@ -48,6 +51,14 @@ const NewCommunityPage = () => {
           />
         }
         label='Private (only added members will see your community)'
+      />
+      <Input
+        title={'Tags'}
+        hint={'Add keywords separated by whitespace'}
+        id={'formTagInput'}
+        val={tagNames}
+        setState={setTagNames}
+        err={tagErr}
       />
       <div className='btn_indicator_container'>
         <button

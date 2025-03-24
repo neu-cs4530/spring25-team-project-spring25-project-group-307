@@ -1,4 +1,4 @@
-import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
+import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
 import { Box, Typography } from '@mui/material';
 import QuestionView from '../../questionPage/question';
 import AskCommunityQuestion from '../../askCommunityQuestion';
@@ -6,12 +6,14 @@ import AskCommunityQuestion from '../../askCommunityQuestion';
 interface CommunityHomeProps {
   community: PopulatedDatabaseCommunity | null;
   currentRole: string;
+  handleTogglePinQuestion: (question: PopulatedDatabaseQuestion) => void;
 }
 
-const CommunityHome = ({ community, currentRole }: CommunityHomeProps) => {
+const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: CommunityHomeProps) => {
   if (!community) {
     return <Typography variant='h5'>Loading community...</Typography>;
   }
+
   const pinnedQuestions = community.pinnedQuestions || [];
   const unpinnedQuestions = community.questions.filter(
     question => !pinnedQuestions.some(pinned => pinned._id === question._id),
@@ -42,6 +44,7 @@ const CommunityHome = ({ community, currentRole }: CommunityHomeProps) => {
               community={community}
               pinnedQuestion={true}
               currentRole={currentRole}
+              handleTogglePinQuestion={handleTogglePinQuestion}
             />
           ))}
         </>
@@ -58,6 +61,7 @@ const CommunityHome = ({ community, currentRole }: CommunityHomeProps) => {
           community={community}
           pinnedQuestion={false}
           currentRole={currentRole}
+          handleTogglePinQuestion={handleTogglePinQuestion}
         />
       ))}
     </div>

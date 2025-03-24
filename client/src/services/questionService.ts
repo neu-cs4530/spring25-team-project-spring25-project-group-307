@@ -108,7 +108,7 @@ const downvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteIn
 };
 
 /**
- * Function to determine the community a question is in.
+ * Function to determine what community a question is in.
  * @param qid - The question to determine the community for.
  * @returns the community the question is in or null if the question is not in a community
  */

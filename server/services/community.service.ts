@@ -2,9 +2,12 @@ import { ObjectId } from 'mongodb';
 import {
   Community,
   DatabaseCommunity,
+  DatabaseTag,
   PopulatedDatabaseCommunity,
+  PopulatedDatabaseCommunityWithTags,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
+  Tag,
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
@@ -167,6 +170,7 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity 
       members: SafeDatabaseUser[];
       questions: PopulatedDatabaseQuestion[];
       pinnedQuestions: PopulatedDatabaseQuestion[];
+      tags: DatabaseTag[];
     }>([
       { path: 'members', model: 'User', select: '-password' },
       { path: 'admins', model: 'User', select: '-password' },
@@ -189,6 +193,7 @@ const getCommunityById = async (id: string): Promise<PopulatedDatabaseCommunity 
           { path: 'comments', model: 'Comment' },
         ],
       },
+      { path: 'tags', model: 'Tag' },
     ]);
 
     return community;
@@ -378,6 +383,27 @@ const unpinQuestion = async (
   }
 };
 
+/**
+ * Retrieves the tag data for a community.
+ * @param communityId the ID of the community to retrieve tags for
+ * @returns the tags for the community or null if an error occurred
+ */
+const getTagsForCommunity = async (communityId: string): Promise<Tag[] | null> => {
+  try {
+    const community: PopulatedDatabaseCommunityWithTags | null = await CommunityModel.findOne({
+      _id: communityId,
+    }).populate<{
+      tags: DatabaseTag[];
+    }>([{ path: 'tags', model: 'Tag' }]);
+    if (!community) {
+      throw new Error('Community not found');
+    }
+    return community.tags;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
@@ -392,4 +418,5 @@ export {
   addUserToCommunity,
   pinQuestion,
   unpinQuestion,
+  getTagsForCommunity,
 };

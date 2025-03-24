@@ -21,6 +21,7 @@ const CommunityListPage = () => {
     toggleCommunityView,
     handleInputChange,
     handleKeyDown,
+    communityTags,
   } = useCommunityPage();
 
   return (
@@ -44,6 +45,7 @@ const CommunityListPage = () => {
                 handleJoinCommunity={handleJoinCommunity}
                 handleLeaveCommunity={handleLeaveCommunity}
                 UserInCommunity={isUserInCommunity(c.title)}
+                communityTags={communityTags[c._id.toString()] || []}
               />
             </Grid2>
           ))}

@@ -1,6 +1,11 @@
 import { ObjectId } from 'mongodb';
 import api from './config';
-import { Community, DatabaseCommunity, PopulatedDatabaseCommunity } from '../types/types';
+import {
+  Community,
+  DatabaseCommunity,
+  DatabaseTag,
+  PopulatedDatabaseCommunity,
+} from '../types/types';
 
 const COMMUNITY_API_URL = `${process.env.REACT_APP_SERVER_URL}/community`;
 
@@ -215,6 +220,19 @@ const unpinQuestion = async (
   return res.data;
 };
 
+/**
+ * Function to retrieve tags from the database from a community.
+ * @param communityId The ID of the community to retrieve tags from
+ * @throws Error if there is an issue fetching the tags.
+ */
+const getTagsByCommunity = async (communityId: ObjectId): Promise<DatabaseTag[]> => {
+  const res = await api.get(`${COMMUNITY_API_URL}/getTagsForCommunity/${communityId.toString()}`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching tags');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -229,4 +247,5 @@ export {
   addUserToCommunity,
   pinQuestion,
   unpinQuestion,
+  getTagsByCommunity,
 };

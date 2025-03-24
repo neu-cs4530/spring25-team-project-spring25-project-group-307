@@ -32,6 +32,7 @@ const communitySchema: Schema = new Schema(
     members: [{ type: Schema.Types.ObjectId, ref: 'User' }],
     questions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
     pinnedQuestions: [{ type: Schema.Types.ObjectId, ref: 'Question' }],
+    tags: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
   },
   { collection: 'Community' },
 );

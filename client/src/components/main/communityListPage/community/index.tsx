@@ -1,8 +1,17 @@
 import Card from '@mui/material/Card';
 import LockIcon from '@mui/icons-material/Lock';
-import { Box, Button, CardActions, CardContent, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Chip,
+  Divider,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { ObjectId } from 'mongodb';
-import { DatabaseCommunity } from '../../../../types/types';
+import { DatabaseCommunity, Tag } from '../../../../types/types';
 
 /**
  * Interface representing the props for the Community component.
@@ -15,6 +24,7 @@ interface CommunityProps {
   handleJoinCommunity: (title: string) => void;
   handleLeaveCommunity: (title: string) => void;
   UserInCommunity: boolean;
+  communityTags: Tag[];
 }
 
 /**
@@ -28,6 +38,7 @@ const CommunityView = ({
   handleJoinCommunity,
   handleLeaveCommunity,
   UserInCommunity,
+  communityTags,
 }: CommunityProps) => (
   <Box>
     <Card>
@@ -71,6 +82,21 @@ const CommunityView = ({
           ) : null}
         </CardActions>
       ) : null}
+      {communityTags.length > 0 && (
+        <Box>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <Typography gutterBottom variant='body2' sx={{ fontWeight: 'bold' }}>
+              Tags
+            </Typography>
+            <Stack direction='row' sx={{ flexWrap: 'wrap' }}>
+              {communityTags.map(tag => (
+                <Chip key={tag.name} label={tag.name} size='small' sx={{ mr: 1, mt: 1 }} />
+              ))}
+            </Stack>
+          </Box>
+        </Box>
+      )}
     </Card>
   </Box>
 );

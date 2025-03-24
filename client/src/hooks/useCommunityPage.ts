@@ -7,8 +7,9 @@ import {
   joinCommunity,
   leaveCommunity,
   getCommunitiesBySearch,
+  getTagsByCommunity,
 } from '../services/communityService';
-import { DatabaseCommunity } from '../types/types';
+import { DatabaseCommunity, DatabaseTag } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -24,6 +25,7 @@ const useCommunityPage = () => {
   const [communityList, setCommunityList] = useState<DatabaseCommunity[]>([]);
   const [viewJoined, setViewJoined] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
+  const [communityTags, setCommunityTags] = useState<Record<string, DatabaseTag[]>>({}); // Map of community ID to tags
   const { user: currentUser } = useUserContext();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -67,6 +69,26 @@ const useCommunityPage = () => {
 
     fetchData();
   }, [search]);
+
+  useEffect(() => {
+    const fetchTags = async () => {
+      const tagsMap: Record<string, DatabaseTag[]> = {};
+
+      // Create an array of promises for fetching tags
+      const tagPromises = communityList.map(async community => {
+        const tags = await getTagsByCommunity(community._id); // Fetch tags for each community
+        tagsMap[community._id.toString()] = tags || [];
+      });
+
+      // Wait for all promises to resolve
+      await Promise.all(tagPromises);
+
+      // Update the state with the fetched tags
+      setCommunityTags(tagsMap);
+    };
+
+    fetchTags();
+  }, [communityList]);
 
   const handleJoinCommunity = async (title: string) => {
     // TODO: in the future this should go view the comunity just joined
@@ -166,6 +188,7 @@ const useCommunityPage = () => {
     toggleCommunityView,
     handleInputChange,
     handleKeyDown,
+    communityTags,
   };
 };
 

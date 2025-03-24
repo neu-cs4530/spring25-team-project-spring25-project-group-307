@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { FakeSOSocket } from '../types/types';
+import { Community, FakeSOSocket } from '../types/types';
 import {
   getCommunities,
   getCommunitiesBySearch,
@@ -14,7 +14,9 @@ import {
   removeQuestionFromCommunity,
   pinQuestion,
   unpinQuestion,
+  getTagsForCommunity,
 } from '../services/community.service';
+import { processTags } from '../services/tag.service';
 
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -71,6 +73,14 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  const isCommunityBodyValid = (community: Community): boolean =>
+    community.title !== undefined &&
+    community.title !== '' &&
+    community.description !== undefined &&
+    community.description !== '' &&
+    community.tags !== undefined &&
+    community.tags.length > 0;
+
   /**
    * Handles adding a community.
    *
@@ -80,10 +90,27 @@ const communityController = (socket: FakeSOSocket) => {
    * @returns A Promise that resolves to void.
    */
   const addCommunityRoute = async (req: Request, res: Response): Promise<void> => {
+    if (!isCommunityBodyValid(req.body)) {
+      res.status(400).send('Invalid Community Body');
+      return;
+    }
+
+    const community: Community = req.body;
+
     try {
+      // Process community tags
+      const communityWithTags = {
+        ...community,
+        tags: await processTags(community.tags),
+      };
+
+      if (communityWithTags.tags.length === 0) {
+        throw new Error('No tags found');
+      }
+
       // Save the community
-      const community = await addCommunity(req.body);
-      res.json(community);
+      const result = await addCommunity(communityWithTags);
+      res.json(result);
     } catch (error) {
       res.status(500).send(`Error when saving community: ${(error as Error).message}`);
     }
@@ -271,6 +298,22 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles getting the tags for a community.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const getTagsRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      // Get the tags for the community
+      const tags = await getTagsForCommunity(req.params.communityId.toString());
+      res.json(tags);
+    } catch (error) {
+      res.status(500).send(`Error when fetching tags for community: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
@@ -288,6 +331,7 @@ const communityController = (socket: FakeSOSocket) => {
   );
   router.patch('/pinQuestion', pinQuestionRoute);
   router.patch('/unpinQuestion', unpinQuestionRoute);
+  router.get('/getTagsForCommunity/:communityId', getTagsRoute);
 
   return router;
 };

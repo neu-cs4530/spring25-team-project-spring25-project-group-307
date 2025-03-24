@@ -6,7 +6,18 @@ import useViewCommunityPage from '../../../hooks/useViewCommunityPage';
 import CommunityUsers from './communityUsers';
 
 const ViewCommunityPage = () => {
-  const { community, currentRole } = useViewCommunityPage();
+  const {
+    community,
+    currentRole,
+    handleTogglePinQuestion,
+    handleRoleChange,
+    handleAddUser,
+    open,
+    handleOpen,
+    handleClose,
+    userToAdd,
+    handleSetUsername,
+  } = useViewCommunityPage();
   const [value, setValue] = useState('1');
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
@@ -22,7 +33,11 @@ const ViewCommunityPage = () => {
           </TabList>
         </Box>
         <TabPanel value='1'>
-          <CommunityHome community={community} currentRole={currentRole} />
+          <CommunityHome
+            community={community}
+            currentRole={currentRole}
+            handleTogglePinQuestion={handleTogglePinQuestion}
+          />
         </TabPanel>
         <TabPanel value='2'>
           <CommunityUsers
@@ -31,6 +46,13 @@ const ViewCommunityPage = () => {
             moderators={community?.moderators}
             members={community?.members}
             userRole={currentRole.toString()}
+            handleRoleChange={handleRoleChange}
+            handleAddUser={handleAddUser}
+            open={open}
+            handleOpen={handleOpen}
+            handleClose={handleClose}
+            userToAdd={userToAdd}
+            handleSetUsername={handleSetUsername}
           />
         </TabPanel>
       </TabContext>
