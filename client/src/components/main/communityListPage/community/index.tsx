@@ -1,5 +1,6 @@
 import Card from '@mui/material/Card';
-import { Button, CardActions, CardContent, Typography } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import { Box, Button, CardActions, CardContent, Typography } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import { DatabaseCommunity } from '../../../../types/types';
 
@@ -28,22 +29,25 @@ const CommunityView = ({
   handleLeaveCommunity,
   UserInCommunity,
 }: CommunityProps) => (
-  <div>
-    <div>
-      <Card>
-        <CardContent>
+  <Box>
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
-          <Typography variant='h5' component='div'>
-            {community.title}
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
-          <Typography variant='body2'>
-            {`${community.members.length + community.admins.length + community.moderators.length} members`}
-          </Typography>
-          <Typography variant='body2'>{community.questions.length} questions</Typography>
-        </CardContent>
+          {community.isPrivate && !UserInCommunity ? <LockIcon /> : null}
+        </Box>
+        <Typography variant='h5' component='div'>
+          {community.title}
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
+        <Typography variant='body2'>
+          {`${community.members.length + community.admins.length + community.moderators.length} members`}
+        </Typography>
+        <Typography variant='body2'>{community.questions.length} questions</Typography>
+      </CardContent>
+      {(community.isPrivate && UserInCommunity) || !community.isPrivate ? (
         <CardActions>
           {UserInCommunity ? (
             <Button
@@ -64,9 +68,9 @@ const CommunityView = ({
             View
           </Button>
         </CardActions>
-      </Card>
-    </div>
-  </div>
+      ) : null}
+    </Card>
+  </Box>
 );
 
 export default CommunityView;

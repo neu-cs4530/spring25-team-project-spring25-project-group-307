@@ -1,4 +1,5 @@
 import React from 'react';
+import { FormControlLabel, Switch } from '@mui/material';
 import useNewCommunity from '../../../hooks/UseNewCommunity';
 import Form from '../baseComponents/form';
 import TextArea from '../baseComponents/textarea';
@@ -8,8 +9,16 @@ import Input from '../baseComponents/input';
  * NewAnswerPage component allows users to submit an answer to a specific question.
  */
 const NewCommunityPage = () => {
-  const { title, setTitle, description, setDescription, titleErr, descriptionErr, postCommunity } =
-    useNewCommunity();
+  const {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    setPrivateCommunity,
+    titleErr,
+    descriptionErr,
+    postCommunity,
+  } = useNewCommunity();
 
   return (
     <Form>
@@ -28,6 +37,17 @@ const NewCommunityPage = () => {
         val={description}
         setState={setDescription}
         err={descriptionErr}
+      />
+      <FormControlLabel
+        sx={{ mb: 2 }}
+        control={
+          <Switch
+            onChange={e => {
+              setPrivateCommunity(e.currentTarget.checked);
+            }}
+          />
+        }
+        label='Private (only added members will see your community)'
       />
       <div className='btn_indicator_container'>
         <button

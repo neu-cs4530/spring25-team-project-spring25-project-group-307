@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Community } from '@fake-stack-overflow/shared/types/community';
 import { addCommunity } from '../services/communityService';
-import { Community } from '../types/types';
 import useUserContext from './useUserContext';
 
 /**
@@ -20,6 +20,7 @@ const useNewCommunity = () => {
   const { user } = useUserContext();
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [privateCommunity, setPrivateCommunity] = useState<boolean>(false);
   const [titleErr, setTitleErr] = useState<string>('');
   const [descriptionErr, setDescriptionErr] = useState<string>('');
 
@@ -55,6 +56,7 @@ const useNewCommunity = () => {
         const community: Community = {
           title,
           description,
+          isPrivate: privateCommunity,
           admins: [user._id],
           moderators: [],
           members: [],
@@ -73,7 +75,16 @@ const useNewCommunity = () => {
     }
   };
 
-  return { title, setTitle, description, setDescription, titleErr, descriptionErr, postCommunity };
+  return {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    setPrivateCommunity,
+    titleErr,
+    descriptionErr,
+    postCommunity,
+  };
 };
 
 export default useNewCommunity;

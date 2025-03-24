@@ -110,7 +110,11 @@ const useCommunityPage = () => {
 
   const isUserInCommunity = (title: string): boolean => {
     const community = communityList.find(c => c.title === title);
-    return community ? community.members.includes(currentUser._id) : false;
+    return community
+      ? community.members.includes(currentUser._id) ||
+          community.admins.includes(currentUser._id) ||
+          community.moderators.includes(currentUser._id)
+      : false;
   };
 
   const toggleCommunityView = async () => {

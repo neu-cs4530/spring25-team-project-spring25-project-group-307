@@ -49,7 +49,9 @@ const getCommunitiesByUser = async (username: string): Promise<DatabaseCommunity
     if ('error' in user) {
       throw new Error(user.error);
     }
-    const communities: DatabaseCommunity[] = await CommunityModel.find({ members: user._id });
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
+      $or: [{ admins: user._id }, { moderators: user._id }, { members: user._id }],
+    });
     return communities;
   } catch (error) {
     return [];

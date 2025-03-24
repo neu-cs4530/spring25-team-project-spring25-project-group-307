@@ -11,6 +11,7 @@ import { SafeDatabaseUser } from './user';
 export interface Community {
   title: string;
   description: string;
+  isPrivate?: boolean;
   admins: ObjectId[];
   moderators: ObjectId[];
   members: ObjectId[];
