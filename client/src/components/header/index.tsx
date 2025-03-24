@@ -1,39 +1,70 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import * as React from 'react';
+import AppBar from '@mui/material/AppBar';
+import Toolbar from '@mui/material/Toolbar';
+import MenuLeft from './menuLeft';
 import useHeader from '../../hooks/useHeader';
 import './index.css';
-import useUserContext from '../../hooks/useUserContext';
+import SearchBar from './searchBar';
+import MenuRight from './menuRight';
+
+/**
+ * Interface representing the props for the Header component.
+ *
+ * handleDrawerToggle - The function to handle the opening and closing of the drawer.
+ */
+interface HeaderProps {
+  handleDrawerToggle: () => void;
+}
 
 /**
  * Header component that renders the main title and a search bar.
  * The search bar allows the user to input a query and navigate to the search results page
  * when they press Enter.
  */
-const Header = () => {
-  const { val, handleInputChange, handleKeyDown, handleSignOut } = useHeader();
-  const { user: currentUser } = useUserContext();
-  const navigate = useNavigate();
+const Header = ({ handleDrawerToggle }: HeaderProps) => {
+  const {
+    val,
+    anchorEl,
+    notificationAnchorEl,
+    handleInputChange,
+    handleKeyDown,
+    handleSignOut,
+    handleMenu,
+    handleNotificationMenu,
+    handleClose,
+    handleViewProfile,
+    handleNavigateHome,
+  } = useHeader();
+
+  const notifications = [
+    'You have a new message',
+    'Your answer was upvoted',
+    'New comment on your question',
+    'Community event happening tomorrow',
+  ];
+
   return (
-    <div id='header' className='header'>
-      <div></div>
-      <div className='title'>Fake Stack Overflow</div>
-      <input
-        id='searchBar'
-        placeholder='Search ...'
-        type='text'
-        value={val}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-      />
-      <button onClick={handleSignOut} className='logout-button'>
-        Log out
-      </button>
-      <button
-        className='view-profile-button'
-        onClick={() => navigate(`/user/${currentUser.username}`)}>
-        View Profile
-      </button>
-    </div>
+    <AppBar position='fixed' color='primary'>
+      <Toolbar
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <MenuLeft handleDrawerToggle={handleDrawerToggle} handleNavigateHome={handleNavigateHome} />
+        <SearchBar handleInputChange={handleInputChange} handleKeyDown={handleKeyDown} val={val} />
+        <MenuRight
+          notifications={notifications}
+          notificationAnchorEl={notificationAnchorEl}
+          handleNotificationMenu={handleNotificationMenu}
+          handleClose={handleClose}
+          anchorEl={anchorEl}
+          handleMenu={handleMenu}
+          handleViewProfile={handleViewProfile}
+          handleSignOut={handleSignOut}
+        />
+      </Toolbar>
+    </AppBar>
   );
 };
 

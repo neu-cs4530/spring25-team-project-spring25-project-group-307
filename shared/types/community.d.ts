@@ -1,4 +1,5 @@
 import { ObjectId } from 'mongodb';
+import { SafeDatabaseUser } from './user';
 
 /**
  * Represents a community.
@@ -25,3 +26,19 @@ export interface Community {
 export interface DatabaseCommunity extends Community {
   _id: ObjectId;
 }
+
+/**
+ * Represents a fully populated community from the database.
+ * - `members`: An array of populated 'DatabaseUser' objects.
+ * - `questions`: An array of populated 'PopulatedDatabaseQuestion' objects.
+ */
+export interface PopulatedDatabaseCommunity
+  extends Omit<DatabaseCommunity, 'members' | 'questions'> {
+  members: SafeDatabaseUser[];
+  questions: PopulatedDatabaseQuestion[];
+}
+
+/**
+ * Type representing possible responses for a Community-related operation.
+ */
+export type CommunityResponse = DatabaseCommunity | { error: string };

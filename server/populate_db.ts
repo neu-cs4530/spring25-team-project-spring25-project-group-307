@@ -203,6 +203,10 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
+    interests: [],
+    ranking: '',
+    score: 0,
+    achievements: [],
   };
 
   return await UserModel.create(userDetail);

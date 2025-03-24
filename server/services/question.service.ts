@@ -1,7 +1,9 @@
 import { ObjectId } from 'mongodb';
 import { QueryOptions } from 'mongoose';
 import {
+  CommunityResponse,
   DatabaseComment,
+  DatabaseCommunity,
   DatabaseQuestion,
   DatabaseTag,
   OrderType,
@@ -23,6 +25,7 @@ import {
   sortQuestionsByNewest,
   sortQuestionsByUnanswered,
 } from '../utils/sort.util';
+import CommunityModel from '../models/communities.model';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -258,5 +261,26 @@ export const addVoteToQuestion = async (
           ? 'Error when adding upvote to question'
           : 'Error when adding downvote to question',
     };
+  }
+};
+
+/**
+ * Determines if a question is part of a community.
+ * @param {string} qid - The question ID
+ * @returns {Promise<CommunityResponse>}} - The community the question is in or null if the question is not in a community
+ */
+export const getCommunityQuestion = async (qid: string): Promise<CommunityResponse> => {
+  try {
+    const community: DatabaseCommunity | null = await CommunityModel.findOne({
+      questions: { $in: new ObjectId(qid) },
+    });
+
+    if (!community) {
+      throw new Error('Community not found');
+    }
+
+    return community;
+  } catch (error) {
+    return { error: 'Error when fetching community for question' };
   }
 };

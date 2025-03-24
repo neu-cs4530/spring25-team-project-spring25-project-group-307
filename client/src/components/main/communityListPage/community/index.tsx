@@ -1,5 +1,6 @@
 import Card from '@mui/material/Card';
 import { Button, CardActions, CardContent, Typography } from '@mui/material';
+import { ObjectId } from 'mongodb';
 import { DatabaseCommunity } from '../../../../types/types';
 
 /**
@@ -9,6 +10,10 @@ import { DatabaseCommunity } from '../../../../types/types';
  */
 interface CommunityProps {
   community: DatabaseCommunity;
+  handleViewCommunity: (cid: ObjectId) => void;
+  handleJoinCommunity: (title: string) => void;
+  handleLeaveCommunity: (title: string) => void;
+  UserInCommunity: boolean;
 }
 
 /**
@@ -16,7 +21,13 @@ interface CommunityProps {
  *
  * @param community - The community object containing community details.
  */
-const CommunityView = ({ community }: CommunityProps) => (
+const CommunityView = ({
+  community,
+  handleViewCommunity,
+  handleJoinCommunity,
+  handleLeaveCommunity,
+  UserInCommunity,
+}: CommunityProps) => (
   <div>
     <div>
       <Card>
@@ -32,8 +43,24 @@ const CommunityView = ({ community }: CommunityProps) => (
           <Typography variant='body2'>{community.questions.length} questions</Typography>
         </CardContent>
         <CardActions>
-          <Button size='small'>Join</Button>
-          <Button size='small'>View</Button>
+          {UserInCommunity ? (
+            <Button
+              onClick={() => handleLeaveCommunity(community.title)}
+              size='small'
+              color='error'>
+              Leave
+            </Button>
+          ) : (
+            <Button
+              onClick={() => handleJoinCommunity(community.title)}
+              size='small'
+              color='primary'>
+              Join
+            </Button>
+          )}
+          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
+            View
+          </Button>
         </CardActions>
       </Card>
     </div>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { Button } from '@mui/material';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
@@ -14,7 +16,14 @@ import useAnswerPage from '../../../hooks/useAnswerPage';
  * It also includes the functionality to vote, ask a new question, and post a new answer.
  */
 const AnswerPage = () => {
-  const { questionID, question, handleNewComment, handleNewAnswer } = useAnswerPage();
+  const {
+    questionID,
+    question,
+    handleNewComment,
+    handleNewAnswer,
+    community,
+    handleReturnToCommunity,
+  } = useAnswerPage();
 
   if (!question) {
     return null;
@@ -22,8 +31,21 @@ const AnswerPage = () => {
 
   return (
     <>
+      {community && (
+        <Button
+          variant='text'
+          startIcon={<ArrowBackIosIcon />}
+          sx={{ mx: '12px', mt: '10px' }}
+          onClick={handleReturnToCommunity}>
+          Go to Community
+        </Button>
+      )}
       <VoteComponent question={question} />
-      <AnswerHeader ansCount={question.answers.length} title={question.title} />
+      <AnswerHeader
+        ansCount={question.answers.length}
+        title={question.title}
+        community={community}
+      />
       <QuestionBody
         views={question.views.length}
         text={question.text}
