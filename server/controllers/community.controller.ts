@@ -67,9 +67,7 @@ const communityController = (socket: FakeSOSocket) => {
       const { tags } = req.body;
       // Get all communities from the database
       const communitiesByTag = await Promise.all(
-        tags.map(async (tagId: string) => {
-          return getCommunitiesByTag(tagId);
-        }),
+        tags.map(async (tagId: string) => getCommunitiesByTag(tagId)),
       );
       // Flatten the array of arrays into a single array of communities
       const allCommunities = communitiesByTag.flat();
@@ -77,8 +75,8 @@ const communityController = (socket: FakeSOSocket) => {
       // Remove duplicates by using a Map keyed by community ID
       const uniqueCommunities = Array.from(
         new Map(allCommunities.map(community => [community._id.toString(), community])).values(),
-      ); 
-      
+      );
+
       // Return the unique communities
       res.json(uniqueCommunities);
     } catch (error) {
@@ -357,7 +355,9 @@ const communityController = (socket: FakeSOSocket) => {
       const tags = await getAllCommunityTags();
       res.json(tags);
     } catch (error) {
-      res.status(500).send(`Error when fetching tags for all communities: ${(error as Error).message}`);
+      res
+        .status(500)
+        .send(`Error when fetching tags for all communities: ${(error as Error).message}`);
     }
   };
 

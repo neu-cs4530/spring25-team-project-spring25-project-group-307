@@ -11,7 +11,6 @@ import {
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
-import { TagSharp } from '@mui/icons-material';
 
 /**
  * Retrieves all communities from the database.
@@ -165,7 +164,7 @@ const leaveCommunity = async (
         $pull: {
           admins: user._id,
           moderators: user._id,
-          members: user._id
+          members: user._id,
         },
       },
       { new: true },
@@ -427,7 +426,7 @@ const getTagsForCommunity = async (communityId: string): Promise<Tag[] | null> =
 
 /**
  * Gets a list of all tags from all communities without duplicates.
- * 
+ *
  * @returns {Promise<DatabaseTag[] | null>} - A list of all tags from all communities without duplicates,
  */
 const getAllCommunityTags = async (): Promise<DatabaseTag[] | null> => {
@@ -448,8 +447,8 @@ const getAllCommunityTags = async (): Promise<DatabaseTag[] | null> => {
     const uniqueTagsSet: Set<DatabaseTag> = new Set<DatabaseTag>();
 
     // iterate through each community and add tags to the set
-    communities.forEach((community) => {
-      community.tags.forEach((tag) => {
+    communities.forEach(community => {
+      community.tags.forEach(tag => {
         uniqueTagsSet.add(tag);
       });
     });

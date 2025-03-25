@@ -199,10 +199,6 @@ const useCommunityPage = () => {
     }
   };
 
-  useEffect(() => {
-    console.log('selectedTags', selectedTags);
-  }, [selectedTags]);
-
   return {
     val,
     titleText,

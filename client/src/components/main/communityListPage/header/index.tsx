@@ -1,5 +1,4 @@
 import React from 'react';
-import { ObjectId } from 'mongodb';
 import { DatabaseTag } from '@fake-stack-overflow/shared';
 import { Box, Chip, Stack, Switch, TextField } from '@mui/material';
 import CreateCommunityButton from '../../createCommunityButton';
