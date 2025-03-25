@@ -1,11 +1,15 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { getUserByUsername } from '../services/userService';
 import { SafeDatabaseUser } from '../types/types';
-import { useRankUpNotifier } from '../components/notificaitonSettings/index';
 
+/**
+ * A custom hook to encapsulate all logic/state for the ProfileSettings component.
+ */
 const useStatistics = () => {
   const { username } = useParams<{ username: string }>();
+
+  // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -18,7 +22,6 @@ const useStatistics = () => {
         setLoading(true);
         const data = await getUserByUsername(username);
         setUserData(data);
-        setErrorMessage(null);
       } catch (error) {
         setErrorMessage('Error fetching user profile');
         setUserData(null);
