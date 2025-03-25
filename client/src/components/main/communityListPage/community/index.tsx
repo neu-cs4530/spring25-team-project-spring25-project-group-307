@@ -41,7 +41,7 @@ const CommunityView = ({
             <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14, pt: 1, pb: 1 }}>
               Community
             </Typography>
-            {UserInCommunity && <OptionsMenu />}
+            {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
           </Box>
 
           <Typography variant='h5' component='div'>

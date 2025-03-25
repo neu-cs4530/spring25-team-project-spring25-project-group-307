@@ -2,30 +2,21 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { useState } from 'react';
-import { FormGroup, FormControlLabel, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
+import { Checkbox, ListItemIcon, ListItemText } from '@mui/material';
+import useOptionsMenu from '../../../../../hooks/useOptionsMenu';
 
-const OptionsMenu = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
-  const subMenuOpen = Boolean(subMenuAnchorEl);
-
-  const [allNewCommunitiesChecked, setAllNewCommunitiesChecked] = useState(false);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleClose = () => {
-    setAnchorEl(null);
-    setSubMenuAnchorEl(null);
-  };
-
-  const handleSubMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setSubMenuAnchorEl(event.currentTarget);
-  };
-
+const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
+  const {
+    handleClick,
+    handleClose,
+    handleSubMenuOpen,
+    open,
+    anchorEl,
+    subMenuAnchorEl,
+    subMenuOpen,
+    allNewCommunitiesChecked,
+    allNewQuestionsCheckBoxOnChange,
+  } = useOptionsMenu(communityTitle);
   return (
     <div>
       <Button
@@ -59,10 +50,7 @@ const OptionsMenu = () => {
         onClose={handleClose}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
-        <MenuItem
-          onClick={e => {
-            setAllNewCommunitiesChecked(prev => !prev);
-          }}>
+        <MenuItem onClick={allNewQuestionsCheckBoxOnChange}>
           <ListItemIcon>
             <Checkbox checked={allNewCommunitiesChecked} />
           </ListItemIcon>
