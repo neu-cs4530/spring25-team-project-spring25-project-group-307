@@ -19,6 +19,7 @@ import messageController from './controllers/message.controller';
 import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
 import communityController from './controllers/community.controller';
+import preferencesController from './controllers/preferences.controller';
 
 dotenv.config();
 
@@ -84,6 +85,7 @@ app.use('/user', userController(socket));
 app.use('/chat', chatController(socket));
 app.use('/games', gameController(socket));
 app.use('/community', communityController(socket));
+app.use('/preferences', preferencesController());
 
 // Export the app instance
 export { app, server, startServer };
