@@ -15,6 +15,8 @@ import {
   pinQuestion,
   unpinQuestion,
   getTagsForCommunity,
+  getAllCommunityTags,
+  getCommunitiesByTag,
 } from '../services/community.service';
 import { processTags } from '../services/tag.service';
 
@@ -50,6 +52,35 @@ const communityController = (socket: FakeSOSocket) => {
       // Get all communities from the database
       const communities = await getCommunitiesBySearch(req.params.search);
       res.json(communities);
+    } catch (error) {
+      res.status(500).send(`Error when fetching communities: ${(error as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles getting all communities to match a list of tag Ids.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   */
+  const getCommunitiesByTagsRoute = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { tags } = req.body;
+      // Get all communities from the database
+      const communitiesByTag = await Promise.all(
+        tags.map(async (tagId: string) => {
+          return getCommunitiesByTag(tagId);
+        }),
+      );
+      // Flatten the array of arrays into a single array of communities
+      const allCommunities = communitiesByTag.flat();
+
+      // Remove duplicates by using a Map keyed by community ID
+      const uniqueCommunities = Array.from(
+        new Map(allCommunities.map(community => [community._id.toString(), community])).values(),
+      ); 
+      
+      // Return the unique communities
+      res.json(uniqueCommunities);
     } catch (error) {
       res.status(500).send(`Error when fetching communities: ${(error as Error).message}`);
     }
@@ -314,9 +345,26 @@ const communityController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles getting all unique tags from all communities.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const getAllCommunityTagsRoute = async (_: Request, res: Response): Promise<void> => {
+    try {
+      // Get all unique tags from all communities
+      const tags = await getAllCommunityTags();
+      res.json(tags);
+    } catch (error) {
+      res.status(500).send(`Error when fetching tags for all communities: ${(error as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.get('/getCommunities', getCommunitiesRoute);
   router.get('/getCommunitiesBySearch/:search', getCommunitiesBySearchRoute);
+  router.post('/getCommunitiesByTags', getCommunitiesByTagsRoute);
   router.get('/getCommunitiesByUser/:username', getCommunitiesByUserRoute);
   router.post('/saveCommunity', addCommunityRoute);
   router.post('/joinCommunity', joinCommunityRoute);
@@ -332,6 +380,7 @@ const communityController = (socket: FakeSOSocket) => {
   router.patch('/pinQuestion', pinQuestionRoute);
   router.patch('/unpinQuestion', unpinQuestionRoute);
   router.get('/getTagsForCommunity/:communityId', getTagsRoute);
+  router.get('/getAllCommunityTags', getAllCommunityTagsRoute);
 
   return router;
 };

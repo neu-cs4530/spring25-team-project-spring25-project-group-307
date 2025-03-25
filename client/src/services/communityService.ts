@@ -30,7 +30,20 @@ const getCommunities = async (): Promise<DatabaseCommunity[]> => {
 const getCommunitiesBySearch = async (search: string): Promise<DatabaseCommunity[]> => {
   const res = await api.get(`${COMMUNITY_API_URL}/getCommunitiesBySearch/${search}`);
   if (res.status !== 200) {
-    throw new Error('Error when fetching list of communities');
+    throw new Error('Error when fetching list of communities by search query');
+  }
+  return res.data;
+};
+
+/**
+ * Function to fetch all communities that match a tag query.
+ * @param tagIds The tag Ids query to match communities against
+ * @throws Error if there is an issue fetching the list of communities.
+ */
+const getCommunitiesByTags = async (tags: string[]): Promise<DatabaseCommunity[]> => {
+  const res = await api.post(`${COMMUNITY_API_URL}/getCommunitiesByTags`, { tags });
+  if (res.status !== 200) {
+    throw new Error('Error when fetching list of communities by Tag query');
   }
   return res.data;
 };
@@ -233,6 +246,18 @@ const getTagsByCommunity = async (communityId: ObjectId): Promise<DatabaseTag[]>
   return res.data;
 };
 
+/**
+ * Function to retrieve all unique tags from all communities.
+ * @throws Error if there is an issue fetching the tags.
+ */
+const getAllCommunityTags = async (): Promise<DatabaseTag[]> => {
+  const res = await api.get(`${COMMUNITY_API_URL}/getAllCommunityTags`);
+  if (res.status !== 200) {
+    throw new Error('Error when fetching tags');
+  }
+  return res.data;
+};
+
 export {
   getCommunities,
   addCommunity,
@@ -240,6 +265,7 @@ export {
   leaveCommunity,
   getCommunitiesByUser,
   getCommunitiesBySearch,
+  getCommunitiesByTags,
   getCommunityById,
   addQuestionToCommunity,
   deleteQuestionFromCommunity,
@@ -248,4 +274,5 @@ export {
   pinQuestion,
   unpinQuestion,
   getTagsByCommunity,
+  getAllCommunityTags,
 };

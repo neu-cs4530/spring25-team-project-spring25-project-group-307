@@ -22,6 +22,9 @@ const CommunityListPage = () => {
     handleInputChange,
     handleKeyDown,
     communityTags,
+    tagFilterList,
+    handleClickTag,
+    selectedTags,
   } = useCommunityPage();
 
   return (
@@ -33,6 +36,9 @@ const CommunityListPage = () => {
         toggleCommunityView={toggleCommunityView}
         handleInputChange={handleInputChange}
         handleKeyDown={handleKeyDown}
+        tagFilterList={tagFilterList}
+        handleClickTag={handleClickTag}
+        selectedTags={selectedTags}
       />
       <div id='community_list' className='right_padding'>
         <Grid2 container spacing={{ xs: 2, md: 3 }} columns={{ xs: 4, sm: 8, md: 12 }}>

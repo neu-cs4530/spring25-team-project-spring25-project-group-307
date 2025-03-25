@@ -8,6 +8,8 @@ import {
   leaveCommunity,
   getCommunitiesBySearch,
   getTagsByCommunity,
+  getAllCommunityTags,
+  getCommunitiesByTags,
 } from '../services/communityService';
 import { DatabaseCommunity, DatabaseTag } from '../types/types';
 import useUserContext from './useUserContext';
@@ -26,6 +28,8 @@ const useCommunityPage = () => {
   const [viewJoined, setViewJoined] = useState<boolean>(true);
   const [search, setSearch] = useState<string>('');
   const [communityTags, setCommunityTags] = useState<Record<string, DatabaseTag[]>>({}); // Map of community ID to tags
+  const [tagFilterList, setTagFilterList] = useState<DatabaseTag[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const { user: currentUser } = useUserContext();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -51,8 +55,12 @@ const useCommunityPage = () => {
      */
     const fetchData = async () => {
       try {
+        if (selectedTags.length > 0) {
+          const res = await getCommunitiesByTags(selectedTags);
+          setCommunityList(res || []);
+        }
         // if no search query, fetch all communities
-        if (search === '') {
+        else if (search === '') {
           const res = await getCommunities();
           setCommunityList(res || []);
         }
@@ -68,7 +76,7 @@ const useCommunityPage = () => {
     };
 
     fetchData();
-  }, [search]);
+  }, [search, selectedTags]);
 
   useEffect(() => {
     const fetchTags = async () => {
@@ -87,7 +95,13 @@ const useCommunityPage = () => {
       setCommunityTags(tagsMap);
     };
 
+    const fetchTagFilterList = async () => {
+      const tags = await getAllCommunityTags();
+      setTagFilterList(tags || []);
+    };
+
     fetchTags();
+    fetchTagFilterList();
   }, [communityList]);
 
   const handleJoinCommunity = async (title: string) => {
@@ -177,6 +191,18 @@ const useCommunityPage = () => {
     }
   };
 
+  const handleClickTag = async (tagId: string) => {
+    if (selectedTags.includes(tagId)) {
+      setSelectedTags(selectedTags.filter(id => id !== tagId));
+    } else {
+      setSelectedTags([...selectedTags, tagId]);
+    }
+  };
+
+  useEffect(() => {
+    console.log('selectedTags', selectedTags);
+  }, [selectedTags]);
+
   return {
     val,
     titleText,
@@ -189,6 +215,9 @@ const useCommunityPage = () => {
     handleInputChange,
     handleKeyDown,
     communityTags,
+    tagFilterList,
+    handleClickTag,
+    selectedTags,
   };
 };
 

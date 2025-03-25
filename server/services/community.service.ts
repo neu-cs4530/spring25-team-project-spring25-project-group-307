@@ -11,6 +11,7 @@ import {
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
 import { getUserByUsername } from './user.service';
+import { TagSharp } from '@mui/icons-material';
 
 /**
  * Retrieves all communities from the database.
@@ -34,6 +35,22 @@ const getCommunitiesBySearch = async (search: string): Promise<DatabaseCommunity
   try {
     const communities: DatabaseCommunity[] = await CommunityModel.find({
       title: { $regex: search, $options: 'i' },
+    });
+    return communities;
+  } catch (error) {
+    return [];
+  }
+};
+
+/**
+ * Retrieves all communities that match a tag query.
+ * @param {string} tagID - The tag query to match communities against
+ * @returns {Promise<DatabaseCommunity[]>} - An array of communities or an empty array if error occurs.
+ */
+const getCommunitiesByTag = async (tagID: string): Promise<DatabaseCommunity[]> => {
+  try {
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
+      tags: { $in: tagID },
     });
     return communities;
   } catch (error) {
@@ -145,7 +162,11 @@ const leaveCommunity = async (
     const community: DatabaseCommunity | null = await CommunityModel.findOneAndUpdate(
       { title },
       {
-        $pull: { members: user._id },
+        $pull: {
+          admins: user._id,
+          moderators: user._id,
+          members: user._id
+        },
       },
       { new: true },
     );
@@ -404,9 +425,48 @@ const getTagsForCommunity = async (communityId: string): Promise<Tag[] | null> =
   }
 };
 
+/**
+ * Gets a list of all tags from all communities without duplicates.
+ * 
+ * @returns {Promise<DatabaseTag[] | null>} - A list of all tags from all communities without duplicates,
+ */
+const getAllCommunityTags = async (): Promise<DatabaseTag[] | null> => {
+  try {
+    // fetch all communities and populate tags
+    const communities = await CommunityModel.find().populate<{
+      tags: DatabaseTag[];
+    }>({
+      path: 'tags',
+      model: 'Tag',
+    });
+
+    if (!communities || communities.length === 0) {
+      throw new Error('No communities found');
+    }
+
+    // create a set to store unique tags
+    const uniqueTagsSet: Set<DatabaseTag> = new Set<DatabaseTag>();
+
+    // iterate through each community and add tags to the set
+    communities.forEach((community) => {
+      community.tags.forEach((tag) => {
+        uniqueTagsSet.add(tag);
+      });
+    });
+
+    // convert set to array
+    const uniqueTagsArray = Array.from(uniqueTagsSet);
+
+    return uniqueTagsArray;
+  } catch (error) {
+    return null;
+  }
+};
+
 export {
   getCommunities,
   getCommunitiesBySearch,
+  getCommunitiesByTag,
   getCommunitiesByUser,
   addCommunity,
   joinCommunity,
@@ -419,4 +479,5 @@ export {
   pinQuestion,
   unpinQuestion,
   getTagsForCommunity,
+  getAllCommunityTags,
 };
