@@ -47,10 +47,13 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
-    achievements: {
-      type: [String],
-      default: [],
-    },
+    achievements: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Achievement',
+      },
+    ],
+    default: [],
   },
   { collection: 'User' },
 );

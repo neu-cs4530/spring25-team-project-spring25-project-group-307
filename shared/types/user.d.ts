@@ -21,6 +21,9 @@ export interface UserCredentials {
  * - `ranking`: The user's ranking based on their activity.
  * - `score`: The user's score representing their contributions.
  * - `achievements`: A list of achievements reached by the user.
+ * - `questionsAsked`: The number of questions asked by the user.
+ * - `responsesGiven`: The number of responses given by the user. 
+ * - `lastLogin`: The date of the user's last login.
  */
 export interface User extends UserCredentials {
   dateJoined: Date;
@@ -29,6 +32,11 @@ export interface User extends UserCredentials {
   ranking: string;
   score: number;
   achievements: string[];
+  // adding questions asked and responses given fields
+  // adding last login field
+  questionsAsked: number;
+  responsesGiven: number;
+  lastLogin?: Date;
 }
 
 /**

@@ -42,3 +42,15 @@ export interface PopulatedDatabaseCommunity
  * Type representing possible responses for a Community-related operation.
  */
 export type CommunityResponse = DatabaseCommunity | { error: string };
+
+/**
+ * Represents an achievement.
+ * - `_id`: Unique identifier for the achievement.
+ * - `name`: The name of the achievement.
+ * - `description`: A brief description of the achievement.
+ */
+export interface DatabaseAchievement {
+  _id: ObjectId;
+  name: string;
+  description: string;
+}
