@@ -1,7 +1,15 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { PopulatedDatabaseCommunity } from '@fake-stack-overflow/shared';
-import { getCommunityById } from '../services/communityService';
+import { ObjectId } from 'mongodb';
+import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
+import {
+  addUserToCommunity,
+  getCommunityById,
+  pinQuestion,
+  unpinQuestion,
+  updateUserRole,
+} from '../services/communityService';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -13,9 +21,79 @@ import { getCommunityById } from '../services/communityService';
  */
 const useViewCommunityPage = () => {
   const { cid } = useParams();
+  const { user } = useUserContext();
   const navigate = useNavigate();
 
   const [community, setCommunity] = useState<PopulatedDatabaseCommunity | null>(null);
+  const [currentRole, setCurrentRole] = useState<string>('None');
+  const [pinned, setPinned] = useState<boolean>(false);
+  const [users, setUsers] = useState<ObjectId[]>([]);
+  const [open, setOpen] = useState(false);
+  const [userToAdd, setUserToAdd] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSetUsername = (newUsername: string) => setUserToAdd(newUsername);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const handleRoleChange = async (username: string, newRole: string) => {
+    setError(null);
+
+    try {
+      // Call the server to update the user's role
+      if (!community) {
+        throw new Error('Community ID not provided');
+      }
+
+      const res = await updateUserRole(community._id, username, newRole);
+
+      if (!res) {
+        throw new Error('Failed to update user role');
+      }
+    } catch (e) {
+      setError('Failed to update role');
+    }
+  };
+
+  /**
+   * Function to pin the question to the community.
+   */
+  const handleTogglePinQuestion = async (question: PopulatedDatabaseQuestion) => {
+    if (community && !pinned) {
+      // pin question
+      const res = await pinQuestion(community._id, question._id);
+      if (res) {
+        setPinned(true);
+      }
+    } else if (community && pinned) {
+      // unpin question
+      const res = await unpinQuestion(community._id, question._id);
+      if (res) {
+        setPinned(false);
+      }
+    }
+  };
+
+  const handleAddUser = async () => {
+    try {
+      if (!community) {
+        throw new Error('Community not found');
+      }
+      // Add the user to the community
+      const res = await addUserToCommunity(community?._id, userToAdd);
+
+      if (!res) {
+        throw new Error('Failed to add user to community');
+      }
+
+      // Update the users list
+      setUsers(res.members.map((u: ObjectId) => u));
+      setUserToAdd('');
+      handleClose();
+    } catch (e) {
+      setError('Failed to add user to community');
+    }
+  };
 
   useEffect(() => {
     if (!cid) {
@@ -34,9 +112,37 @@ const useViewCommunityPage = () => {
     };
 
     fetchCommunity();
-  }, [cid, navigate]);
+  }, [cid, navigate, pinned, users]);
 
-  return { community };
+  useEffect(() => {
+    const setCurrentUserRole = () => {
+      if (community) {
+        if (community.admins.some(admin => admin._id === user?._id)) {
+          setCurrentRole('ADMIN');
+        } else if (community.moderators.some(moderator => moderator._id === user?._id)) {
+          setCurrentRole('MODERATOR');
+        } else {
+          setCurrentRole('MEMBER');
+        }
+      }
+    };
+
+    setCurrentUserRole();
+  }, [community, user]);
+
+  return {
+    community,
+    currentRole,
+    handleTogglePinQuestion,
+    handleRoleChange,
+    handleSetUsername,
+    handleOpen,
+    handleClose,
+    handleAddUser,
+    userToAdd,
+    error,
+    open,
+  };
 };
 
 export default useViewCommunityPage;

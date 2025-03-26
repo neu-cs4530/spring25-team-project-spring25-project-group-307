@@ -67,3 +67,17 @@ export const addComment = async (
     return { error: `Error when adding comment: ${(error as Error).message}` };
   }
 };
+
+/**
+ * Deletes a comment from the database.
+ * @param {string} cid - The ID of the comment to delete.
+ * @returns {Promise<CommentResponse>} - The deleted comment or an error message.
+ */
+export const deleteCommentById = async (cid: string): Promise<CommentResponse> => {
+  try {
+    const result: DatabaseComment | null = await CommentModel.findByIdAndDelete(cid);
+    return result || { error: 'Comment not found' };
+  } catch (error) {
+    return { error: 'Error when deleting a comment' };
+  }
+};

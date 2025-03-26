@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Community } from '@fake-stack-overflow/shared/types/community';
 import { addCommunity } from '../services/communityService';
-import { Community } from '../types/types';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to handle adding communities and form validation.
@@ -16,10 +17,14 @@ import { Community } from '../types/types';
  */
 const useNewCommunity = () => {
   const navigate = useNavigate();
+  const { user } = useUserContext();
   const [title, setTitle] = useState<string>('');
   const [description, setDescription] = useState<string>('');
+  const [tagNames, setTagNames] = useState<string>('');
+  const [privateCommunity, setPrivateCommunity] = useState<boolean>(false);
   const [titleErr, setTitleErr] = useState<string>('');
   const [descriptionErr, setDescriptionErr] = useState<string>('');
+  const [tagErr, setTagErr] = useState<string>('');
 
   const validateForm = (): boolean => {
     let isValid = true;
@@ -41,35 +46,70 @@ const useNewCommunity = () => {
       setDescriptionErr('');
     }
 
+    const tagnames = tagNames.split(' ').filter(tagName => tagName.trim() !== '');
+    if (tagnames.length === 0) {
+      setTagErr('Should have at least 1 tag');
+      isValid = false;
+    } else if (tagnames.length > 5) {
+      setTagErr('Cannot have more than 5 tags');
+      isValid = false;
+    } else {
+      setTagErr('');
+    }
+
+    for (const tagName of tagnames) {
+      if (tagName.length > 20) {
+        setTagErr('New tag length cannot be more than 20');
+        isValid = false;
+        break;
+      }
+    }
+
     return isValid;
   };
 
   const postCommunity = async () => {
-    if (validateForm()) {
-      try {
-        if (!validateForm()) {
-          return;
-        }
-        const community: Community = {
-          title,
-          description,
-          members: [],
-          questions: [],
-        };
+    if (!validateForm()) {
+      return;
+    }
+    const tagnames = tagNames.split(' ').filter(tagName => tagName.trim() !== '');
+    const tags = tagnames.map(tagName => ({
+      name: tagName,
+      description: 'user added community tag',
+    }));
 
-        const res = await addCommunity(community);
+    const community: Community = {
+      title,
+      description,
+      isPrivate: privateCommunity,
+      admins: [user._id],
+      moderators: [],
+      members: [],
+      questions: [],
+      pinnedQuestions: [],
+      tags,
+    };
 
-        if (res && res._id) {
-          navigate('/communities');
-        }
-      } catch (e) {
-        // eslint-disable-next-line no-console
-        console.error(e);
-      }
+    const res = await addCommunity(community);
+
+    if (res && res._id) {
+      navigate('/communities');
     }
   };
 
-  return { title, setTitle, description, setDescription, titleErr, descriptionErr, postCommunity };
+  return {
+    title,
+    setTitle,
+    description,
+    setDescription,
+    tagNames,
+    setTagNames,
+    setPrivateCommunity,
+    titleErr,
+    descriptionErr,
+    tagErr,
+    postCommunity,
+  };
 };
 
 export default useNewCommunity;

@@ -3,6 +3,7 @@ import {
   DatabaseCommunity,
   PopulatedDatabaseQuestion,
   Question,
+  QuestionResponse,
   VoteInterface,
 } from '../types/types';
 import api from './config';
@@ -62,6 +63,19 @@ const addQuestion = async (q: Question): Promise<PopulatedDatabaseQuestion> => {
 };
 
 /**
+ * Function to delete a question.
+ * @param qid - The ID of the question to delete.
+ * @throws Error if there is an issue deleting the question.
+ */
+const deleteQuestion = async (qid: ObjectId): Promise<QuestionResponse> => {
+  const res = await api.delete(`${QUESTION_API_URL}/deleteQuestion/${qid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while deleting the question');
+  }
+  return res.data;
+};
+
+/**
  * Function to upvote a question.
  *
  * @param qid - The ID of the question to upvote.
@@ -94,7 +108,7 @@ const downvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteIn
 };
 
 /**
- * Function to determine the community a question is in.
+ * Function to determine what community a question is in.
  * @param qid - The question to determine the community for.
  * @returns the community the question is in or null if the question is not in a community
  */
@@ -110,6 +124,7 @@ export {
   getQuestionsByFilter,
   getQuestionById,
   addQuestion,
+  deleteQuestion,
   upvoteQuestion,
   downvoteQuestion,
   getCommunityQuestion,

@@ -1,7 +1,17 @@
 import Card from '@mui/material/Card';
-import { Button, CardActions, CardContent, Typography } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Chip,
+  Divider,
+  Stack,
+  Typography,
+} from '@mui/material';
 import { ObjectId } from 'mongodb';
-import { DatabaseCommunity } from '../../../../types/types';
+import { DatabaseCommunity, Tag } from '../../../../types/types';
 
 /**
  * Interface representing the props for the Community component.
@@ -14,6 +24,7 @@ interface CommunityProps {
   handleJoinCommunity: (title: string) => void;
   handleLeaveCommunity: (title: string) => void;
   UserInCommunity: boolean;
+  communityTags: Tag[];
 }
 
 /**
@@ -27,21 +38,27 @@ const CommunityView = ({
   handleJoinCommunity,
   handleLeaveCommunity,
   UserInCommunity,
+  communityTags,
 }: CommunityProps) => (
-  <div>
-    <div>
-      <Card>
-        <CardContent>
+  <Box>
+    <Card>
+      <CardContent>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
-          <Typography variant='h5' component='div'>
-            {community.title}
-          </Typography>
-          <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
-          <Typography variant='body2'>{community.members.length} members</Typography>
-          <Typography variant='body2'>{community.questions.length} questions</Typography>
-        </CardContent>
+          {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
+        </Box>
+        <Typography variant='h5' component='div'>
+          {community.title}
+        </Typography>
+        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
+        <Typography variant='body2'>
+          {`${community.members.length + community.admins.length + community.moderators.length} members`}
+        </Typography>
+        <Typography variant='body2'>{community.questions.length} questions</Typography>
+      </CardContent>
+      {(community.isPrivate && UserInCommunity) || !community.isPrivate ? (
         <CardActions>
           {UserInCommunity ? (
             <Button
@@ -58,13 +75,30 @@ const CommunityView = ({
               Join
             </Button>
           )}
-          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
-            View
-          </Button>
+          {UserInCommunity ? (
+            <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
+              View
+            </Button>
+          ) : null}
         </CardActions>
-      </Card>
-    </div>
-  </div>
+      ) : null}
+      {communityTags.length > 0 && (
+        <Box>
+          <Divider />
+          <Box sx={{ p: 2 }}>
+            <Typography gutterBottom variant='body2' sx={{ fontWeight: 'bold' }}>
+              Tags
+            </Typography>
+            <Stack direction='row' sx={{ flexWrap: 'wrap' }}>
+              {communityTags.map(tag => (
+                <Chip key={tag.name} label={tag.name} size='small' sx={{ mr: 1, mt: 1 }} />
+              ))}
+            </Stack>
+          </Box>
+        </Box>
+      )}
+    </Card>
+  </Box>
 );
 
 export default CommunityView;

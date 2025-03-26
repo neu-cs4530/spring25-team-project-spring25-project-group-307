@@ -39,6 +39,16 @@ export interface AddCommentRequest extends Request {
 }
 
 /**
+ * Interface extending the request body for deleting a comment.
+ * - `cid`: The unique identifier of the comment being deleted.
+ */
+export interface DeleteCommentRequest extends Request {
+  params: {
+    cid: string;
+  };
+}
+
+/**
  * Type representing possible responses for a Comment-related operation.
  * - Either a `DatabaseComment` object or an error message.
  */
