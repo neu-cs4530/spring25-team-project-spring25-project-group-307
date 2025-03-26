@@ -1,6 +1,10 @@
 import express, { Response } from 'express';
-import { addUserPreferenceToCommunity } from '../services/preferences.service';
-import { AddPreferenceRequest, UserPreference } from '../types/types';
+import {
+  addUserPreferenceToCommunity,
+  getPreferencesForCommunity,
+  removeUserPreferenceFromCommunity,
+} from '../services/preferences.service';
+import { PreferenceRequest, UserPreference } from '../types/types';
 
 const preferencesController = () => {
   const ALL_USER_PREFERENCES: UserPreference[] = ['All Questions'];
@@ -11,7 +15,7 @@ const preferencesController = () => {
    * @param req the request
    * @returns true if valid, otherwise false
    */
-  const ValidateAddPreferenceRequest = (req: AddPreferenceRequest) => {
+  const ValidateAddPreferenceRequest = (req: PreferenceRequest) => {
     if (
       req.body === undefined ||
       req.body.userPreference === undefined ||
@@ -36,7 +40,7 @@ const preferencesController = () => {
    *
    * @returns A Promise that resolves to void.
    */
-  const addPreference = async (req: AddPreferenceRequest, res: Response): Promise<void> => {
+  const addPreference = async (req: PreferenceRequest, res: Response): Promise<void> => {
     if (!ValidateAddPreferenceRequest(req)) {
       res
         .status(400)
@@ -63,8 +67,71 @@ const preferencesController = () => {
     }
   };
 
+  const removePreference = async (req: PreferenceRequest, res: Response): Promise<void> => {
+    if (!ValidateAddPreferenceRequest(req)) {
+      res
+        .status(400)
+        .send('Please include a valid preference, community title, and username in the body');
+      return;
+    }
+
+    const { communityTitle, userPreference, username } = req.body;
+
+    try {
+      const preferences = await removeUserPreferenceFromCommunity(
+        userPreference,
+        username,
+        communityTitle,
+      );
+
+      if ('error' in preferences) {
+        throw new Error(preferences.error as string);
+      }
+
+      res.json(preferences);
+    } catch (err) {
+      res.status(500).send(`Error when removing preference: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Retrieves preferences for a given user and community.
+   *
+   * @param req The request object containing the username and community title.
+   * @param res The response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const getPreferences = async (req: PreferenceRequest, res: Response): Promise<void> => {
+    const { username, communityTitle } = req.query;
+
+    if (!username || !communityTitle) {
+      res
+        .status(400)
+        .send('Please include a valid username and community title in the query parameters');
+      return;
+    }
+
+    try {
+      const preferences = await getPreferencesForCommunity(
+        username as string,
+        communityTitle as string,
+      );
+
+      if ('error' in preferences) {
+        throw new Error(preferences.error as string);
+      }
+
+      res.json(preferences);
+    } catch (err) {
+      res.status(500).send(`Error retrieving preferences: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router
   router.post('/addPreference', addPreference);
+  router.post('/removePreference', removePreference);
+  router.get('/getPreferences', getPreferences);
 
   return router;
 };

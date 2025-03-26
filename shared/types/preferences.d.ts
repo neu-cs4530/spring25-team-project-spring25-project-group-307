@@ -22,7 +22,7 @@ export interface DatabasePreferences extends Preferences {
   _id: ObjectId;
 }
 
-export interface AddPreferenceRequest extends Request {
+export interface PreferenceRequest extends Request {
   body: {
     userPreference: UserPreference;
     username: string;

@@ -19,7 +19,7 @@ const addPreference = async (
     username,
     communityTitle,
   };
-  console.log('here');
+
   const res = await api.post(`${PREFERENCES_API_URL}/addPreference`, data);
   if (res.status !== 200) {
     throw new Error('Error when adding preference');
@@ -27,4 +27,35 @@ const addPreference = async (
   return res.data;
 };
 
-export default addPreference;
+const removePreference = async (
+  userPreference: UserPreference,
+  username: string,
+  communityTitle: string,
+) => {
+  const data = {
+    userPreference,
+    username,
+    communityTitle,
+  };
+
+  const res = await api.post(`${PREFERENCES_API_URL}/removePreference`, data);
+  if (res.status !== 200) {
+    throw new Error('Error when removing preference');
+  }
+  return res.data;
+};
+
+const getPreferences = async (
+  username: string,
+  communityTitle: string,
+): Promise<DatabasePreferences> => {
+  const res = await api.get(
+    `${PREFERENCES_API_URL}/getPreferences?username=${username}&communityTitle=${communityTitle}`,
+  );
+  if (res.status !== 200) {
+    throw new Error('Error when removing preference');
+  }
+  return res.data;
+};
+
+export { addPreference, removePreference, getPreferences };

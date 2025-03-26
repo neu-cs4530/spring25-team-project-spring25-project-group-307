@@ -43,3 +43,55 @@ export const addUserPreferenceToCommunity = async (
     return { error: 'Error when saving a preference' };
   }
 };
+/**
+ * removes the given userPreference from the given community for the given user
+ * @param userPreference
+ * @param username
+ * @param communityTitle
+ * @returns
+ */
+export const removeUserPreferenceFromCommunity = async (
+  userPreference: UserPreference,
+  username: string,
+  communityTitle: string,
+): Promise<PreferencesResponse> => {
+  try {
+    const preferences = await PreferencesModel.findOneAndUpdate(
+      { username, communityTitle },
+      { $pull: { userPreferences: userPreference } },
+      { new: true },
+    );
+
+    if (preferences) {
+      return preferences;
+    }
+
+    throw new Error('preferences not found for community and user');
+  } catch (error) {
+    return { error: 'Error when saving a preference' };
+  }
+};
+
+/**
+ * Retrieves the preferences for a given user and community.
+ *
+ * @param username username of the user
+ * @param communityTitle title of the community
+ * @returns PreferencesResponse containing the user's preferences for the community
+ */
+export const getPreferencesForCommunity = async (
+  username: string,
+  communityTitle: string,
+): Promise<PreferencesResponse> => {
+  try {
+    const preferences = await PreferencesModel.findOne({ username, communityTitle });
+
+    if (!preferences) {
+      throw new Error('Preferences not found for the given user and community');
+    }
+
+    return preferences;
+  } catch (error) {
+    return { error: 'Error retrieving preferences' };
+  }
+};

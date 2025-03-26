@@ -7,24 +7,24 @@ import useOptionsMenu from '../../../../../hooks/useOptionsMenu';
 
 const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
   const {
-    handleClick,
+    handleMenuOpen,
     handleClose,
     handleSubMenuOpen,
-    open,
+    menuOpen,
     anchorEl,
     subMenuAnchorEl,
     subMenuOpen,
-    allNewCommunitiesChecked,
+    allNewQuestionsChecked,
     allNewQuestionsCheckBoxOnChange,
   } = useOptionsMenu(communityTitle);
   return (
     <div>
       <Button
         id='demo-positioned-button'
-        aria-controls={open ? 'demo-positioned-menu' : undefined}
+        aria-controls={menuOpen ? 'demo-positioned-menu' : undefined}
         aria-haspopup='true'
-        aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}>
+        aria-expanded={menuOpen ? 'true' : undefined}
+        onClick={handleMenuOpen}>
         <MoreHorizIcon />
       </Button>
 
@@ -32,7 +32,7 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
         id='demo-positioned-menu'
         aria-labelledby='demo-positioned-button'
         anchorEl={anchorEl}
-        open={open}
+        open={menuOpen}
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
@@ -52,7 +52,7 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
         transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
         <MenuItem onClick={allNewQuestionsCheckBoxOnChange}>
           <ListItemIcon>
-            <Checkbox checked={allNewCommunitiesChecked} />
+            <Checkbox checked={allNewQuestionsChecked} />
           </ListItemIcon>
           <ListItemText primary='All New Questions' />
         </MenuItem>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { UserPreference } from '@fake-stack-overflow/shared';
-import addPreference from '../services/preferencesService';
+import { addPreference, getPreferences, removePreference } from '../services/preferencesService';
 import useUserContext from './useUserContext';
 
 const useOptionsMenu = (communityTitle: string) => {
@@ -8,12 +8,14 @@ const useOptionsMenu = (communityTitle: string) => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [subMenuAnchorEl, setSubMenuAnchorEl] = useState<null | HTMLElement>(null);
-  const open = Boolean(anchorEl);
+  const menuOpen = Boolean(anchorEl);
   const subMenuOpen = Boolean(subMenuAnchorEl);
 
-  const [allNewCommunitiesChecked, setAllNewCommunitiesChecked] = useState(false);
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const [allNewQuestionsChecked, setAllNewQuestionsChecked] = useState(false);
+  const preferenceToSetter: Record<UserPreference, (value: boolean) => void> = {
+    'All Questions': setAllNewQuestionsChecked,
+  };
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -27,33 +29,43 @@ const useOptionsMenu = (communityTitle: string) => {
   };
 
   const allNewQuestionsCheckBoxOnChange = (event: React.MouseEvent<HTMLElement>) => {
-    setAllNewCommunitiesChecked(prev => {
+    setAllNewQuestionsChecked(prev => {
       const newValue = !prev;
       if (newValue) {
-        addPreference('All Questions', user.username, communityTitle).then(result =>
-          console.log(result),
-        );
+        addPreference('All Questions', user.username, communityTitle);
       } else {
-        // remove pref her
-        console.log('remove pref');
+        // remove pref here
+        removePreference('All Questions', user.username, communityTitle);
       }
       return newValue;
     });
   };
 
   useEffect(() => {
-    console.log(`getting the preferences for ${communityTitle}`);
+    getPreferences(user.username, communityTitle)
+      .then(result => {
+        result.userPreferences.forEach(preference => {
+          preferenceToSetter[preference](true);
+        });
+      })
+      .catch(() => {
+        // set all check box to false
+
+        Object.keys(preferenceToSetter).forEach(key => {
+          preferenceToSetter[key as UserPreference](false);
+        });
+      });
   }, []);
 
   return {
-    handleClick,
+    handleMenuOpen,
     handleClose,
     handleSubMenuOpen,
-    open,
+    menuOpen,
     anchorEl,
     subMenuAnchorEl,
     subMenuOpen,
-    allNewCommunitiesChecked,
+    allNewQuestionsChecked,
     allNewQuestionsCheckBoxOnChange,
   };
 };
