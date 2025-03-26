@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import { SafeDatabaseUser } from './user';
+import { DatabaseTag, Tag } from './tag';
 
 /**
  * Represents a community.
@@ -11,8 +12,13 @@ import { SafeDatabaseUser } from './user';
 export interface Community {
   title: string;
   description: string;
+  isPrivate?: boolean;
+  admins: ObjectId[];
+  moderators: ObjectId[];
   members: ObjectId[];
   questions: ObjectId[];
+  pinnedQuestions: ObjectId[];
+  tags: Tag[];
 }
 
 /**
@@ -23,8 +29,16 @@ export interface Community {
  * - `members`: An array of references to 'User' documents that are members of the community.
  * - `questions`: An array of references to 'Question' documents that are part of the community.
  */
-export interface DatabaseCommunity extends Community {
+export interface DatabaseCommunity extends Omit<Community, 'tags'> {
   _id: ObjectId;
+  tags: ObjectId[];
+}
+
+/**
+ * Represents a Community with tags populated from the database.
+ */
+export interface PopulatedDatabaseCommunityWithTags extends Omit<DatabaseCommunity, 'tags'> {
+  tags: Tag[];
 }
 
 /**
@@ -33,9 +47,16 @@ export interface DatabaseCommunity extends Community {
  * - `questions`: An array of populated 'PopulatedDatabaseQuestion' objects.
  */
 export interface PopulatedDatabaseCommunity
-  extends Omit<DatabaseCommunity, 'members' | 'questions'> {
+  extends Omit<
+    DatabaseCommunity,
+    'members' | 'admins' | 'moderators' | 'questions' | 'pinnedQuestions' | 'tags'
+  > {
+  admins: SafeDatabaseUser[];
+  moderators: SafeDatabaseUser[];
   members: SafeDatabaseUser[];
   questions: PopulatedDatabaseQuestion[];
+  pinnedQuestions: PopulatedDatabaseQuestion[];
+  tags: DatabaseTag[];
 }
 
 /**

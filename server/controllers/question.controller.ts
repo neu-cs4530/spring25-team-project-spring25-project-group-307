@@ -19,6 +19,7 @@ import {
   getQuestionsByOrder,
   saveQuestion,
   getCommunityQuestion,
+  deleteQuestionById,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
@@ -178,6 +179,36 @@ const questionController = (socket: FakeSOSocket) => {
   };
 
   /**
+   * Deletes a question from the database. The question is identified by its unique ID.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req the HTTP request object containing the question ID as a parameter.
+   * @param res the HTTP response object used to send back the result of the operation.
+   *
+   * @returns a Promise that resolves to void.
+   */
+  const deleteQuestion = async (req: FindQuestionByIdRequest, res: Response): Promise<void> => {
+    const { qid } = req.params;
+
+    if (!ObjectId.isValid(qid)) {
+      res.status(400).send('Invalid ID format');
+      return;
+    }
+
+    try {
+      const result = await deleteQuestionById(qid);
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when deleting question`);
+    }
+  };
+
+  /**
    * Helper function to handle upvoting or downvoting a question.
    *
    * @param req The VoteRequest object containing the question ID and the username.
@@ -268,6 +299,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
   router.post('/addQuestion', addQuestion);
+  router.delete('/deleteQuestion/:qid', deleteQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);

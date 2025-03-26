@@ -1,5 +1,6 @@
 import React from 'react';
-import { Switch, TextField } from '@mui/material';
+import { DatabaseTag } from '@fake-stack-overflow/shared';
+import { Box, Chip, Stack, Switch, TextField } from '@mui/material';
 import CreateCommunityButton from '../../createCommunityButton';
 
 /**
@@ -15,6 +16,9 @@ interface CommunityHeaderProps {
   toggleCommunityView: () => void;
   handleInputChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleKeyDown: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  tagFilterList: DatabaseTag[];
+  handleClickTag: (tagId: string) => void;
+  selectedTags: string[];
 }
 
 /**
@@ -32,6 +36,9 @@ const CommunityHeader = ({
   toggleCommunityView,
   handleInputChange,
   handleKeyDown,
+  tagFilterList,
+  handleClickTag,
+  selectedTags,
 }: CommunityHeaderProps) => (
   <div>
     <div className='space_between right_padding'>
@@ -56,6 +63,19 @@ const CommunityHeader = ({
         <span>All</span>
       </div>
     </div>
+    <Box sx={{ mx: 4 }}>
+      <Stack direction='row' spacing={1}>
+        {tagFilterList.map(tag => (
+          <Chip
+            key={tag._id.toString()}
+            label={tag.name}
+            size='medium'
+            onClick={() => handleClickTag(tag._id.toString())}
+            color={selectedTags.includes(tag._id.toString()) ? 'primary' : 'default'}
+          />
+        ))}
+      </Stack>
+    </Box>
   </div>
 );
 

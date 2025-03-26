@@ -9,8 +9,10 @@ import {
   DatabaseCommunity,
 } from '../types/types';
 import useUserContext from './useUserContext';
-import addComment from '../services/commentService';
-import { getQuestionById, getCommunityQuestion } from '../services/questionService';
+import { addComment, deleteComment } from '../services/commentService';
+import { getQuestionById, getCommunityQuestion, deleteQuestion } from '../services/questionService';
+import { deleteQuestionFromCommunity } from '../services/communityService';
+import { deleteAnswer } from '../services/answerService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -28,6 +30,7 @@ const useAnswerPage = () => {
   const [questionID, setQuestionID] = useState<string>(qid || '');
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
   const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
+  const [currentRole, setCurrentRole] = useState<string>('None');
 
   /**
    * Function to handle navigation to the "New Answer" page.
@@ -70,11 +73,61 @@ const useAnswerPage = () => {
   };
 
   /**
+   * Function to handle deleting a comment from a question or answer.
+   */
+  const handleDeleteComment = async (commentID: ObjectId) => {
+    if (question) {
+      const res = await deleteComment(commentID);
+      if (res) {
+        const updatedComments = question.comments.filter(comment => comment._id !== commentID);
+        setQuestion({ ...question, comments: updatedComments });
+      }
+    }
+  };
+
+  /**
    * Function to handle navigating to the community the question is from.
    */
   const handleReturnToCommunity = () => {
     if (community) {
       navigate(`/community/${community._id}`);
+    }
+  };
+
+  /**
+   * Function to delete a question from a community.
+   */
+  const handleDeleteQuestionFromCommunity = async () => {
+    if (community && question) {
+      const res = await deleteQuestionFromCommunity(community._id, question._id);
+      if (res) {
+        navigate(`/community/${community._id}`);
+      }
+    }
+  };
+
+  /**
+   * Function to delete a question globally.
+   */
+  const handleDeleteQuestionGlobal = async () => {
+    if (question) {
+      const res = await deleteQuestion(question._id);
+      if (res) {
+        navigate('/home');
+      }
+    }
+  };
+
+  /**
+   * Function to delete an answer from a question.
+   */
+  const handleDeleteAnswer = async (answerID: ObjectId) => {
+    if (question) {
+      const res = await deleteAnswer(answerID);
+      if (res) {
+        const updatedAnswers = question.answers.filter(answer => answer._id !== answerID);
+        setQuestion({ ...question, answers: updatedAnswers });
+      }
     }
   };
 
@@ -95,6 +148,22 @@ const useAnswerPage = () => {
     // eslint-disable-next-line no-console
     fetchData().catch(e => console.log(e));
   }, [questionID, user.username]);
+
+  useEffect(() => {
+    const setCurrentUserRole = () => {
+      if (community) {
+        if (community.admins.some(admin => admin === user?._id)) {
+          setCurrentRole('ADMIN');
+        } else if (community.moderators.some(moderator => moderator === user?._id)) {
+          setCurrentRole('MODERATOR');
+        } else {
+          setCurrentRole('MEMBER');
+        }
+      }
+    };
+
+    setCurrentUserRole();
+  }, [community, user, currentRole]);
 
   useEffect(() => {
     /**
@@ -222,9 +291,14 @@ const useAnswerPage = () => {
     questionID,
     question,
     handleNewComment,
+    handleDeleteComment,
     handleNewAnswer,
+    handleDeleteAnswer,
     community,
     handleReturnToCommunity,
+    handleDeleteQuestionFromCommunity,
+    handleDeleteQuestionGlobal,
+    currentRole,
   };
 };
 

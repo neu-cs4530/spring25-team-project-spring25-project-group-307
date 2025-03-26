@@ -59,9 +59,40 @@ const tagController = () => {
     }
   };
 
+  const getTagsByIds = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { tagIds } = req.body;
+      const tags = await TagModel.find({ _id: { $in: tagIds } });
+
+      if (!tags) {
+        throw new Error('Error while fetching tags by IDs');
+      }
+
+      res.json(tags);
+    } catch (err) {
+      res.status(500).send(`Error when fetching tags by IDs: ${(err as Error).message}`);
+    }
+  };
+
+  const getAllTags = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const tags = await TagModel.find();
+
+      if (!tags) {
+        throw new Error('Error while fetching tags');
+      }
+
+      res.json(tags);
+    } catch (err) {
+      res.status(500).send(`Error when fetching tags: ${(err as Error).message}`);
+    }
+  };
+
   // Add appropriate HTTP verbs and their endpoints to the router.
   router.get('/getTagsWithQuestionNumber', getTagsWithQuestionNumber);
   router.get('/getTagByName/:name', getTagByName); // New endpoint to get tag by name
+  router.get('/getAllTags', getAllTags);
+  router.post('/getTagsByIds', getTagsByIds);
 
   return router;
 };

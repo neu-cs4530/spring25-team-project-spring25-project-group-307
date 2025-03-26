@@ -1,13 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ChipProps } from '@mui/material';
 import {
   getUserByUsername,
   deleteUser,
   resetPassword,
   updateBiography,
 } from '../services/userService';
-import { SafeDatabaseUser } from '../types/types';
+import { DatabaseTag, Interest, SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
+import { getInterestsByUser, updateInterests } from '../services/interestService';
+import { getAllTags, getTagsByIds } from '../services/tagService';
+import { refresh } from '../services/feedService';
 
 /**
  * A custom hook to encapsulate all logic/state for the ProfileSettings component.
@@ -19,11 +23,15 @@ const useProfileSettings = () => {
 
   // Local state
   const [userData, setUserData] = useState<SafeDatabaseUser | null>(null);
+  const [populatedTags, setPopulatedTags] = useState<DatabaseTag[]>([]);
+  const [allTags, setAllTags] = useState<DatabaseTag[]>([]);
   const [newPassword, setNewPassword] = useState('');
   const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [editBioMode, setEditBioMode] = useState(false);
   const [newBio, setNewBio] = useState('');
+  const [editInterestsMode, setEditInterestsMode] = useState(false);
+  const [newInterests, setNewInterests] = useState<Interest[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -44,6 +52,18 @@ const useProfileSettings = () => {
         setLoading(true);
         const data = await getUserByUsername(username);
         setUserData(data);
+
+        // If the user has interests, fetch them
+        const userInterests = await getInterestsByUser(data._id);
+        if (userInterests.length > 0) {
+          const tags = await getTagsByIds(userInterests.map(interest => interest.tagId));
+          setPopulatedTags(tags);
+          setNewInterests(userInterests);
+        }
+
+        // Fetch all tags from the database
+        const allPopulatedTags = await getAllTags();
+        setAllTags(allPopulatedTags);
       } catch (error) {
         setErrorMessage('Error fetching user profile');
         setUserData(null);
@@ -118,6 +138,31 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleUpdateInterests = async () => {
+    if (!username) return;
+    try {
+      // Await the async call to update the interests
+      await updateInterests(username, newInterests);
+
+      // Ensure state updates occur sequentially after the API call completes
+      await new Promise(resolve => {
+        setEditInterestsMode(false); // Exit edit mode
+        resolve(null); // Resolve the promise
+      });
+
+      const newTags = await getTagsByIds(newInterests.map(interest => interest.tagId));
+      setPopulatedTags(newTags);
+
+      await refresh(currentUser._id);
+
+      setSuccessMessage('Interests updated!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to update interests.');
+      setSuccessMessage(null);
+    }
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -139,8 +184,22 @@ const useProfileSettings = () => {
     });
   };
 
+  const getTagColor = (tag: DatabaseTag): ChipProps['color'] => {
+    const matchingInterest = newInterests.find(
+      interest => interest.userId === currentUser._id && interest.tagId === tag._id,
+    );
+    let color: ChipProps['color'] = 'default';
+    if (matchingInterest) {
+      color = matchingInterest.priority === 'high' ? 'secondary' : 'primary';
+    }
+    return color;
+  };
+
   return {
     userData,
+    populatedTags,
+    allTags,
+    getTagColor,
     newPassword,
     confirmNewPassword,
     setNewPassword,
@@ -150,6 +209,10 @@ const useProfileSettings = () => {
     setEditBioMode,
     newBio,
     setNewBio,
+    editInterestsMode,
+    setEditInterestsMode,
+    newInterests,
+    setNewInterests,
     successMessage,
     errorMessage,
     showConfirmation,
@@ -161,6 +224,7 @@ const useProfileSettings = () => {
     togglePasswordVisibility,
     handleResetPassword,
     handleUpdateBiography,
+    handleUpdateInterests,
     handleDeleteUser,
   };
 };

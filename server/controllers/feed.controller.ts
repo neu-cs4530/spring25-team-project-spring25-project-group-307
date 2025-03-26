@@ -1,49 +1,74 @@
 import express, { Router, Request, Response } from 'express';
+import { FakeSOSocket } from '../types/types';
 import {
-  FeedItem,
-  Feed,
-  DatabaseFeed,
-  FakeSOSocket,
-  User,
-  UpdateInterestsRequest,
-} from '../types/types';
-import {
-  calculateWeightedQuestions,
+  getAllQuestionsInOrderAndSaveToFeed,
   getQuestionsForInfiniteScroll,
+  updateFeedLastViewedRanking,
 } from '../services/feed.service';
 
 const feedController = (socket: FakeSOSocket) => {
   const router: Router = express.Router();
 
-  const isFeedItemValid = (item: FeedItem): boolean =>
-    item.content !== undefined &&
-    item.content !== null &&
-    item.createdAt !== undefined &&
-    item.createdAt !== null &&
-    item.updatedAt !== undefined &&
-    item.updatedAt !== null;
+  /**
+   * Handles the request to refresh the feed for a user.
+   * @param req The request containing the user ID.
+   * @param res The response, either returning the refreshed feed's questions or an error.
+   * @returns A promise resolving to void.
+   */
+  const refreshFeed = async (req: Request, res: Response): Promise<void> => {
+    if (req.body === undefined) {
+      res.status(400).send('Invalid refreshFeed body');
+      return;
+    }
 
-  const isFeedValid = (feed: Feed): boolean =>
-    feed.items !== undefined &&
-    feed.items !== null &&
-    feed.items.length > 0 &&
-    feed.items.every(isFeedItemValid);
+    const { userId } = req.body;
 
-  const isDatabaseFeedValid = (feed: DatabaseFeed): boolean =>
-    feed._id !== undefined &&
-    feed._id !== null &&
-    feed.items !== undefined &&
-    feed.items !== null &&
-    feed.items.length > 0 &&
-    feed.items.every(item => item !== null);
+    if (userId === undefined) {
+      res.status(400).send('Invalid user ID');
+      return;
+    }
 
-  const isUpdateInterestsBodyValid = (req: UpdateInterestsRequest): boolean =>
-    req.body !== undefined &&
-    req.body.username !== undefined &&
-    req.body.username.trim() !== '' &&
-    req.body.interests !== undefined &&
-    Array.isArray(req.body.interests);
+    try {
+      const questions = await getAllQuestionsInOrderAndSaveToFeed(userId);
+      await updateFeedLastViewedRanking(userId, 0);
 
+      res.status(200).send(questions);
+    } catch (error) {
+      res.status(500).send(`Error when refreshing feed: ${error}`);
+    }
+  };
+
+  /**
+   * Handles the request to get the next feed items for a user.
+   * @param req The request containing the user ID and limit.
+   * @param res The response, either returning the next feed items or an error.
+   * @returns A promise resolving to void.
+   */
+  const getNextFeedItems = async (req: Request, res: Response): Promise<void> => {
+    if (req.body === undefined) {
+      res.status(400).send('Invalid getNextFeedItems body');
+      return;
+    }
+
+    const { userId, limit } = req.body;
+
+    if (userId === undefined || limit === undefined) {
+      res.status(400).send('Invalid user ID or limit');
+      return;
+    }
+
+    try {
+      const questions = await getQuestionsForInfiniteScroll(userId, limit);
+
+      res.status(200).send(questions);
+    } catch (error) {
+      res.status(500).send(`Error when getting next feed items: ${error}`);
+    }
+  };
+
+  // Define routes for the feed-related operations.
+  router.post('/refresh', refreshFeed);
+  router.post('/next', getNextFeedItems);
   return router;
 };
 
