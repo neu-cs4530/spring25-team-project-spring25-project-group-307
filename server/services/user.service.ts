@@ -43,6 +43,10 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       ranking: result.ranking,
       score: result.score,
       achievements: result.achievements,
+      // adding in the addtional parameters
+      questionsAsked: result.questionsAsked,
+      responsesGiven: result.responsesGiven,
+      lastLogin: result.lastLogin,
     };
 
     return safeUser;
@@ -59,7 +63,11 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
  */
 export const getUserByUsername = async (username: string): Promise<UserResponse> => {
   try {
-    const user: SafeDatabaseUser | null = await UserModel.findOne({ username }).select('-password');
+    const user: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      // when user logs in, update the last login time to the current time
+      { lastLogin: new Date() },
+    ).select('-password');
 
     if (!user) {
       throw Error('User not found');

@@ -14,6 +14,7 @@ import {
   Tag,
   VoteResponse,
 } from '../../types/types';
+import UserModel from '../../models/users.model';
 
 const addVoteToQuestionSpy = jest.spyOn(questionUtil, 'addVoteToQuestion');
 const getQuestionsByOrderSpy: jest.SpyInstance = jest.spyOn(questionUtil, 'getQuestionsByOrder');
@@ -163,6 +164,17 @@ const simplifyQuestion = (question: PopulatedDatabaseQuestion) => ({
 });
 
 const EXPECTED_QUESTIONS = MOCK_POPULATED_QUESTIONS.map(question => simplifyQuestion(question));
+
+jest.mock('../../models/users.model', () => ({
+  __esModule: true,
+  default: {
+    findOne: jest.fn().mockResolvedValue({
+      score: 10,
+      questionsAsked: 2,
+    }),
+    updateOne: jest.fn().mockResolvedValue({}),
+  },
+}));
 
 describe('Test questionController', () => {
   describe('POST /addQuestion', () => {
