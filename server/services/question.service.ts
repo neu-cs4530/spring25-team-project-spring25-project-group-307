@@ -269,10 +269,10 @@ export const addVoteToQuestion = async (
  * @param {string} qid - The question ID
  * @returns {Promise<CommunityResponse>}} - The community the question is in or null if the question is not in a community
  */
-export const getCommunityQuestion = async (qid: string): Promise<CommunityResponse> => {
+export const getCommunityQuestion = async (qid: ObjectId): Promise<CommunityResponse> => {
   try {
     const community: DatabaseCommunity | null = await CommunityModel.findOne({
-      questions: { $in: new ObjectId(qid) },
+      questions: { $in: qid },
     });
 
     if (!community) {

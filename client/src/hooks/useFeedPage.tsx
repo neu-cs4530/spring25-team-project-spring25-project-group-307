@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
-import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
+import { FeedItem } from '@fake-stack-overflow/shared';
+import { getNext, refresh } from '../services/feedService';
+import useUserContext from './useUserContext';
 
 const useFeedPage = () => {
-  const [questions, setQuestions] = useState<Omit<PopulatedDatabaseQuestion, '_id'>[]>([]);
-  const [isQuestionsLoading, setIsQuestionsLoading] = useState(false);
-  const [noMoreContent, setNoMoreContent] = useState(true);
+  const [feedItems, setFeedItems] = useState<Omit<FeedItem, '_id'>[]>([]);
+  const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
+  const [noMoreContent, setNoMoreContent] = useState(false);
+  const { user: currentUser } = useUserContext();
 
   const pageEndElement = useRef(null);
   const getMoreQuestions = async (limit: number) => {
@@ -13,54 +16,34 @@ const useFeedPage = () => {
     await new Promise(resolve => {
       setTimeout(resolve, 1000);
     });
-    setQuestions(prev => [
-      ...prev,
-      {
-        title: 'Title1',
-        text: 'Text1',
-        tags: [],
-        answers: [],
-        comments: [],
-        askedBy: '',
-        askDateTime: new Date(),
-        views: [],
-        upVotes: [],
-        downVotes: [],
-      },
-      {
-        title: 'Title2',
-        text: 'Text2',
-        tags: [],
-        answers: [],
-        comments: [],
-        askedBy: '',
-        askDateTime: new Date(),
-        views: [],
-        upVotes: [],
-        downVotes: [],
-      },
-      {
-        title: 'Title3',
-        text: 'Text3',
-        tags: [],
-        answers: [],
-        comments: [],
-        askedBy: '',
-        askDateTime: new Date(),
-        views: [],
-        upVotes: [],
-        downVotes: [],
-      },
-    ]);
+
+    const newQuestions = await getNext(currentUser._id, limit);
+
+    setFeedItems(prev => [...prev, ...newQuestions]);
     setIsQuestionsLoading(false);
-    // Todo: make sure we only set this if we know from the api that more content is available
-    setNoMoreContent(false);
+    if (newQuestions.length === 0) {
+      setNoMoreContent(true);
+    } else {
+      setNoMoreContent(false);
+    }
   };
 
-  const resetFeed = () => {
-    setQuestions([]);
+  const resetFeed = async () => {
+    await refresh(currentUser._id);
+    setFeedItems([]);
     getMoreQuestions(3);
   };
+
+  const setupFeed = async () => {
+    setFeedItems([]);
+    getMoreQuestions(0);
+  };
+
+  useEffect(() => {
+    setupFeed();
+
+    return () => {};
+  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -85,10 +68,11 @@ const useFeedPage = () => {
       if (targetElement) {
         observer.unobserve(targetElement);
       }
+      observer.disconnect();
     };
   }, [noMoreContent]);
 
-  return { questions, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed };
+  return { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed };
 };
 
 export default useFeedPage;
