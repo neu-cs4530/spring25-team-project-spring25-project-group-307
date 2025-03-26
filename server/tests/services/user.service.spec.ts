@@ -10,6 +10,9 @@ import {
 } from '../../services/user.service';
 import { SafeDatabaseUser, User, UserCredentials } from '../../types/types';
 import { user, safeUser } from '../mockData.models';
+import FeedModel from '../../models/feed.model';
+import FeedItemModel from '../../models/feedItem.model';
+import InterestModel from '../../models/interest.model';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -160,7 +163,21 @@ describe('deleteUserByUsername', () => {
   });
 
   it('should return the deleted user when deleted succesfully', async () => {
+    const feed = {
+      _id: new mongoose.Types.ObjectId(),
+      userId: safeUser._id,
+      lastViewedRanking: 0,
+    };
+
+    const deleteRes = {
+      deletedCount: 0,
+    };
+
     mockingoose(UserModel).toReturn(safeUser, 'findOneAndDelete');
+    mockingoose(FeedModel).toReturn(feed._id, 'findOne');
+    mockingoose(FeedModel).toReturn(feed, 'findOneAndDelete');
+    mockingoose(FeedItemModel).toReturn(deleteRes, 'deleteMany');
+    mockingoose(InterestModel).toReturn(deleteRes, 'deleteMany');
 
     const deletedUser = (await deleteUserByUsername(user.username)) as SafeDatabaseUser;
 
@@ -195,7 +212,6 @@ describe('updateUser', () => {
     _id: new mongoose.Types.ObjectId(),
     username: user.username,
     dateJoined: user.dateJoined,
-    interests: [],
     biography: user.biography,
     ranking: user.ranking,
     score: user.score,
