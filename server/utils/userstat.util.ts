@@ -1,6 +1,3 @@
-
-
-
 /**
  *  Purpose: Contains utility functions for user statistics.
  *  This function returns the updated rank of a user based on their score or default ranking.
