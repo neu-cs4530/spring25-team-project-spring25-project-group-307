@@ -3,6 +3,8 @@ import { ObjectId } from 'mongodb';
 import { Answer, AddAnswerRequest, FakeSOSocket, PopulatedDatabaseAnswer } from '../types/types';
 import { addAnswerToQuestion, saveAnswer } from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
+import UserModel from '../models/users.model';
+import getUpdatedRank from '../utils/userstat.util';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -69,6 +71,25 @@ const answerController = (socket: FakeSOSocket) => {
 
       if (populatedAns && 'error' in populatedAns) {
         throw new Error(populatedAns.error);
+      }
+
+      const user = await UserModel.findOne({ username: ansInfo.ansBy });
+
+      if (user) {
+        const newScore = user.score + 10;
+        const newRank = getUpdatedRank(newScore);
+        const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
+
+        await UserModel.updateOne(
+          { username: ansInfo.ansBy },
+          {
+            $set: {
+              score: newScore,
+              ranking: newRank,
+              responsesGiven: newResponsesGiven,
+            },
+          },
+        );
       }
 
       // Populates the fields of the answer that was added and emits the new object
