@@ -35,15 +35,8 @@ const useFeedPage = () => {
   };
 
   const setupFeed = async () => {
-    setFeedItems([]);
-    getMoreQuestions(0);
+    await refresh(currentUser._id);
   };
-
-  useEffect(() => {
-    setupFeed();
-
-    return () => {};
-  }, []);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,11 +61,10 @@ const useFeedPage = () => {
       if (targetElement) {
         observer.unobserve(targetElement);
       }
-      observer.disconnect();
     };
-  }, [noMoreContent]);
+  }, [getMoreQuestions]);
 
-  return { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed };
+  return { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed, setupFeed };
 };
 
 export default useFeedPage;
