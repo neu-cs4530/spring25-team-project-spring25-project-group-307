@@ -192,6 +192,9 @@ export const user: User = {
   ranking: 'Newcomer Newbie',
   score: 0,
   achievements: [],
+  questionsAsked: 0,
+  responsesGiven: 0,
+  lastLogin: new Date('2024-12-03'),
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -202,4 +205,7 @@ export const safeUser: SafeDatabaseUser = {
   ranking: 'Newcomer Newbie',
   score: 0,
   achievements: [],
+  questionsAsked: 0,
+  responsesGiven: 0,
+  lastLogin: new Date('2024-12-03'),
 };

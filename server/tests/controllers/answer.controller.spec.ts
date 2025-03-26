@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 import { app } from '../../app';
 import * as answerUtil from '../../services/answer.service';
 import * as databaseUtil from '../../utils/database.util';
+import UserModel from '../../models/users.model';
 
 const saveAnswerSpy = jest.spyOn(answerUtil, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(answerUtil, 'addAnswerToQuestion');
@@ -57,6 +58,22 @@ describe('POST /addAnswer', () => {
       downVotes: [],
       answers: [mockAnswer],
       comments: [],
+    });
+
+    const findOneSpy = jest.spyOn(UserModel, 'findOne');
+    findOneSpy.mockResolvedValueOnce({
+      username: 'dummyUserId',
+      score: 0,
+      ranking: 'Newcomer Newbie',
+      responsesGiven: 0,
+    });
+    const updateOneSpy = jest.spyOn(UserModel, 'updateOne');
+    updateOneSpy.mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
     });
 
     const response = await supertest(app).post('/answer/addAnswer').send(mockReqBody);

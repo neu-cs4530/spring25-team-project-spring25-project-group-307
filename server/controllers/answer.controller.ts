@@ -91,7 +91,6 @@ const answerController = (socket: FakeSOSocket) => {
           },
         );
       }
-
       // Populates the fields of the answer that was added and emits the new object
       socket.emit('answerUpdate', {
         qid: new ObjectId(qid),

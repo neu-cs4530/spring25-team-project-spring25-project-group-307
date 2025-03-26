@@ -162,8 +162,6 @@ const questionController = (socket: FakeSOSocket) => {
         throw new Error(populatedQuestion.error);
       }
 
-      socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
-      res.json(populatedQuestion);
       // Award score and update rank
       const user = await UserModel.findOne({ username: question.askedBy });
       if (user) {
@@ -175,11 +173,11 @@ const questionController = (socket: FakeSOSocket) => {
           { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
         );
       }
+      socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
+      res.json(populatedQuestion);
     } catch (err: unknown) {
       if (err instanceof Error) {
         res.status(500).send(`Error when saving question: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when saving question`);
       }
     }
   };
