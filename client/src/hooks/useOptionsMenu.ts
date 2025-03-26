@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { UserPreference } from '@fake-stack-overflow/shared';
 import { addPreference, getPreferences, removePreference } from '../services/preferencesService';
 import useUserContext from './useUserContext';
@@ -12,9 +12,11 @@ const useOptionsMenu = (communityTitle: string) => {
   const subMenuOpen = Boolean(subMenuAnchorEl);
 
   const [allNewQuestionsChecked, setAllNewQuestionsChecked] = useState(false);
-  const preferenceToSetter: Record<UserPreference, (value: boolean) => void> = {
-    'All Questions': setAllNewQuestionsChecked,
-  };
+  const preferenceToSetter: Record<UserPreference, (value: boolean) => void> = useMemo(
+    () => ({ 'All Questions': setAllNewQuestionsChecked }),
+    [],
+  );
+
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -55,7 +57,7 @@ const useOptionsMenu = (communityTitle: string) => {
           preferenceToSetter[key as UserPreference](false);
         });
       });
-  }, []);
+  }, [communityTitle, preferenceToSetter, user.username]);
 
   return {
     handleMenuOpen,

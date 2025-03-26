@@ -1,9 +1,18 @@
-import Card from '@mui/material/Card';
-import { Box, Button, CardActions, CardContent, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  CardActions,
+  CardContent,
+  Typography,
+  Card,
+  Chip,
+  Divider,
+  Stack,
+} from '@mui/material';
 import { ObjectId } from 'mongodb';
-import OptionsMenu from './optionsMenu';
 import LockIcon from '@mui/icons-material/Lock';
-import { Chip, Divider, Stack } from '@mui/material';
+import OptionsMenu from './optionsMenu';
+
 import { DatabaseCommunity, Tag } from '../../../../types/types';
 
 /**

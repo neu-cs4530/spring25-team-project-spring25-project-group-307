@@ -10,7 +10,7 @@ const useUserPreferenceUpdates = () => {
     socket.on('preferencesUpdate', () => {
       setSnackbarOpen(true);
     });
-  }, []);
+  }, [socket]);
   return { snackbarOpen, setSnackbarOpen };
 };
 
