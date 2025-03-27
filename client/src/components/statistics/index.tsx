@@ -25,6 +25,21 @@ import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import CommentIcon from '@mui/icons-material/Comment';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import TaskAltIcon from '@mui/icons-material/TaskAlt';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
+import HowToVoteIcon from '@mui/icons-material/HowToVote';
+import PsychologyAltIcon from '@mui/icons-material/PsychologyAlt';
+import CelebrationIcon from '@mui/icons-material/Celebration';
+import GamesIcon from '@mui/icons-material/Games';
+import VideogameAssetIcon from '@mui/icons-material/VideogameAsset';
+import SportsEsportsIcon from '@mui/icons-material/SportsEsports';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StairsIcon from '@mui/icons-material/Stairs';
+import StarPurple500Icon from '@mui/icons-material/StarPurple500';
+import StarRateIcon from '@mui/icons-material/StarRate';
+import StarHalfIcon from '@mui/icons-material/StarHalf';
 import useStatistics from '../../hooks/useStatistics';
 
 // Define ranking tiers and score requirements for each rank
@@ -57,6 +72,26 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Nim Novice', requirement: 'Win 5 games of Nim' },
   { name: 'Nim King', requirement: 'Win 25 games of Nim' },
 ];
+
+const achievementIcons: Record<string, React.ReactElement> = {
+  'First Step': <StairsIcon />,
+  'Helpful Mind': <PsychologyAltIcon />,
+  'Casual Talker': <CommentIcon />,
+  'Curious Thinker': <EmojiObjectsIcon />,
+  'Problem Solver': <CelebrationIcon />,
+  'Acknowledged': <TaskAltIcon />,
+  'Audience Pleaser': <ThumbUpIcon />,
+  'Review': <HowToVoteIcon />,
+  'Community Favorite': <FavoriteIcon />,
+  'Ascension I': <StarBorderIcon />,
+  'Ascension II': <StarPurple500Icon />,
+  'Ascension III': <StarHalfIcon />,
+  'Ascension IV': <StarRateIcon />,
+  'Ascension V': <EmojiEventsIcon />,
+  'Nim Beginner': <SportsEsportsIcon />,
+  'Nim Novice': <GamesIcon />,
+  'Nim King': <VideogameAssetIcon />,
+};
 
 // Get the user's progress percentage toward the next rank
 const getProgress = (score: number) => {
@@ -189,7 +224,7 @@ const StatisticsSettings: React.FC = () => {
                   <ListItem>
                     <ListItemAvatar>
                       <Avatar sx={{ bgcolor: 'gray' }}>
-                        <EmojiEventsIcon />
+                        {achievementIcons[achievement.name] || <EmojiEventsIcon />}
                       </Avatar>
                     </ListItemAvatar>
                     <ListItemText primary={achievement.name} />
