@@ -162,11 +162,6 @@ const questionController = (socket: FakeSOSocket) => {
       }
 
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
-      // only emit if user is in community and has subsribed to this even
-
-      if (true) {
-        socket.emit('preferencesUpdate', 'new question');
-      }
 
       res.json(populatedQuestion);
     } catch (err: unknown) {

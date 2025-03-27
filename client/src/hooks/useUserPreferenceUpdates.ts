@@ -6,12 +6,20 @@ const useUserPreferenceUpdates = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+
+  const handleClose = () => {
+    setSnackbarOpen(false);
+    setSnackbarMessage('');
+  };
+
   useEffect(() => {
-    socket.on('preferencesUpdate', () => {
+    socket.on('preferencesUpdate', updateMessage => {
       setSnackbarOpen(true);
+      setSnackbarMessage(updateMessage);
     });
   }, [socket]);
-  return { snackbarOpen, setSnackbarOpen };
+  return { snackbarOpen, handleClose, snackbarMessage };
 };
 
 export default useUserPreferenceUpdates;

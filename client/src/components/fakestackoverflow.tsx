@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './layout';
 import Login from './auth/login';
@@ -45,7 +45,21 @@ const ProtectedRoute = ({
  * It manages the state for search terms and the main title.
  */
 const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
-  const [user, setUser] = useState<SafeDatabaseUser | null>(null);
+  const [user, setSafeDatabaseUser] = useState<SafeDatabaseUser | null>(null);
+  const setUser = (safeDatabaseUser: SafeDatabaseUser | null) => {
+    if (socket && safeDatabaseUser) {
+      setSafeDatabaseUser(safeDatabaseUser);
+      socket.emit('loginUser', safeDatabaseUser.username);
+    }
+  };
+  // in case of disconnect
+  useEffect(() => {
+    if (user && socket) {
+      socket.on('connect', () => {
+        socket.emit('loginUser', user.username);
+      });
+    }
+  }, [socket, user]);
 
   return (
     <LoginContext.Provider value={{ setUser }}>

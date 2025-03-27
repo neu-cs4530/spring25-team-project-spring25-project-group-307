@@ -19,6 +19,11 @@ import {
   getCommunitiesByTag,
 } from '../services/community.service';
 import { processTags } from '../services/tag.service';
+import {
+  getAllPreferencesForCommunity,
+  getPreferencesForCommunity,
+} from '../services/preferences.service';
+import UserNotificationManager from '../services/userNotificationManager';
 
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -225,6 +230,28 @@ const communityController = (socket: FakeSOSocket) => {
     try {
       // Add the question to the community
       const community = await addQuestionToCommunity(req.body.communityId, req.body.questionId);
+
+      // only emit if user is in community and has subsribed to this event
+
+      if (community !== null) {
+        const userNotificationManager = UserNotificationManager.getInstance();
+        const loggedinUsers = userNotificationManager.getLoggedInUsers();
+
+        getAllPreferencesForCommunity(community.title).then(preferences => {
+          preferences.forEach(databasePeferences => {
+            if (loggedinUsers.includes(databasePeferences.username)) {
+              const clientSocket = userNotificationManager.getUserSocketByUsername(
+                databasePeferences.username,
+              );
+              clientSocket?.emit(
+                'preferencesUpdate',
+                `A new question has been posted in ${community.title}. Check it out!`,
+              );
+            }
+          });
+        });
+      }
+
       res.json(community);
     } catch (error) {
       res.status(500).send(`Error when adding question to community: ${(error as Error).message}`);

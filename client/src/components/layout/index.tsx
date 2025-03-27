@@ -3,21 +3,21 @@ import { Outlet } from 'react-router-dom';
 import { Snackbar } from '@mui/material';
 
 import SideBarNav from '../main/sideBarNav';
-import useUserPreferenceUpdates from '../../hooks/useUserPreferenceUpdates';
+import useUserNotificationPreferenceUpdates from '../../hooks/useUserPreferenceUpdates';
 
 /**
  * Main component represents the layout of the main page, including a sidebar and the main content area.
  */
 const Layout = () => {
-  const { snackbarOpen, setSnackbarOpen } = useUserPreferenceUpdates();
+  const { snackbarOpen, handleClose, snackbarMessage } = useUserNotificationPreferenceUpdates();
 
   return (
     <>
       <Snackbar
         open={snackbarOpen}
-        onClose={() => setSnackbarOpen(false)}
+        onClose={handleClose}
         autoHideDuration={6000}
-        message='New post added!'
+        message={snackbarMessage}
       />
       <div id='main' className='main'>
         <SideBarNav />

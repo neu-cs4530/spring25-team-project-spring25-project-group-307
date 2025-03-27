@@ -1,8 +1,11 @@
-import { PreferencesResponse, UserPreference } from '@fake-stack-overflow/shared';
+import {
+  DatabasePreferences,
+  PreferencesResponse,
+  UserPreference,
+} from '@fake-stack-overflow/shared';
 import PreferencesModel from '../models/preferences.model';
 import { getUserByUsername } from './user.service';
-import { error } from 'console';
-import { getCommunitiesByUser } from './community.service';
+
 // TODO : add tests
 /**
  * adds a userPreference to an existing Preferences for a community,
@@ -93,5 +96,23 @@ export const getPreferencesForCommunity = async (
     return preferences;
   } catch (error) {
     return { error: 'Error retrieving preferences' };
+  }
+};
+
+/**
+ * Retrieves all user preferences for a given community.
+ *
+ * @param communityTitle title of the community
+ * @returns PreferencesResponse[] containing all user preferences for the community
+ */
+export const getAllPreferencesForCommunity = async (
+  communityTitle: string,
+): Promise<DatabasePreferences[]> => {
+  try {
+    const preferences = await PreferencesModel.find({ communityTitle });
+
+    return preferences;
+  } catch (error) {
+    return [];
   }
 };
