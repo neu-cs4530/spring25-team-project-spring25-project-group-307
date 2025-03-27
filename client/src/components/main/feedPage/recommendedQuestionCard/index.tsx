@@ -4,22 +4,17 @@ import Typography from '@mui/material/Typography';
 import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
-import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
+import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
 
 import useUserContext from '../../../../hooks/useUserContext';
 import { joinCommunity } from '../../../../services/communityService';
 
-const RecommendedQuestionCard = ({
-  question,
-}: {
-  question: Omit<PopulatedDatabaseQuestion, '_id'>;
-}) => {
+const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
-  // todo this should go to view question
   const viewQuestion = () => {
-    if ('_id' in question) {
-      navigate(`/question/${question._id}`);
+    if ('_id' in item.question) {
+      navigate(`/question/${item.question._id}`);
     }
   };
   const { user } = useUserContext();
@@ -45,7 +40,7 @@ const RecommendedQuestionCard = ({
         }}>
         <CardContent>
           {/* Header Section */}
-          {question.community && (
+          {item.community && (
             <Box
               sx={{
                 display: 'flex',
@@ -56,12 +51,12 @@ const RecommendedQuestionCard = ({
               }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant='subtitle1' fontWeight='bold'>
-                  {question.community.title}
+                  {item.community.title}
                 </Typography>
               </Box>
               <Button
                 onClick={() => {
-                  if (question.community) joinCommunity(question.community.title, user.username);
+                  if (item.community) joinCommunity(item.community.title, user.username);
                 }}
                 variant='contained'
                 size='small'
@@ -73,31 +68,35 @@ const RecommendedQuestionCard = ({
 
           {/* Card Content */}
           <Typography sx={{ mt: 1.5 }} variant='h5' component='div'>
-            {question.title}
+            {item.question.title}
           </Typography>
           <Typography sx={{ color: 'text.secondary', fontSize: '0.875rem' }}>
-            {question.askDateTime.toLocaleString()}
+            {item.question.askDateTime.toLocaleString()}
           </Typography>
           <Typography variant='body2'>
-            {question.text}
+            {item.question.text}
             <br />
           </Typography>
         </CardContent>
         <CardActions>
           <Button size='small'>View Post</Button>
         </CardActions>
-        <Box
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 1,
-            backgroundColor: '#ebedef',
-            borderRadius: '20px',
-            px: 2,
-            py: 0.5,
-            width: 'auto',
-          }}>
-          <Typography variant='body2'>Tag</Typography>
+        <Box sx={{ display: 'flex', gap: 2 }}>
+          {item.question.tags.map((tag: DatabaseTag) => (
+            <Box
+              key={tag._id.toString()}
+              sx={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                backgroundColor: '#ebedef',
+                borderRadius: '20px',
+                px: 2,
+                py: 0.5,
+                width: 'auto',
+              }}>
+              <Typography variant='body2'>{tag.name}</Typography>
+            </Box>
+          ))}
         </Box>
       </Card>
     </Box>
