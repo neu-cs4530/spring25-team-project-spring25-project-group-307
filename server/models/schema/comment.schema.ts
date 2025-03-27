@@ -8,6 +8,7 @@ import { Schema } from 'mongoose';
  * - `text`: The content of the comment.
  * - `commentBy`: The username of the user who commented.
  * - `commentDateTime`: The date and time when the comment was posted.
+ * - 'replies': an array of references to 'Comment' documents that are replies to the comment.
  */
 const commentSchema: Schema = new Schema(
   {
@@ -20,6 +21,7 @@ const commentSchema: Schema = new Schema(
     commentDateTime: {
       type: Date,
     },
+    replies: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
   },
   { collection: 'Comment' },
 );

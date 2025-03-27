@@ -61,8 +61,8 @@ export interface ChatUpdatePayload {
  * - `type`: The type of the updated item (`'question'` or `'answer'`).
  */
 export interface CommentUpdatePayload {
-  result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer;
-  type: 'question' | 'answer';
+  result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer | PopulatedDatabaseComment;
+  type: 'question' | 'answer' | 'comment';
 }
 
 /**

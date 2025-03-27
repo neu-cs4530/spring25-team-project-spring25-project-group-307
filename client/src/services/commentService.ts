@@ -12,7 +12,7 @@ const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
  */
 interface AddCommentRequestBody {
   id?: string;
-  type: 'question' | 'answer';
+  type: 'question' | 'answer' | 'comment';
   comment: Comment;
 }
 
@@ -26,7 +26,7 @@ interface AddCommentRequestBody {
  */
 const addComment = async (
   id: string,
-  type: 'question' | 'answer',
+  type: 'question' | 'answer' | 'comment',
   comment: Comment,
 ): Promise<DatabaseComment> => {
   const reqBody: AddCommentRequestBody = {

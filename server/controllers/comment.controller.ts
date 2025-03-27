@@ -7,6 +7,7 @@ import {
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
   DeleteCommentRequest,
+  PopulatedDatabaseComment,
 } from '../types/types';
 import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
@@ -24,7 +25,7 @@ const commentController = (socket: FakeSOSocket) => {
   const isRequestValid = (req: AddCommentRequest): boolean =>
     !!req.body.id &&
     !!req.body.type &&
-    (req.body.type === 'question' || req.body.type === 'answer') &&
+    (req.body.type === 'question' || req.body.type === 'answer' || req.body.type === 'comment') &&
     !!req.body.comment &&
     req.body.comment.text !== undefined &&
     req.body.comment.commentBy !== undefined &&
@@ -106,7 +107,7 @@ const commentController = (socket: FakeSOSocket) => {
       }
 
       socket.emit('commentUpdate', {
-        result: populatedDoc as PopulatedDatabaseQuestion | PopulatedDatabaseAnswer,
+        result: populatedDoc as PopulatedDatabaseQuestion | PopulatedDatabaseAnswer | PopulatedDatabaseComment,
         type,
       });
       res.json(comFromDb);
