@@ -16,6 +16,10 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
     subMenuOpen,
     allNewQuestionsChecked,
     allNewQuestionsCheckBoxOnChange,
+    answersToMyQuestionsChecked,
+    answersToMyQuestionsCheckedOnChange,
+    commentsOnMyAnswersChecked,
+    commentsOnMyAnswersCheckedOnChange,
   } = useOptionsMenu(communityTitle);
   return (
     <div>
@@ -55,6 +59,18 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
             <Checkbox checked={allNewQuestionsChecked} />
           </ListItemIcon>
           <ListItemText primary='All New Questions' />
+        </MenuItem>
+        <MenuItem onClick={answersToMyQuestionsCheckedOnChange}>
+          <ListItemIcon>
+            <Checkbox checked={answersToMyQuestionsChecked} />
+          </ListItemIcon>
+          <ListItemText primary='Answers to my Questions' />
+        </MenuItem>
+        <MenuItem onClick={commentsOnMyAnswersCheckedOnChange}>
+          <ListItemIcon>
+            <Checkbox checked={commentsOnMyAnswersChecked} />
+          </ListItemIcon>
+          <ListItemText primary='Comments on my Answers' />
         </MenuItem>
 
         {/* TODO: add more notification preferences here in future */}

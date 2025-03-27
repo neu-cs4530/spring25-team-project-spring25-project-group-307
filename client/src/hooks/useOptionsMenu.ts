@@ -12,8 +12,15 @@ const useOptionsMenu = (communityTitle: string) => {
   const subMenuOpen = Boolean(subMenuAnchorEl);
 
   const [allNewQuestionsChecked, setAllNewQuestionsChecked] = useState(false);
+  const [answersToMyQuestionsChecked, setanswersToMyQuestionsChecked] = useState(false);
+  const [commentsOnMyAnswersChecked, setcommentsOnMyAnswersChecked] = useState(false);
+
   const preferenceToSetter: Record<UserPreference, (value: boolean) => void> = useMemo(
-    () => ({ 'All Questions': setAllNewQuestionsChecked }),
+    () => ({
+      'All Questions': setAllNewQuestionsChecked,
+      'Answers to my Questions': setanswersToMyQuestionsChecked,
+      'Comments on my Answers': setcommentsOnMyAnswersChecked,
+    }),
     [],
   );
 
@@ -38,6 +45,32 @@ const useOptionsMenu = (communityTitle: string) => {
       } else {
         // remove pref here
         removePreference('All Questions', user.username, communityTitle);
+      }
+      return newValue;
+    });
+  };
+
+  const answersToMyQuestionsCheckedOnChange = (event: React.MouseEvent<HTMLElement>) => {
+    setanswersToMyQuestionsChecked(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        addPreference('Answers to my Questions', user.username, communityTitle);
+      } else {
+        // remove pref here
+        removePreference('Answers to my Questions', user.username, communityTitle);
+      }
+      return newValue;
+    });
+  };
+
+  const commentsOnMyAnswersCheckedOnChange = (event: React.MouseEvent<HTMLElement>) => {
+    setcommentsOnMyAnswersChecked(prev => {
+      const newValue = !prev;
+      if (newValue) {
+        addPreference('Comments on my Answers', user.username, communityTitle);
+      } else {
+        // remove pref here
+        removePreference('Comments on my Answers', user.username, communityTitle);
       }
       return newValue;
     });
@@ -69,6 +102,10 @@ const useOptionsMenu = (communityTitle: string) => {
     subMenuOpen,
     allNewQuestionsChecked,
     allNewQuestionsCheckBoxOnChange,
+    answersToMyQuestionsChecked,
+    answersToMyQuestionsCheckedOnChange,
+    commentsOnMyAnswersChecked,
+    commentsOnMyAnswersCheckedOnChange,
   };
 };
 
