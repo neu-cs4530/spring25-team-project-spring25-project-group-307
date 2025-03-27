@@ -6,20 +6,19 @@ import {
 } from '../services/preferences.service';
 import { PreferenceRequest, UserPreference } from '../types/types';
 
+const ALL_USER_PREFERENCES: UserPreference[] = [
+  'All Questions',
+  'Answers to my Questions',
+  'Comments on my Answers',
+];
 const preferencesController = () => {
-  const ALL_USER_PREFERENCES: UserPreference[] = [
-    'All Questions',
-    'Answers to my Questions',
-    'Comments on my Answers',
-  ];
-
   const router = express.Router();
   /**
    * Validates a AddPreferenceRequest
    * @param req the request
    * @returns true if valid, otherwise false
    */
-  const ValidateAddPreferenceRequest = (req: PreferenceRequest) => {
+  const validateAddPreferenceRequest = (req: PreferenceRequest) => {
     if (
       req.body === undefined ||
       req.body.userPreference === undefined ||
@@ -45,7 +44,7 @@ const preferencesController = () => {
    * @returns A Promise that resolves to void.
    */
   const addPreference = async (req: PreferenceRequest, res: Response): Promise<void> => {
-    if (!ValidateAddPreferenceRequest(req)) {
+    if (!validateAddPreferenceRequest(req)) {
       res
         .status(400)
         .send('Please include a valid preference, community title, and username in the body');
@@ -72,7 +71,7 @@ const preferencesController = () => {
   };
 
   const removePreference = async (req: PreferenceRequest, res: Response): Promise<void> => {
-    if (!ValidateAddPreferenceRequest(req)) {
+    if (!validateAddPreferenceRequest(req)) {
       res
         .status(400)
         .send('Please include a valid preference, community title, and username in the body');

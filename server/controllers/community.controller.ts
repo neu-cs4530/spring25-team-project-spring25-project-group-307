@@ -19,10 +19,7 @@ import {
   getCommunitiesByTag,
 } from '../services/community.service';
 import { processTags } from '../services/tag.service';
-import {
-  getAllPreferencesForCommunity,
-  getPreferencesForCommunity,
-} from '../services/preferences.service';
+import { getAllPreferencesForCommunity } from '../services/preferences.service';
 import UserNotificationManager from '../services/userNotificationManager';
 
 const communityController = (socket: FakeSOSocket) => {

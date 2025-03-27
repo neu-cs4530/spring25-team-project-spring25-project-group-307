@@ -36,7 +36,7 @@ export const addUserPreferenceToCommunity = async (
       throw new Error(user.error as string);
     }
 
-    const createdPreferences = PreferencesModel.create({
+    const createdPreferences = await PreferencesModel.create({
       userPreferences: [userPreference],
       username,
       communityTitle,

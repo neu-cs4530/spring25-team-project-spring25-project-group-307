@@ -12,7 +12,7 @@ class UserNotificationManager {
    */
   private _socketIdToSocket: Map<
     string,
-    Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, any>
+    Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap>
   >;
 
   /**
@@ -44,7 +44,7 @@ class UserNotificationManager {
    * @param {Socket} socket - The WebSocket connection instance.
    */
   public addInitialConnection(
-    socket: Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, any>,
+    socket: Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap>,
   ): void {
     this._socketIdToUser.set(socket.id, null);
     this._socketIdToSocket.set(socket.id, socket);
@@ -64,7 +64,6 @@ class UserNotificationManager {
    * @param {string} socketId - The unique ID of the socket connection to remove.
    */
   public removeConnection(socketId: string): void {
-    console.log(`Removing connection for ${this._socketIdToUser.get(socketId)}`);
     this._socketIdToUser.delete(socketId);
     this._socketIdToSocket.delete(socketId);
   }
@@ -86,7 +85,7 @@ class UserNotificationManager {
    */
   public getUserSocketByUsername(
     username: string,
-  ): Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap, any> | null {
+  ): Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap> | null {
     for (const [socketId, user] of this._socketIdToUser.entries()) {
       if (user === username) {
         return this._socketIdToSocket.get(socketId) || null;
