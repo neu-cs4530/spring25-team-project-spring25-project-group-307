@@ -44,6 +44,21 @@ export const saveAnswer = async (answer: Answer): Promise<AnswerResponse> => {
 };
 
 /**
+ * Deletes an answer from the database.
+ *
+ * @param {string} aid - The ID of the answer to delete.
+ * @returns {Promise<AnswerResponse>} - A promise resolving to the deleted answer or an error message.
+ */
+export const deleteAnswerById = async (aid: string): Promise<AnswerResponse> => {
+  try {
+    const result: DatabaseAnswer | null = await AnswerModel.findByIdAndDelete(aid);
+    return result || { error: 'Answer not found' };
+  } catch (error) {
+    return { error: 'Error when deleting an answer' };
+  }
+};
+
+/**
  * Adds an existing answer to a specified question in the database.
  *
  * @param {string} qid - The ID of the question to which the answer will be added.

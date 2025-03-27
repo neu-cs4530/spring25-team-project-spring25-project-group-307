@@ -1,4 +1,7 @@
 import { useState } from 'react';
+import { ObjectId } from 'mongodb';
+import { Box, IconButton } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { getMetaData } from '../../../tool';
 import { Comment, DatabaseComment } from '../../../types/types';
 import './index.css';
@@ -13,6 +16,8 @@ import useUserContext from '../../../hooks/useUserContext';
 interface CommentSectionProps {
   comments: DatabaseComment[];
   handleAddComment: (comment: Comment) => void;
+  handleDeleteComment: (commentId: ObjectId) => void;
+  currentRole: string;
 }
 
 /**
@@ -21,7 +26,12 @@ interface CommentSectionProps {
  * @param comments: an array of Comment objects
  * @param handleAddComment: function to handle the addition of a new comment
  */
-const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => {
+const CommentSection = ({
+  comments,
+  handleAddComment,
+  handleDeleteComment,
+  currentRole,
+}: CommentSectionProps) => {
   const { user } = useUserContext();
   const [text, setText] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
@@ -58,11 +68,20 @@ const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => 
           <ul className='comments-list'>
             {comments.length > 0 ? (
               comments.map(comment => (
-                <li key={String(comment._id)} className='comment-item'>
-                  <p className='comment-text'>{comment.text}</p>
-                  <small className='comment-meta'>
-                    {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
-                  </small>
+                <li key={comment._id.toString()} className='comment-item'>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div>
+                      <p className='comment-text'>{comment.text}</p>
+                      <small className='comment-meta'>
+                        {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
+                      </small>
+                    </div>
+                    {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
+                      <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>
+                        <DeleteIcon />
+                      </IconButton>
+                    ) : null}
+                  </Box>
                 </li>
               ))
             ) : (

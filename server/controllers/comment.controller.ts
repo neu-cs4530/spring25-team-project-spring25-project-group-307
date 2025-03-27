@@ -6,8 +6,9 @@ import {
   FakeSOSocket,
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
+  DeleteCommentRequest,
 } from '../types/types';
-import { addComment, saveComment } from '../services/comment.service';
+import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
 
 const commentController = (socket: FakeSOSocket) => {
@@ -28,6 +29,15 @@ const commentController = (socket: FakeSOSocket) => {
     req.body.comment.text !== undefined &&
     req.body.comment.commentBy !== undefined &&
     req.body.comment.commentDateTime !== undefined;
+
+  /**
+   * Checkes if the provided delete comment request contains the required fields.
+   *
+   * @param req The request object containing the comment ID.
+   *
+   * @returns `true` if the request is valid, otherwise `false`.
+   */
+  const isDeleteRequestValid = (req: DeleteCommentRequest): boolean => !!req.params.cid;
 
   /**
    * Validates the comment object to ensure it is not empty.
@@ -105,7 +115,33 @@ const commentController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles deleting a comment from the database.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const deleteComment = async (req: DeleteCommentRequest, res: Response): Promise<void> => {
+    if (!isDeleteRequestValid(req)) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { cid } = req.params;
+
+    try {
+      const comment = await deleteCommentById(cid);
+      if (!comment) {
+        throw new Error('failed to delete comment');
+      }
+      res.json(comment);
+    } catch (error) {
+      res.status(500).send(`Error when deleting comment: ${(error as Error).message}`);
+    }
+  };
+
   router.post('/addComment', addCommentRoute);
+  router.delete('/deleteComment/:cid', deleteComment);
 
   return router;
 };

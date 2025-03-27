@@ -1,11 +1,17 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
+import { useNavigate } from 'react-router-dom';
+import { grey } from '@mui/material/colors';
+import IconButton from '@mui/material/IconButton';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import Box from '@mui/material/Box';
 import MenuLeft from './menuLeft';
 import useHeader from '../../hooks/useHeader';
 import './index.css';
 import SearchBar from './searchBar';
 import MenuRight from './menuRight';
+import useUserContext from '../../hooks/useUserContext';
 
 /**
  * Interface representing the props for the Header component.
@@ -43,6 +49,15 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
     'Community event happening tomorrow',
   ];
 
+  const navigate = useNavigate();
+
+  const { user: currentUser } = useUserContext();
+
+  const handleViewStatistics = () => {
+    navigate(`/statistics/${currentUser.username}`);
+    handleClose();
+  };
+
   return (
     <AppBar position='fixed' color='primary'>
       <Toolbar
@@ -53,16 +68,26 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
         }}>
         <MenuLeft handleDrawerToggle={handleDrawerToggle} handleNavigateHome={handleNavigateHome} />
         <SearchBar handleInputChange={handleInputChange} handleKeyDown={handleKeyDown} val={val} />
-        <MenuRight
-          notifications={notifications}
-          notificationAnchorEl={notificationAnchorEl}
-          handleNotificationMenu={handleNotificationMenu}
-          handleClose={handleClose}
-          anchorEl={anchorEl}
-          handleMenu={handleMenu}
-          handleViewProfile={handleViewProfile}
-          handleSignOut={handleSignOut}
-        />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <IconButton
+            size='large'
+            aria-label='leaderboard'
+            color='inherit'
+            onClick={handleViewStatistics}
+            sx={{ paddingRight: 0 }}>
+            <LeaderboardIcon sx={{ color: grey[50] }} />
+          </IconButton>
+          <MenuRight
+            notifications={notifications}
+            notificationAnchorEl={notificationAnchorEl}
+            handleNotificationMenu={handleNotificationMenu}
+            handleClose={handleClose}
+            anchorEl={anchorEl}
+            handleMenu={handleMenu}
+            handleViewProfile={handleViewProfile}
+            handleSignOut={handleSignOut}
+          />
+        </Box>
       </Toolbar>
     </AppBar>
   );

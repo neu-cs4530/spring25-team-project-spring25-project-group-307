@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import api from './config';
 import { Comment, DatabaseComment } from '../types/types';
 
@@ -40,4 +41,12 @@ const addComment = async (
   return res.data;
 };
 
-export default addComment;
+const deleteComment = async (cid: ObjectId): Promise<DatabaseComment> => {
+  const res = await api.delete(`${COMMENT_API_URL}/deleteComment/${cid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while deleting a comment');
+  }
+  return res.data;
+};
+
+export { addComment, deleteComment };

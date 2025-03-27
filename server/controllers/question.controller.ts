@@ -19,9 +19,12 @@ import {
   getQuestionsByOrder,
   saveQuestion,
   getCommunityQuestion,
+  deleteQuestionById,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
+import UserModel from '../models/users.model';
+import getUpdatedRank from '../utils/userstat.util';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -160,14 +163,53 @@ const questionController = (socket: FakeSOSocket) => {
         throw new Error(populatedQuestion.error);
       }
 
+      // Award score and update rank
+      const user = await UserModel.findOne({ username: question.askedBy });
+      if (user) {
+        const newScore = user.score + 5;
+        const newRank = getUpdatedRank(newScore);
+        const newQuestionsAsked = user.questionsAsked + 1;
+        await UserModel.updateOne(
+          { username: question.askedBy },
+          { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
+        );
+      }
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
       res.json(populatedQuestion);
     } catch (err: unknown) {
       if (err instanceof Error) {
         res.status(500).send(`Error when saving question: ${err.message}`);
-      } else {
-        res.status(500).send(`Error when saving question`);
       }
+    }
+  };
+
+  /**
+   * Deletes a question from the database. The question is identified by its unique ID.
+   * If there is an error, the HTTP response's status is updated.
+   *
+   * @param req the HTTP request object containing the question ID as a parameter.
+   * @param res the HTTP response object used to send back the result of the operation.
+   *
+   * @returns a Promise that resolves to void.
+   */
+  const deleteQuestion = async (req: FindQuestionByIdRequest, res: Response): Promise<void> => {
+    const { qid } = req.params;
+
+    if (!ObjectId.isValid(qid)) {
+      res.status(400).send('Invalid ID format');
+      return;
+    }
+
+    try {
+      const result = await deleteQuestionById(qid);
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.json(result);
+    } catch (err: unknown) {
+      res.status(500).send(`Error when deleting question`);
     }
   };
 
@@ -262,6 +304,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.get('/getQuestion', getQuestionsByFilter);
   router.get('/getQuestionById/:qid', getQuestionById);
   router.post('/addQuestion', addQuestion);
+  router.delete('/deleteQuestion/:qid', deleteQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);

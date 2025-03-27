@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { Answer, PopulatedDatabaseAnswer } from '../types/types';
 import api from './config';
 
@@ -20,4 +21,12 @@ const addAnswer = async (qid: string, ans: Answer): Promise<PopulatedDatabaseAns
   return res.data;
 };
 
-export default addAnswer;
+const deleteAnswer = async (aid: ObjectId): Promise<PopulatedDatabaseAnswer> => {
+  const res = await api.delete(`${ANSWER_API_URL}/deleteAnswer/${aid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while deleting an answer');
+  }
+  return res.data;
+};
+
+export { addAnswer, deleteAnswer };

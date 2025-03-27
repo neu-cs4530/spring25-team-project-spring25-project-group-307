@@ -55,7 +55,7 @@ describe('getUserByUsername', () => {
   });
 
   it('should return the matching user', async () => {
-    mockingoose(UserModel).toReturn(safeUser, 'findOne');
+    mockingoose(UserModel).toReturn(safeUser, 'findOneAndUpdate');
 
     const retrievedUser = (await getUserByUsername(user.username)) as SafeDatabaseUser;
 
@@ -216,6 +216,9 @@ describe('updateUser', () => {
     ranking: user.ranking,
     score: user.score,
     achievements: user.achievements,
+    questionsAsked: user.questionsAsked,
+    responsesGiven: user.responsesGiven,
+    lastLogin: user.lastLogin,
   };
 
   const updates: Partial<User> = {
