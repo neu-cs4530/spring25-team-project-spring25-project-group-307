@@ -8,6 +8,7 @@ const useFeedPage = () => {
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
   const [noMoreContent, setNoMoreContent] = useState(false);
   const { user: currentUser } = useUserContext();
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const pageEndElement = useRef(null);
   const getMoreQuestions = async (limit: number) => {
@@ -41,9 +42,11 @@ const useFeedPage = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !noMoreContent) {
+        if (entry.isIntersecting && !noMoreContent && !isIntersecting) {
+          setIsIntersecting(true);
           getMoreQuestions(3);
         }
+        setIsIntersecting(false);
       },
       {
         root: null, // Defaults to viewport
