@@ -49,7 +49,7 @@ const FeedPage = () => {
                 resetFeed();
               }}
               sx={{ mt: 1, color: '#1877F2', fontSize: 14 }}>
-              View Older Posts
+              Refresh Feed
             </Link>
           </Box>
         )}

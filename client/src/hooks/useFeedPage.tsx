@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { FeedItem } from '@fake-stack-overflow/shared';
 import { getNext, refresh } from '../services/feedService';
 import useUserContext from './useUserContext';
@@ -8,29 +8,35 @@ const useFeedPage = () => {
   const [isQuestionsLoading, setIsQuestionsLoading] = useState(true);
   const [noMoreContent, setNoMoreContent] = useState(false);
   const { user: currentUser } = useUserContext();
-  const [isIntersecting, setIsIntersecting] = useState(false);
+  const [isFetching, setIsFetching] = useState(false);
+
+  const isFetchingRef = useRef(isFetching);
+  const noMoreContentRef = useRef(noMoreContent);
 
   const pageEndElement = useRef(null);
-  const getMoreQuestions = async (limit: number) => {
-    if (isIntersecting) return;
-    setIsIntersecting(true);
-    setIsQuestionsLoading(true);
+  const getMoreQuestions = useCallback(
+    async (limit: number) => {
+      if (isFetching) return;
+      setIsFetching(true);
+      setIsQuestionsLoading(true);
 
-    await new Promise(resolve => {
-      setTimeout(resolve, 1000);
-    });
+      await new Promise(resolve => {
+        setTimeout(resolve, 1000);
+      });
 
-    const newQuestions = await getNext(currentUser._id, limit);
+      const newQuestions = await getNext(currentUser._id, limit);
 
-    setFeedItems(prev => [...prev, ...newQuestions]);
-    setIsIntersecting(false);
-    setIsQuestionsLoading(false);
-    if (newQuestions.length === 0) {
-      setNoMoreContent(true);
-    } else {
-      setNoMoreContent(false);
-    }
-  };
+      setFeedItems(prev => [...prev, ...newQuestions]);
+      setIsFetching(false);
+      setIsQuestionsLoading(false);
+      if (newQuestions.length === 0) {
+        setNoMoreContent(true);
+      } else {
+        setNoMoreContent(false);
+      }
+    },
+    [currentUser._id, isFetching],
+  );
 
   const resetFeed = async () => {
     await refresh(currentUser._id);
@@ -43,9 +49,17 @@ const useFeedPage = () => {
   };
 
   useEffect(() => {
+    isFetchingRef.current = isFetching;
+  }, [isFetching]);
+
+  useEffect(() => {
+    noMoreContentRef.current = noMoreContent;
+  }, [noMoreContent]);
+
+  useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !noMoreContent && !isIntersecting) {
+        if (entry.isIntersecting && !noMoreContentRef.current && !isFetchingRef.current) {
           getMoreQuestions(3);
         }
       },
