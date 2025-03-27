@@ -12,6 +12,8 @@ const useFeedPage = () => {
 
   const pageEndElement = useRef(null);
   const getMoreQuestions = async (limit: number) => {
+    if (isIntersecting) return;
+    setIsIntersecting(true);
     setIsQuestionsLoading(true);
 
     await new Promise(resolve => {
@@ -21,6 +23,7 @@ const useFeedPage = () => {
     const newQuestions = await getNext(currentUser._id, limit);
 
     setFeedItems(prev => [...prev, ...newQuestions]);
+    setIsIntersecting(false);
     setIsQuestionsLoading(false);
     if (newQuestions.length === 0) {
       setNoMoreContent(true);
@@ -43,10 +46,8 @@ const useFeedPage = () => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && !noMoreContent && !isIntersecting) {
-          setIsIntersecting(true);
           getMoreQuestions(3);
         }
-        setIsIntersecting(false);
       },
       {
         root: null, // Defaults to viewport
