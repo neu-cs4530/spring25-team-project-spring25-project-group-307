@@ -19,9 +19,8 @@ import {
   getCommunitiesByTag,
 } from '../services/community.service';
 import { processTags } from '../services/tag.service';
-import { getAllPreferencesForCommunity } from '../services/preferences.service';
 import UserNotificationManager from '../services/userNotificationManager';
-import { getCommunityQuestion, getQuestionById } from '../services/question.service';
+import { getQuestionById } from '../services/question.service';
 
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
