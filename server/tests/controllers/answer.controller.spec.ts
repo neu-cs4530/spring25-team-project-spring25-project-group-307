@@ -5,6 +5,7 @@ import { app } from '../../app';
 import * as answerUtil from '../../services/answer.service';
 import * as databaseUtil from '../../utils/database.util';
 import UserModel from '../../models/users.model';
+import CommunityModel from '../../models/communities.model';
 
 const saveAnswerSpy = jest.spyOn(answerUtil, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(answerUtil, 'addAnswerToQuestion');
@@ -75,6 +76,9 @@ describe('POST /addAnswer', () => {
       upsertedCount: 0,
       upsertedId: null,
     });
+
+    const findOneSpyCommunity = jest.spyOn(CommunityModel, 'findOne');
+    findOneSpyCommunity.mockResolvedValueOnce(null);
 
     const response = await supertest(app).post('/answer/addAnswer').send(mockReqBody);
 
