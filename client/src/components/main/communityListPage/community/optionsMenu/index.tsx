@@ -70,7 +70,7 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
           <ListItemIcon>
             <Checkbox checked={commentsOnMyAnswersChecked} />
           </ListItemIcon>
-          <ListItemText primary='Comments on my Answers' />
+          <ListItemText primary='Comments on my Questions' />
         </MenuItem>
 
         {/* TODO: add more notification preferences here in future */}

@@ -9,7 +9,7 @@ import { PreferenceRequest, UserPreference } from '../types/types';
 const ALL_USER_PREFERENCES: UserPreference[] = [
   'All Questions',
   'Answers to my Questions',
-  'Comments on my Answers',
+  'Comments on my Questions',
 ];
 const preferencesController = () => {
   const router = express.Router();

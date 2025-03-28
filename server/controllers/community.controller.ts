@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { Community, FakeSOSocket } from '../types/types';
+import { Community, DatabaseQuestion, FakeSOSocket } from '../types/types';
 import {
   getCommunities,
   getCommunitiesBySearch,
@@ -21,6 +21,7 @@ import {
 import { processTags } from '../services/tag.service';
 import { getAllPreferencesForCommunity } from '../services/preferences.service';
 import UserNotificationManager from '../services/userNotificationManager';
+import { getCommunityQuestion, getQuestionById } from '../services/question.service';
 
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -229,23 +230,16 @@ const communityController = (socket: FakeSOSocket) => {
       const community = await addQuestionToCommunity(req.body.communityId, req.body.questionId);
 
       // only emit if user is in community and has subsribed to this event
-
+      // skip the user who asked the question
       if (community !== null) {
-        const userNotificationManager = UserNotificationManager.getInstance();
-        const loggedinUsers = userNotificationManager.getLoggedInUsers();
-
-        getAllPreferencesForCommunity(community.title).then(preferences => {
-          preferences.forEach(databasePeferences => {
-            if (loggedinUsers.includes(databasePeferences.username)) {
-              const clientSocket = userNotificationManager.getUserSocketByUsername(
-                databasePeferences.username,
-              );
-              clientSocket?.emit(
-                'preferencesUpdate',
-                `A new question has been posted in ${community.title}. Check it out!`,
-              );
-            }
-          });
+        getQuestionById(req.body.questionId).then(question => {
+          const userNotificationManager = UserNotificationManager.getInstance();
+          userNotificationManager.notifyOnlineUsersInCommunity(
+            community.title,
+            'All Questions',
+            `A new question has been posted in ${community.title}. Check it out!`,
+            [(question as DatabaseQuestion).askedBy],
+          );
         });
       }
 

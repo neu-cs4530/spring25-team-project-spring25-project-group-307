@@ -10,6 +10,9 @@ import {
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
 import CommentModel from '../models/comments.model';
+import UserNotificationManager from './userNotificationManager';
+import { getCommunityQuestion, getQuestionById } from './question.service';
+import mongoose from 'mongoose';
 
 /**
  * Saves a new comment to the database.
@@ -60,6 +63,23 @@ export const addComment = async (
 
     if (result === null) {
       throw new Error('Failed to add comment');
+    }
+    // notify users
+    if (type === 'question' && result) {
+      getCommunityQuestion(new mongoose.Types.ObjectId(id)).then(async community => {
+        if (!('error' in community)) {
+          const userNotificationManager = UserNotificationManager.getInstance();
+          const question = await getQuestionById(id);
+          if (!('error' in question)) {
+            userNotificationManager.notifySpecificOnlineUsers(
+              community.title,
+              [question.askedBy],
+              'Comments on my Questions',
+              `Someone commented on your question in ${community.title}. Check it out!`,
+            );
+          }
+        }
+      });
     }
 
     return result;

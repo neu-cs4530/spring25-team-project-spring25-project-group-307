@@ -1,5 +1,10 @@
-import { ClientToServerEvents, ServerToClientEvents } from '@fake-stack-overflow/shared';
+import {
+  ClientToServerEvents,
+  ServerToClientEvents,
+  UserPreference,
+} from '@fake-stack-overflow/shared';
 import { DefaultEventsMap, Socket } from 'socket.io';
+import { getAllPreferencesForCommunity } from './preferences.service';
 
 class UserNotificationManager {
   /**
@@ -73,15 +78,13 @@ class UserNotificationManager {
    * @returns {string[]} An array of usernames that are currently logged in.
    */
   public getLoggedInUsers(): string[] {
-    return Array.from(this._socketIdToUser.values()).filter(
-      (username): username is string => username !== null,
-    );
+    return Array.from(this._socketIdToUser.values()).filter(username => username !== null);
   }
 
   /**
    * Retrieves the WebSocket connection for a given username.
    * @param {string} username - The username of the user whose socket is needed.
-   * @returns {Socket | null} The user's socket instance, or null if not online.
+   * @returns {Socket | null} The user's socket instance, or null if not found.
    */
   public getUserSocketByUsername(
     username: string,
@@ -92,6 +95,63 @@ class UserNotificationManager {
       }
     }
     return null;
+  }
+  /**
+   * Notify the online users part of the given community with the given message if they have enabled the given user preference
+   * @param communityTitle the title of the community
+   * @param userPreference the user preference
+   * @param notificationMessage the message
+   * @param skipUsers usersnames that we want to not notify
+   */
+  public async notifyOnlineUsersInCommunity(
+    communityTitle: string,
+    userPreference: UserPreference,
+    notificationMessage: string,
+    skipUsers: string[],
+  ) {
+    const loggedinUsers = this.getLoggedInUsers();
+
+    const preferences = await getAllPreferencesForCommunity(communityTitle);
+
+    preferences.forEach(databasePeferences => {
+      if (
+        !skipUsers.includes(databasePeferences.username) &&
+        loggedinUsers.includes(databasePeferences.username) &&
+        databasePeferences.userPreferences.includes(userPreference)
+      ) {
+        const clientSocket = this.getUserSocketByUsername(databasePeferences.username);
+        clientSocket?.emit('preferencesUpdate', notificationMessage);
+      }
+    });
+  }
+
+  /**
+   * Notify specific online users with the given message if they have enabled the given user preference.
+   * @param communityTitle the title of the community
+   * @param usernames the list of users to notify
+   * @param userPreference the user preference
+   * @param notificationMessage the message
+   */
+  public async notifySpecificOnlineUsers(
+    communityTitle: string,
+    usernames: string[],
+    userPreference: UserPreference,
+    notificationMessage: string,
+  ) {
+    const loggedinUsers = this.getLoggedInUsers();
+
+    const preferences = await getAllPreferencesForCommunity(communityTitle);
+
+    preferences.forEach(databasePeferences => {
+      if (
+        usernames.includes(databasePeferences.username) &&
+        loggedinUsers.includes(databasePeferences.username) &&
+        databasePeferences.userPreferences.includes(userPreference)
+      ) {
+        const clientSocket = this.getUserSocketByUsername(databasePeferences.username);
+        clientSocket?.emit('preferencesUpdate', notificationMessage);
+      }
+    });
   }
 }
 

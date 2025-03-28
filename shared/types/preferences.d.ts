@@ -5,7 +5,10 @@ import { Request } from 'express';
  * User preferences  for a community will be one of the following
  */
 // Todo: add more of these
-export type UserPreference = 'All Questions' | 'Answers to my Questions' | 'Comments on my Answers';
+export type UserPreference =
+  | 'All Questions'
+  | 'Answers to my Questions'
+  | 'Comments on my Questions';
 
 /**
  * Interface to represent the Preferences a user has for notification in a community

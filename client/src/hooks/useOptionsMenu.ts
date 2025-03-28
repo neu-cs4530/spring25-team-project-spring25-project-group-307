@@ -19,7 +19,7 @@ const useOptionsMenu = (communityTitle: string) => {
     () => ({
       'All Questions': setAllNewQuestionsChecked,
       'Answers to my Questions': setanswersToMyQuestionsChecked,
-      'Comments on my Answers': setcommentsOnMyAnswersChecked,
+      'Comments on my Questions': setcommentsOnMyAnswersChecked,
     }),
     [],
   );
@@ -67,10 +67,10 @@ const useOptionsMenu = (communityTitle: string) => {
     setcommentsOnMyAnswersChecked(prev => {
       const newValue = !prev;
       if (newValue) {
-        addPreference('Comments on my Answers', user.username, communityTitle);
+        addPreference('Comments on my Questions', user.username, communityTitle);
       } else {
         // remove pref here
-        removePreference('Comments on my Answers', user.username, communityTitle);
+        removePreference('Comments on my Questions', user.username, communityTitle);
       }
       return newValue;
     });
