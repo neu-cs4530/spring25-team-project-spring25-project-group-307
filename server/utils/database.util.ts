@@ -1,5 +1,4 @@
 import {
-  CommentResponse,
   DatabaseComment,
   DatabaseMessage,
   DatabaseTag,
@@ -128,7 +127,11 @@ export const populateDocument = async (
   id: string,
   type: 'question' | 'answer' | 'chat' | 'comment',
 ): Promise<
-  PopulatedDatabaseAnswer | PopulatedDatabaseChat | PopulatedDatabaseQuestion | PopulatedDatabaseComment | { error: string }
+  | PopulatedDatabaseAnswer
+  | PopulatedDatabaseChat
+  | PopulatedDatabaseQuestion
+  | PopulatedDatabaseComment
+  | { error: string }
 > => {
   try {
     if (!id) {

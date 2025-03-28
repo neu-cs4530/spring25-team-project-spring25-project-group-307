@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { ObjectId } from 'mongodb';
-import { Box, IconButton } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { getMetaData } from '../../../tool';
+import { Button, Typography } from '@mui/material';
 import { Comment, DatabaseComment } from '../../../types/types';
 import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
+import CommentItem from './commentItem';
 
 /**
  * Interface representing the props for the Comment Section component.
@@ -59,29 +58,23 @@ const CommentSection = ({
 
   return (
     <div className='comment-section'>
-      <button className='toggle-button' onClick={() => setShowComments(!showComments)}>
-        {showComments ? 'Hide Comments' : 'Show Comments'}
-      </button>
+      <Button size='small' onClick={() => setShowComments(!showComments)}>
+        <Typography color='text-secondary'>
+          {showComments ? 'Hide Comments' : 'Show Comments'}
+        </Typography>
+      </Button>
 
       {showComments && (
         <div className='comments-container'>
           <ul className='comments-list'>
             {comments.length > 0 ? (
               comments.map(comment => (
-                <li key={comment._id.toString()} className='comment-item'>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    <div>
-                      <p className='comment-text'>{comment.text}</p>
-                      <small className='comment-meta'>
-                        {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
-                      </small>
-                    </div>
-                    {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
-                      <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    ) : null}
-                  </Box>
+                <li key={comment._id.toString()}>
+                  <CommentItem
+                    comment={comment}
+                    handleDeleteComment={handleDeleteComment}
+                    currentRole={currentRole}
+                  />
                 </li>
               ))
             ) : (

@@ -8,6 +8,7 @@ import {
   PopulatedDatabaseAnswer,
   DeleteCommentRequest,
   PopulatedDatabaseComment,
+  GetCommentRequest,
 } from '../types/types';
 import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
@@ -39,6 +40,13 @@ const commentController = (socket: FakeSOSocket) => {
    * @returns `true` if the request is valid, otherwise `false`.
    */
   const isDeleteRequestValid = (req: DeleteCommentRequest): boolean => !!req.params.cid;
+
+  /**
+   * Checks if the provided get comment request contains the required fields.
+   * @param req The request object containing the comment ID.
+   * @returns `true` if the request is valid, otherwise `false`.
+   */
+  const isGetRequestValid = (req: GetCommentRequest): boolean => !!req.params.cid;
 
   /**
    * Validates the comment object to ensure it is not empty.
@@ -107,7 +115,10 @@ const commentController = (socket: FakeSOSocket) => {
       }
 
       socket.emit('commentUpdate', {
-        result: populatedDoc as PopulatedDatabaseQuestion | PopulatedDatabaseAnswer | PopulatedDatabaseComment,
+        result: populatedDoc as
+          | PopulatedDatabaseQuestion
+          | PopulatedDatabaseAnswer
+          | PopulatedDatabaseComment,
         type,
       });
       res.json(comFromDb);
@@ -141,8 +152,34 @@ const commentController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Handles retrieving a populated database comment.
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @returns A Promise that resolves to void.
+   */
+  const getCommentByIdRoute = async (req: GetCommentRequest, res: Response): Promise<void> => {
+    if (!isGetRequestValid(req)) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { cid } = req.params;
+
+    try {
+      const comment = await populateDocument(cid, 'comment');
+      if (!comment) {
+        throw new Error('Failed to retrieve comment');
+      }
+      res.json(comment);
+    } catch (error) {
+      res.status(500).send(`Error when retrieving comment: ${(error as Error).message}`);
+    }
+  };
+
   router.post('/addComment', addCommentRoute);
   router.delete('/deleteComment/:cid', deleteComment);
+  router.get('/getComment/:cid', getCommentByIdRoute);
 
   return router;
 };

@@ -37,18 +37,30 @@ const AnswerPage = () => {
   }
 
   return (
-    <>
+    <Box sx={{ maxWidth: '1000px', mx: 'auto', mt: 2 }}>
       {community && (
         <Button
-          variant='text'
+          variant='outlined'
           startIcon={<ArrowBackIosIcon />}
-          sx={{ mx: '12px', mt: '10px' }}
+          sx={{
+            my: 2,
+            ml: 2,
+            borderRadius: '8px',
+          }}
           onClick={handleReturnToCommunity}>
           Go to Community
         </Button>
       )}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
+          ml: 2,
+        }}>
         <VoteComponent question={question} />
+        {/* Conditional Delete Button */}
         {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
           <DeleteQuestionComponent
             deleteQuestionFromCommunity={handleDeleteQuestionFromCommunity}
@@ -88,14 +100,16 @@ const AnswerPage = () => {
           currentRole={currentRole}
         />
       ))}
-      <button
-        className='bluebtn ansButton'
+      <Button
+        variant='contained'
+        color='primary'
+        sx={{ my: 2, borderRadius: '8px' }}
         onClick={() => {
           handleNewAnswer();
         }}>
         Answer Question
-      </button>
-    </>
+      </Button>
+    </Box>
   );
 };
 
