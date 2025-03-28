@@ -57,6 +57,7 @@ const CommunityUsers = ({
       handleClose={handleClose}
       userToAdd={userToAdd}
       handleSetUsername={handleSetUsername}
+      communityUsers={[...(admins || []), ...(moderators || []), ...(members || [])]}
     />
     <TableContainer component={Paper}>
       <Table aria-label='simple table'>

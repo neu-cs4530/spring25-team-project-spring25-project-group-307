@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Box, Button } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { ObjectId } from 'mongodb';
@@ -32,25 +32,42 @@ const AnswerPage = () => {
     currentRole,
   } = useAnswerPage();
 
+  const [moderate, setModerate] = useState<boolean>(false);
+
+  const handleClickModerate = () => {
+    setModerate(!moderate);
+  };
+
   if (!question) {
     return null;
   }
 
   return (
     <Box sx={{ maxWidth: '1000px', mx: 'auto', mt: 2 }}>
-      {community && (
-        <Button
-          variant='outlined'
-          startIcon={<ArrowBackIosIcon />}
-          sx={{
-            my: 2,
-            ml: 2,
-            borderRadius: '8px',
-          }}
-          onClick={handleReturnToCommunity}>
-          Go to Community
-        </Button>
-      )}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: 2 }}>
+        {community && (
+          <Button
+            variant='outlined'
+            startIcon={<ArrowBackIosIcon />}
+            sx={{
+              my: 2,
+              borderRadius: '8px',
+            }}
+            onClick={handleReturnToCommunity}>
+            Go to Community
+          </Button>
+        )}
+        {community && (currentRole === 'MODERATOR' || currentRole === 'ADMIN') && (
+          <Button
+            variant={moderate ? 'contained' : 'outlined'}
+            size='small'
+            color='error'
+            sx={{ my: 2, borderRadius: '8px' }}
+            onClick={handleClickModerate}>
+            {moderate ? 'Stop Moderating' : 'Moderate'}
+          </Button>
+        )}
+      </Box>
       <Box
         sx={{
           display: 'flex',
@@ -61,7 +78,7 @@ const AnswerPage = () => {
         }}>
         <VoteComponent question={question} />
         {/* Conditional Delete Button */}
-        {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
+        {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate && (
           <DeleteQuestionComponent
             deleteQuestionFromCommunity={handleDeleteQuestionFromCommunity}
             deleteQuestionGlobal={handleDeleteQuestionGlobal}
@@ -84,6 +101,7 @@ const AnswerPage = () => {
         handleAddComment={(comment: Comment) => handleNewComment(comment, 'question', questionID)}
         handleDeleteComment={(commentId: ObjectId) => handleDeleteComment(commentId)}
         currentRole={currentRole}
+        moderate={moderate}
       />
       {question.answers.map(a => (
         <AnswerView
@@ -98,6 +116,7 @@ const AnswerPage = () => {
           handleDeleteComment={(commentId: ObjectId) => handleDeleteComment(commentId)}
           handleDeleteAnswer={() => handleDeleteAnswer(a._id)}
           currentRole={currentRole}
+          moderate={moderate}
         />
       ))}
       <Button

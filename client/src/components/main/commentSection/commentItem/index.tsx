@@ -17,9 +17,10 @@ interface CommentItemProps {
   comment: DatabaseComment;
   handleDeleteComment: (commentId: ObjectId) => void;
   currentRole: string;
+  moderate?: boolean;
 }
 
-const CommentItem = ({ comment, handleDeleteComment, currentRole }: CommentItemProps) => {
+const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: CommentItemProps) => {
   const { user } = useUserContext();
   const [showReplies, setShowReplies] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
@@ -85,7 +86,7 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole }: CommentItemP
             </Typography>
           </CardContent>
         </Card>
-        {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
+        {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate ? (
           <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>
             <DeleteIcon />
           </IconButton>
@@ -122,6 +123,7 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole }: CommentItemP
               comment={reply}
               handleDeleteComment={handleDeleteReply}
               currentRole={currentRole}
+              moderate={moderate}
             />
           ))}
         </Box>

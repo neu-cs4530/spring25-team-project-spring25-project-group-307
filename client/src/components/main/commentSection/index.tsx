@@ -17,6 +17,7 @@ interface CommentSectionProps {
   handleAddComment: (comment: Comment) => void;
   handleDeleteComment: (commentId: ObjectId) => void;
   currentRole: string;
+  moderate?: boolean;
 }
 
 /**
@@ -30,6 +31,7 @@ const CommentSection = ({
   handleAddComment,
   handleDeleteComment,
   currentRole,
+  moderate,
 }: CommentSectionProps) => {
   const { user } = useUserContext();
   const [text, setText] = useState<string>('');
@@ -74,6 +76,7 @@ const CommentSection = ({
                     comment={comment}
                     handleDeleteComment={handleDeleteComment}
                     currentRole={currentRole}
+                    moderate={moderate}
                   />
                 </li>
               ))
