@@ -31,12 +31,10 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
   const {
     val,
     anchorEl,
-    notificationAnchorEl,
     handleInputChange,
     handleKeyDown,
     handleSignOut,
     handleMenu,
-    handleNotificationMenu,
     handleClose,
     handleViewProfile,
     handleNavigateHome,
@@ -78,9 +76,6 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
             <LeaderboardIcon sx={{ color: grey[50] }} />
           </IconButton>
           <MenuRight
-            notifications={notifications}
-            notificationAnchorEl={notificationAnchorEl}
-            handleNotificationMenu={handleNotificationMenu}
             handleClose={handleClose}
             anchorEl={anchorEl}
             handleMenu={handleMenu}
