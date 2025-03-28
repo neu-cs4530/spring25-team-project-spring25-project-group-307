@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { app } from '../../app';
 import * as commentUtil from '../../services/comment.service';
 import * as databaseUtil from '../../utils/database.util';
+import CommunityModel from '../../models/communities.model';
 
 const saveCommentSpy = jest.spyOn(commentUtil, 'saveComment');
 const addCommentSpy = jest.spyOn(commentUtil, 'addComment');
@@ -57,6 +58,9 @@ describe('POST /addComment', () => {
       answers: [],
       comments: [mockComment],
     });
+
+    const findOneSpyCommunity = jest.spyOn(CommunityModel, 'findOne');
+    findOneSpyCommunity.mockResolvedValueOnce(null);
 
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 

@@ -11,7 +11,7 @@ import { addAnswerToQuestion, deleteAnswerById, saveAnswer } from '../services/a
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
-import { getCommunityQuestion, getQuestionById } from '../services/question.service';
+import { getCommunityQuestion } from '../services/question.service';
 import UserNotificationManager from '../services/userNotificationManager';
 
 const answerController = (socket: FakeSOSocket) => {

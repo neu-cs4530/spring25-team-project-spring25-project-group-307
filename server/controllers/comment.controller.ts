@@ -10,7 +10,6 @@ import {
 } from '../types/types';
 import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
-import userNotificationManager from '../services/userNotificationManager';
 import { getCommunityQuestion } from '../services/question.service';
 import UserNotificationManager from '../services/userNotificationManager';
 

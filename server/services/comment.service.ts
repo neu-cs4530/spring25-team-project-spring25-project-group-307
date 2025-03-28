@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import {
   AnswerResponse,
   Comment,
@@ -11,8 +10,6 @@ import {
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
 import CommentModel from '../models/comments.model';
-import UserNotificationManager from './userNotificationManager';
-import { getCommunityQuestion, getQuestionById } from './question.service';
 
 /**
  * Saves a new comment to the database.
