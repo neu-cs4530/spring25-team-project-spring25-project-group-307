@@ -1,16 +1,18 @@
-import Card from '@mui/material/Card';
-import LockIcon from '@mui/icons-material/Lock';
 import {
   Box,
   Button,
   CardActions,
   CardContent,
+  Typography,
+  Card,
   Chip,
   Divider,
   Stack,
-  Typography,
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
+import LockIcon from '@mui/icons-material/Lock';
+import OptionsMenu from './optionsMenu';
+
 import { DatabaseCommunity, Tag } from '../../../../types/types';
 
 /**
@@ -47,6 +49,7 @@ const CommunityView = ({
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
+          {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
           {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
         </Box>
         <Typography variant='h5' component='div'>

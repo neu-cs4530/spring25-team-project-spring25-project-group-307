@@ -175,6 +175,7 @@ const questionController = (socket: FakeSOSocket) => {
         );
       }
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
+
       res.json(populatedQuestion);
     } catch (err: unknown) {
       if (err instanceof Error) {

@@ -10,6 +10,8 @@ import {
 } from '../types/types';
 import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
 import { populateDocument } from '../utils/database.util';
+import { getCommunityQuestion } from '../services/question.service';
+import UserNotificationManager from '../services/userNotificationManager';
 
 const commentController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -103,6 +105,21 @@ const commentController = (socket: FakeSOSocket) => {
 
       if (populatedDoc && 'error' in populatedDoc) {
         throw new Error(populatedDoc.error);
+      }
+
+      // notify users
+      if (type === 'question') {
+        const communityQuestion = await getCommunityQuestion(status._id);
+        if (!('error' in communityQuestion)) {
+          const userNotificationManager = UserNotificationManager.getInstance();
+
+          await userNotificationManager.notifySpecificOnlineUsers(
+            communityQuestion.title,
+            [(populatedDoc as PopulatedDatabaseQuestion).askedBy],
+            'Comments on my Questions',
+            `Someone commented on your question in ${communityQuestion.title}. Check it out!`,
+          );
+        }
       }
 
       socket.emit('commentUpdate', {

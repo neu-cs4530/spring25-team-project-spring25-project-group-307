@@ -11,6 +11,8 @@ import { addAnswerToQuestion, deleteAnswerById, saveAnswer } from '../services/a
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
+import { getCommunityQuestion } from '../services/question.service';
+import UserNotificationManager from '../services/userNotificationManager';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -106,6 +108,17 @@ const answerController = (socket: FakeSOSocket) => {
               responsesGiven: newResponsesGiven,
             },
           },
+        );
+      }
+
+      const communityQuestion = await getCommunityQuestion(status._id);
+      if (!('error' in communityQuestion)) {
+        const userNotificationManager = UserNotificationManager.getInstance();
+        await userNotificationManager.notifySpecificOnlineUsers(
+          communityQuestion.title,
+          [status.askedBy],
+          'Answers to my Questions',
+          `Your question in ${communityQuestion.title} has a new answer. Check it out!`,
         );
       }
       // Populates the fields of the answer that was added and emits the new object

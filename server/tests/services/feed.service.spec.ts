@@ -1,8 +1,6 @@
-import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
 import FeedModel from '../../models/feed.model';
-import { DatabaseFeed, FeedItem } from '../../types/types';
-import { saveFeed } from '../../services/feed.service';
+import { DatabaseFeed } from '../../types/types';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');

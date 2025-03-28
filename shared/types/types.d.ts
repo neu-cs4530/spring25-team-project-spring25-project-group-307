@@ -8,6 +8,7 @@ export * from './socket';
 export * from './tag';
 export * from './user';
 export * from './community';
+export * from './preferences';
 export * from './interest';
 export * from './feedItem';
 export * from './feed';
