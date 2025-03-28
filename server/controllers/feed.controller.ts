@@ -30,6 +30,7 @@ const feedController = (socket: FakeSOSocket) => {
 
     try {
       const questions = await getAllQuestionsInOrderAndSaveToFeed(userId);
+
       await updateFeedLastViewedRanking(userId, 0);
 
       res.status(200).send(questions);

@@ -23,6 +23,7 @@ import TagModel from '../models/tags.model';
 import AnswerModel from '../models/answers.model';
 import CommentModel from '../models/comments.model';
 import CommunityModel from '../models/communities.model';
+import { getCommunityQuestion } from './question.service';
 
 /**
  * Saves a new feed to the database.
@@ -105,17 +106,20 @@ export const calculateWeightedQuestions = async (
       return acc;
     }, {});
 
-    const res = questions
-      .map(question => {
-        const weightSum = question.tags.reduce((acc: number, tag: ObjectId) => {
-          const tagId = tag.toString();
-          return acc + (interests[tagId] || 0);
-        }, 0);
-        return { ...question, weight: weightSum };
-      })
-      .sort((a, b) => b.weight - a.weight);
+    // Create an array of { question, weight } objects
+    const weightedQuestions = questions.map(question => ({
+      question, // Store reference to the original Mongoose object
+      weight: question.tags.reduce((acc: number, tag: ObjectId) => {
+        const tagId = tag.toString();
+        return acc + (interests[tagId] || 0);
+      }, 0),
+    }));
 
-    return res;
+    // Sort by weight in descending order
+    weightedQuestions.sort((a, b) => b.weight - a.weight);
+
+    // Return only the original questions in the new order
+    return weightedQuestions.map(item => item.question);
   } catch (err) {
     return [];
   }
@@ -137,12 +141,19 @@ export const getAllQuestionsInOrderAndSaveToFeed = async (
 
     await deleteFeedItemsByFeedId(userFeed._id);
 
+    const communities = await Promise.all(
+      weightedQuestions.map(async aQuestion => {
+        const communityResult = await getCommunityQuestion(aQuestion._id);
+        return 'error' in communityResult ? undefined : communityResult;
+      }),
+    );
+
     await Promise.all(
       weightedQuestions.map((aQuestion, index) =>
         saveFeedItem({
           feed: userFeed,
           question: aQuestion,
-          community: undefined,
+          community: communities[index],
           viewedRanking: index,
         }),
       ),
@@ -176,8 +187,6 @@ export const getQuestionsForInfiniteScroll = async (
       throw new Error('Feed items not found');
     }
 
-    await updateFeedLastViewedRanking(userId, endIndex);
-
     const questionIds = userFeedItems.map(feedItem => feedItem.question);
 
     const questions: PopulatedDatabaseQuestion[] = await QuestionModel.find({
@@ -200,6 +209,8 @@ export const getQuestionsForInfiniteScroll = async (
       const community = communities.find(c => c._id.equals(feedItem.community));
       return { feed: userFeed, question, community, viewedRanking: feedItem.viewedRanking };
     });
+
+    await updateFeedLastViewedRanking(userId, startIndex + feedItems.length);
 
     return feedItems;
   } catch (err) {

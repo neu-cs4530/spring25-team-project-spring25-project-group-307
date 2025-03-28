@@ -8,11 +8,11 @@ import RecommendedContentPanel from './recommendedContentPanel';
 import useFeedPage from '../../../hooks/useFeedPage';
 
 const FeedPage = () => {
-  const { questions, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed } = useFeedPage();
+  const { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed } = useFeedPage();
 
   return (
     <>
-      <RecommendedContentPanel questions={questions} />
+      <RecommendedContentPanel feedItems={feedItems} />
       <Box sx={{ width: '100%', typography: 'body1' }}>
         <Box ref={pageEndElement} sx={{ width: '100%', p: 2 }}></Box>
         {noMoreContent && (
@@ -49,7 +49,7 @@ const FeedPage = () => {
                 resetFeed();
               }}
               sx={{ mt: 1, color: '#1877F2', fontSize: 14 }}>
-              View Older Posts
+              Refresh Feed
             </Link>
           </Box>
         )}
