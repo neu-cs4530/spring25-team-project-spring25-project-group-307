@@ -1,7 +1,7 @@
 import express, { Request, Response, Router } from 'express';
 import { FakeSOSocket, UpdateInterestsRequest, InterestByUserIdRequest } from '../types/types';
 import {
-  deleteInterestsByUserId,
+  deleteInterest,
   getInterestsByTagIds,
   getInterestsByUserId,
   getInterestsByUserIdAndTagIds,
@@ -46,12 +46,27 @@ const interestController = (socket: FakeSOSocket) => {
         return;
       }
 
-      // Delete the user's existing interests
-      await deleteInterestsByUserId(user._id);
+      const existingInterests = await getInterestsByUserId(user._id);
+
+      // Compare existing interests with new interests. Do not update shared interests. If an interest is in existing but not in new, delete it. If an interest is in new but not in existing, save it.
+      const interestsToDelete = existingInterests.filter(
+        existingInterest =>
+          !interests.some(newInterest => newInterest.tagId === existingInterest.tagId),
+      );
+      const interestsToSave = interests.filter(
+        newInterest =>
+          !existingInterests.some(existingInterest => newInterest.tagId === existingInterest.tagId),
+      );
+
+      await Promise.all(
+        interestsToDelete.map(async interest => {
+          await deleteInterest(interest);
+        }),
+      );
 
       // Save the new interests
       await Promise.all(
-        interests.map(async interest => {
+        interestsToSave.map(async interest => {
           await saveInterest(interest);
         }),
       );
