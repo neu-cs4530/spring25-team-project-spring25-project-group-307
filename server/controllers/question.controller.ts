@@ -25,6 +25,8 @@ import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
+import grantAchievementToUser from '../services/achievement.service';
+import QuestionModel from '../models/questions.model';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -169,6 +171,12 @@ const questionController = (socket: FakeSOSocket) => {
         const newScore = user.score + 5;
         const newRank = getUpdatedRank(newScore);
         const newQuestionsAsked = user.questionsAsked + 1;
+        if (user.questionsAsked === 0) {
+          await grantAchievementToUser(user._id.toString(), 'First Step');
+        }
+        if (user.questionsAsked === 5) {
+          await grantAchievementToUser(user._id.toString(), 'Curious Thinker');
+        }
         await UserModel.updateOne(
           { username: question.askedBy },
           { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
