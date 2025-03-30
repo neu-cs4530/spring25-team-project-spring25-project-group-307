@@ -12,7 +12,6 @@ import {
   CommunityResponse,
 } from '../types/types';
 import {
-  addVoteToQuestion,
   fetchAndIncrementQuestionViewsById,
   filterQuestionsByAskedBy,
   filterQuestionsBySearch,
@@ -24,6 +23,8 @@ import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
+import grantAchievementToUser from '../services/achievement.service';
+import QuestionModel from '../models/questions.model';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -168,6 +169,12 @@ const questionController = (socket: FakeSOSocket) => {
         const newScore = user.score + 5;
         const newRank = getUpdatedRank(newScore);
         const newQuestionsAsked = user.questionsAsked + 1;
+        if (user.questionsAsked === 0) {
+          await grantAchievementToUser(user._id.toString(), 'First Step');
+        }
+        if (user.questionsAsked === 5) {
+          await grantAchievementToUser(user._id.toString(), 'Curious Thinker');
+        }
         await UserModel.updateOne(
           { username: question.askedBy },
           { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
@@ -196,31 +203,96 @@ const questionController = (socket: FakeSOSocket) => {
     res: Response,
     type: 'upvote' | 'downvote',
   ): Promise<void> => {
-    if (!req.body.qid || !req.body.username) {
-      res.status(400).send('Invalid request');
-      return;
-    }
-
     const { qid, username } = req.body;
 
+    if (!qid || !username) {
+      res.status(400).send('Missing qid or username');
+    }
+
     try {
-      let status;
+      const question = await QuestionModel.findById(qid);
+      if (!question) {
+        res.status(404).send('Question not found');
+        return;
+      }
+
+      const voter = await UserModel.findOne({ username });
+      const recipient = await UserModel.findOne({ username: question.askedBy });
+
+      const wasUpvoted = question.upVotes.includes(username);
+      const wasDownvoted = question.downVotes.includes(username);
+      if (!voter || !recipient) {
+        res.status(404).send('User not found');
+        return;
+      }
+      question.upVotes = question.upVotes.filter(u => u !== username);
+      question.downVotes = question.downVotes.filter(u => u !== username);
+
+      let voterDelta = 0;
+      let recipientDelta = 0;
 
       if (type === 'upvote') {
-        status = await addVoteToQuestion(qid, username, type);
+        if (wasUpvoted) {
+          voterDelta = -1;
+          recipientDelta = -5;
+        } else if (wasDownvoted) {
+          voterDelta = +2;
+          recipientDelta = +7;
+          question.upVotes.push(username);
+        } else {
+          // First time upvote
+          voterDelta = +1;
+          recipientDelta = +5;
+          question.upVotes.push(username);
+        }
+      } else if (type === 'downvote') {
+        if (wasDownvoted) {
+          // Cancel downvote
+          voterDelta = +1;
+          recipientDelta = +2;
+        } else if (wasUpvoted) {
+          // From upvote → downvote
+          voterDelta = -2;
+          recipientDelta = -7;
+          question.downVotes.push(username);
+        } else {
+          // First time downvote
+          voterDelta = -1;
+          recipientDelta = -2;
+          question.downVotes.push(username);
+        }
+      }
+
+      await question.save();
+      if (voter._id.equals(recipient._id)) {
+        voter.score += voterDelta + recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        await voter.save();
       } else {
-        status = await addVoteToQuestion(qid, username, type);
+        voter.score += voterDelta;
+        recipient.score += recipientDelta;
+
+        voter.ranking = getUpdatedRank(voter.score);
+        recipient.ranking = getUpdatedRank(recipient.score);
+
+        await voter.save();
+        await recipient.save();
       }
 
-      if (status && 'error' in status) {
-        throw new Error(status.error);
-      }
+      socket.emit('voteUpdate', {
+        qid,
+        upVotes: question.upVotes,
+        downVotes: question.downVotes,
+      });
 
-      // Emit the updated vote counts to all connected clients
-      socket.emit('voteUpdate', { qid, upVotes: status.upVotes, downVotes: status.downVotes });
-      res.json(status);
+      res.json({
+        success: true,
+        vote: type,
+        voterScore: voter ? voter.score : null,
+        recipientScore: recipient ? recipient.score : null,
+      });
     } catch (err) {
-      res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
+      res.status(500).send(`Voting failed: ${(err as Error).message}`);
     }
   };
 

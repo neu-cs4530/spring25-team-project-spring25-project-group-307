@@ -59,13 +59,10 @@ const userSchema: Schema = new Schema(
       type: Date,
       default: null,
     },
-    achievements: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: 'Achievement',
-      },
-    ],
-    default: [],
+    achievements: {
+      type: [String],
+      default: [],
+    },
   },
   { collection: 'User' },
 );

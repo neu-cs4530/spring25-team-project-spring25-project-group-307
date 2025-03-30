@@ -135,6 +135,8 @@ async function answerCreate(
     ansBy: ansBy,
     ansDateTime: ansDateTime,
     comments: comments,
+    upVotes: [],
+    downVotes: [],
   };
   return await AnswerModel.create(answerDetail);
 }

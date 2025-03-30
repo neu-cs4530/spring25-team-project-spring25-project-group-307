@@ -40,6 +40,7 @@ import StairsIcon from '@mui/icons-material/Stairs';
 import StarPurple500Icon from '@mui/icons-material/StarPurple500';
 import StarRateIcon from '@mui/icons-material/StarRate';
 import StarHalfIcon from '@mui/icons-material/StarHalf';
+import LockIcon from '@mui/icons-material/Lock';
 import useStatistics from '../../hooks/useStatistics';
 
 // Define ranking tiers and score requirements for each rank
@@ -56,13 +57,11 @@ const RANKING_TIERS = [
 const ACHIEVEMENTS_LIST = [
   { name: 'First Step', requirement: 'Post first question' },
   { name: 'Helpful Mind', requirement: 'Post first answer' },
-  { name: 'Casual Talker', requirement: 'Post first post' },
   { name: 'Curious Thinker', requirement: 'Ask 5 questions' },
   { name: 'Problem Solver', requirement: 'Answer 5 questions' },
-  { name: 'Acknowledged', requirement: 'First answer accepted' },
   { name: 'Audience Pleaser', requirement: 'Get 5 upvotes on an answer' },
   { name: 'Review', requirement: 'Give 10 upvotes' },
-  { name: 'Community Favorite', requirement: 'Get 10 upvotes on a question/post' },
+  { name: 'Community Favorite', requirement: 'Get 10 upvotes on a question' },
   { name: 'Ascension I', requirement: 'Reached Common Contributor' },
   { name: 'Ascension II', requirement: 'Reached Skilled Solver' },
   { name: 'Ascension III', requirement: 'Reached Expert Explorer' },
@@ -106,6 +105,7 @@ const getProgress = (score: number) => {
 
 const StatisticsSettings: React.FC = () => {
   const { userData, loading } = useStatistics();
+  const earnedAchievements = userData?.achievements ?? [];
 
   if (loading) {
     return (
@@ -219,18 +219,49 @@ const StatisticsSettings: React.FC = () => {
               Achievements
             </Typography>
             <List>
-              {ACHIEVEMENTS_LIST.map((achievement, index) => (
-                <Tooltip key={index} title={achievement.requirement} arrow>
-                  <ListItem>
-                    <ListItemAvatar>
-                      <Avatar sx={{ bgcolor: 'gray' }}>
-                        {achievementIcons[achievement.name] || <EmojiEventsIcon />}
-                      </Avatar>
-                    </ListItemAvatar>
-                    <ListItemText primary={achievement.name} />
-                  </ListItem>
-                </Tooltip>
-              ))}
+              {ACHIEVEMENTS_LIST.map((achievement, index) => {
+                const isEarned = earnedAchievements.includes(achievement.name);
+                const icon = achievementIcons[achievement.name] || <EmojiEventsIcon />;
+
+                return (
+                  <Tooltip key={index} title={achievement.requirement} arrow>
+                    <ListItem>
+                      <ListItemAvatar>
+                        <Box position='relative' display='inline-block'>
+                          <Avatar
+                            sx={{
+                              bgcolor: isEarned ? 'primary.main' : 'grey.400',
+                              color: isEarned ? 'white' : 'grey.700',
+                              boxShadow: isEarned ? '0 0 6px #1976d2' : 'none',
+                              transition: 'all 0.3s ease',
+                            }}>
+                            {icon}
+                          </Avatar>
+                          {!isEarned && (
+                            <LockIcon
+                              sx={{
+                                position: 'absolute',
+                                top: -4,
+                                right: -4,
+                                fontSize: 16,
+                                color: 'grey.600',
+                                backgroundColor: 'white',
+                                borderRadius: '50%',
+                              }}
+                            />
+                          )}
+                        </Box>
+                      </ListItemAvatar>
+                      <ListItemText
+                        primary={achievement.name}
+                        sx={{
+                          color: isEarned ? 'text.primary' : 'text.disabled',
+                        }}
+                      />
+                    </ListItem>
+                  </Tooltip>
+                );
+              })}
             </List>
           </Card>
         </Grid>

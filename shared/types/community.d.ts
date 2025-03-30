@@ -49,8 +49,3 @@ export type CommunityResponse = DatabaseCommunity | { error: string };
  * - `name`: The name of the achievement.
  * - `description`: A brief description of the achievement.
  */
-export interface DatabaseAchievement {
-  _id: ObjectId;
-  name: string;
-  description: string;
-}

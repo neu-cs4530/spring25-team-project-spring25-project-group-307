@@ -14,6 +14,8 @@ export interface Answer {
   ansBy: string;
   ansDateTime: Date;
   comments: Comment[];
+  upVotes: string[];
+  downVotes: string[];
 }
 
 /**

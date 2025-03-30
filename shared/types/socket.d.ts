@@ -133,4 +133,5 @@ export interface ServerToClientEvents {
   gameUpdate: (game: GameUpdatePayload) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
+  answerVoteUpdate: (vote: VoteUpdatePayload) => void;
 }
