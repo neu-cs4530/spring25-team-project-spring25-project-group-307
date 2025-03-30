@@ -76,6 +76,7 @@ const AnswerPage = () => {
       {question.answers.map(a => (
         <AnswerView
           key={String(a._id)}
+          answer={a}
           text={a.text}
           ansBy={a.ansBy}
           meta={getMetaData(new Date(a.ansDateTime))}
