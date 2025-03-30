@@ -244,21 +244,85 @@ const questionController = (socket: FakeSOSocket) => {
     const { qid, username } = req.body;
 
     try {
-      let status;
-
-      if (type === 'upvote') {
-        status = await addVoteToQuestion(qid, username, type);
-      } else {
-        status = await addVoteToQuestion(qid, username, type);
+      const question = await QuestionModel.findById(qid);
+      if (!question) {
+        res.status(404).send('Question not found');
+        return;
       }
 
-      if (status && 'error' in status) {
-        throw new Error(status.error);
+      const voter = await UserModel.findOne({ username });
+      const recipient = await UserModel.findOne({ username: question.askedBy });
+
+      if (!voter || !recipient) {
+        res.status(404).send('User not found');
+        return;
+      }
+
+      const wasUpvoted = question.upVotes.includes(username);
+      const wasDownvoted = question.downVotes.includes(username);
+
+      question.upVotes = question.upVotes.filter(u => u !== username);
+      question.downVotes = question.downVotes.filter(u => u !== username);
+
+      const result = await addVoteToQuestion(qid, username, type);
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      let voterDelta = 0;
+      let recipientDelta = 0;
+
+      if (type === 'upvote') {
+        if (wasUpvoted) {
+          voterDelta = -1;
+          recipientDelta = -5;
+        } else if (wasDownvoted) {
+          voterDelta = +2;
+          recipientDelta = +7;
+        } else {
+          // First time upvote
+          voterDelta = +1;
+          recipientDelta = +5;
+        }
+      } else if (type === 'downvote') {
+        if (wasDownvoted) {
+          // Cancel downvote
+          voterDelta = +1;
+          recipientDelta = +2;
+        } else if (wasUpvoted) {
+          // From upvote → downvote
+          voterDelta = -2;
+          recipientDelta = -7;
+        } else {
+          // First time downvote
+          voterDelta = -1;
+          recipientDelta = -2;
+        }
+      }
+
+      if (voter._id.equals(recipient._id)) {
+        voter.score += voterDelta + recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        await voter.save();
+      } else {
+        voter.score += voterDelta;
+        recipient.score += recipientDelta;
+
+        voter.ranking = getUpdatedRank(voter.score);
+        recipient.ranking = getUpdatedRank(recipient.score);
+
+        await voter.save();
+        await recipient.save();
       }
 
       // Emit the updated vote counts to all connected clients
-      socket.emit('voteUpdate', { qid, upVotes: status.upVotes, downVotes: status.downVotes });
-      res.json(status);
+      socket.emit('voteUpdate', { qid, upVotes: result.upVotes, downVotes: result.downVotes });
+      res.json({
+        success: true,
+        vote: type,
+        voterScore: voter.score,
+        recipientScore: recipient.score,
+      });
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
     }
