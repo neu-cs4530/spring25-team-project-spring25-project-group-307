@@ -7,11 +7,21 @@ import {
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
   DeleteCommentRequest,
+  CommentVoteRequest,
 } from '../types/types';
-import { addComment, deleteCommentById, saveComment } from '../services/comment.service';
+import {
+  addComment,
+  deleteCommentById,
+  saveComment,
+  addVoteToComment,
+} from '../services/comment.service';
+import getUpdatedRank from '../utils/userstat.util';
+import CommentModel from '../models/comments.model';
+import grantAchievementToUser from '../services/achievement.service';
 import { populateDocument } from '../utils/database.util';
 import { getCommunityQuestion } from '../services/question.service';
 import UserNotificationManager from '../services/userNotificationManager';
+import UserModel from '../models/users.model';
 
 const commentController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -157,8 +167,127 @@ const commentController = (socket: FakeSOSocket) => {
     }
   };
 
+  const voteComment = async (
+    req: CommentVoteRequest,
+    res: Response,
+    type: 'upvote' | 'downvote',
+  ): Promise<void> => {
+    if (!req.body.cid || !req.body.username) {
+      res.status(400).send('Invalid vote request');
+      return;
+    }
+
+    const { cid, username } = req.body;
+
+    try {
+      const comment = await CommentModel.findById(cid);
+      if (!comment) {
+        res.status(404).send('Comment not found');
+        return;
+      }
+
+      const voter = await UserModel.findOne({ username });
+      const recipient = await UserModel.findOne({ username: comment.commentBy });
+
+      if (!voter || !recipient) {
+        res.status(404).send('User not found');
+        return;
+      }
+
+      const wasUpvoted = comment.upVotes.includes(username);
+      const wasDownvoted = comment.downVotes.includes(username);
+
+      comment.upVotes = comment.upVotes.filter(u => u !== username);
+      comment.downVotes = comment.downVotes.filter(u => u !== username);
+
+      const result = await addVoteToComment(cid, username, type);
+      if ('error' in result) throw new Error(result.error);
+
+      let voterDelta = 0;
+      let recipientDelta = 0;
+
+      if (type === 'upvote') {
+        if (wasUpvoted) {
+          voterDelta = -1;
+          recipientDelta = -3;
+        } else if (wasDownvoted) {
+          voterDelta = +2;
+          recipientDelta = +6;
+        } else {
+          voterDelta = +1;
+          recipientDelta = +3;
+        }
+      } else if (wasDownvoted) {
+        voterDelta = +1;
+        recipientDelta = +1;
+      } else if (wasUpvoted) {
+        voterDelta = -2;
+        recipientDelta = -6;
+      } else {
+        voterDelta = -1;
+        recipientDelta = -1;
+      }
+
+      if (voter._id.equals(recipient._id)) {
+        voter.score += voterDelta + recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        await voter.save();
+      } else {
+        voter.score += voterDelta;
+        recipient.score += recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        recipient.ranking = getUpdatedRank(recipient.score);
+        await voter.save();
+        await recipient.save();
+      }
+
+      socket.emit('commentVoteUpdate', {
+        cid,
+        upVotes: result.upVotes,
+        downVotes: result.downVotes,
+      });
+
+      res.json({
+        success: true,
+        vote: type,
+        voterScore: voter.score,
+        recipientScore: recipient.score,
+      });
+    } catch (err) {
+      res.status(500).send(`Error when ${type}ing comment: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles upvoting a comment. The request must contain the answer ID (aid) and the username.
+   * If the request is invalid or an error occurs, the appropriate HTTP response status and message are returned.
+   *
+   * @param req The VoteRequest object containing the answer ID and the username.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const upvoteComment = async (req: CommentVoteRequest, res: Response): Promise<void> => {
+    voteComment(req, res, 'upvote');
+  };
+
+  /**
+   * Handles downvoting a comment. The request must contain the question ID (qid) and the username.
+   * If the request is invalid or an error occurs, the appropriate HTTP response status and message are returned.
+   *
+   * @param req The VoteRequest object containing the question ID and the username.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const downvoteComment = async (req: CommentVoteRequest, res: Response): Promise<void> => {
+    voteComment(req, res, 'downvote');
+  };
+
   router.post('/addComment', addCommentRoute);
   router.delete('/deleteComment/:cid', deleteComment);
+  router.post('/upvoteComment', upvoteComment);
+  router.post('/downvoteComment', downvoteComment);
 
   return router;
 };

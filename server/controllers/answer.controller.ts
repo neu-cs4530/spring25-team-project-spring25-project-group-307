@@ -20,6 +20,7 @@ import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
 import { getCommunityQuestion } from '../services/question.service';
 import UserNotificationManager from '../services/userNotificationManager';
+import grantAchievementToUser from '../services/achievement.service';
 import AnswerModel from '../models/answers.model';
 
 const answerController = (socket: FakeSOSocket) => {
@@ -101,12 +102,20 @@ const answerController = (socket: FakeSOSocket) => {
       }
 
       const user = await UserModel.findOne({ username: ansInfo.ansBy });
-
+      const currentRank = user?.ranking;
       if (user) {
         const newScore = user.score + 10;
         const newRank = getUpdatedRank(newScore);
+        if (currentRank !== newRank && newRank === 'Common Contributor') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension I');
+        }
         const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
-
+        if (user.responsesGiven === 0) {
+          await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+        }
+        if (user.responsesGiven === 5) {
+          await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+        }
         await UserModel.updateOne(
           { username: ansInfo.ansBy },
           {
@@ -205,6 +214,19 @@ const answerController = (socket: FakeSOSocket) => {
       let recipientDelta = 0;
 
       if (type === 'upvote') {
+        const updatedAnswer = await AnswerModel.findById(aid);
+        if (updatedAnswer && updatedAnswer.upVotes.length === 5) {
+          await grantAchievementToUser(recipient._id.toString(), 'Audience Pleaser');
+        }
+
+        // Award achievement if the voter has upvoted 10 different answers
+        const upvotedAnswersCount = await AnswerModel.countDocuments({
+          upVotes: username,
+        });
+
+        if (upvotedAnswersCount === 10) {
+          await grantAchievementToUser(voter._id.toString(), 'Ambitious Reviewer');
+        }
         if (wasUpvoted) {
           voterDelta = -1;
           recipientDelta = -10;
@@ -270,7 +292,7 @@ const answerController = (socket: FakeSOSocket) => {
   };
 
   /**
-   * Handles downvoting a question. The request must contain the question ID (qid) and the username.
+   * Handles downvoting an answer. The request must contain the question ID (qid) and the username.
    * If the request is invalid or an error occurs, the appropriate HTTP response status and message are returned.
    *
    * @param req The VoteRequest object containing the question ID and the username.

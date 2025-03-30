@@ -273,6 +273,10 @@ const questionController = (socket: FakeSOSocket) => {
       let recipientDelta = 0;
 
       if (type === 'upvote') {
+        const updatedQuestion = await QuestionModel.findById(qid);
+        if (updatedQuestion && updatedQuestion.upVotes.length === 10) {
+          await grantAchievementToUser(recipient._id.toString(), 'Community Favorite');
+        }
         if (wasUpvoted) {
           voterDelta = -1;
           recipientDelta = -5;

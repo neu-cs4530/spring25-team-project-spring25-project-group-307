@@ -1,3 +1,4 @@
+import { QueryOptions } from 'mongoose';
 import {
   AnswerResponse,
   Comment,
@@ -6,7 +7,9 @@ import {
   DatabaseComment,
   DatabaseQuestion,
   QuestionResponse,
+  VoteResponse,
 } from '../types/types';
+
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
 import CommentModel from '../models/comments.model';
@@ -79,5 +82,92 @@ export const deleteCommentById = async (cid: string): Promise<CommentResponse> =
     return result || { error: 'Comment not found' };
   } catch (error) {
     return { error: 'Error when deleting a comment' };
+  }
+};
+
+/**
+ * Adds a vote to a comment (upvote or downvote).
+ * @param {string} cid - The comment ID
+ * @param {string} username - The voting user
+ * @param {'upvote' | 'downvote'} voteType - Vote type
+ * @returns {Promise<VoteResponse>} - Vote status
+ */
+export const addVoteToComment = async (
+  cid: string,
+  username: string,
+  voteType: 'upvote' | 'downvote',
+): Promise<VoteResponse> => {
+  let updateOperation: QueryOptions;
+
+  if (voteType === 'upvote') {
+    updateOperation = [
+      {
+        $set: {
+          upVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+              { $concatArrays: ['$upVotes', [username]] },
+            ],
+          },
+          downVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              '$downVotes',
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  } else {
+    updateOperation = [
+      {
+        $set: {
+          downVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+              { $concatArrays: ['$downVotes', [username]] },
+            ],
+          },
+          upVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              '$upVotes',
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  try {
+    const result = await CommentModel.findByIdAndUpdate(cid, updateOperation, { new: true });
+
+    if (!result) return { error: 'Comment not found' };
+
+    let msg = '';
+    if (voteType === 'upvote') {
+      msg = result.upVotes.includes(username)
+        ? 'Comment upvoted successfully'
+        : 'Upvote cancelled successfully';
+    } else {
+      msg = result.downVotes.includes(username)
+        ? 'Comment downvoted successfully'
+        : 'Downvote cancelled successfully';
+    }
+
+    return {
+      msg,
+      upVotes: result.upVotes || [],
+      downVotes: result.downVotes || [],
+    };
+  } catch (err) {
+    return {
+      error:
+        voteType === 'upvote' ? 'Error when upvoting comment' : 'Error when downvoting comment',
+    };
   }
 };

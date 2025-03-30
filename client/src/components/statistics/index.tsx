@@ -60,7 +60,7 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Curious Thinker', requirement: 'Ask 5 questions' },
   { name: 'Problem Solver', requirement: 'Answer 5 questions' },
   { name: 'Audience Pleaser', requirement: 'Get 5 upvotes on an answer' },
-  { name: 'Review', requirement: 'Give 10 upvotes' },
+  { name: 'Ambitious Reviewer', requirement: 'Give 10 upvotes on an answer' },
   { name: 'Community Favorite', requirement: 'Get 10 upvotes on a question' },
   { name: 'Ascension I', requirement: 'Reached Common Contributor' },
   { name: 'Ascension II', requirement: 'Reached Skilled Solver' },
@@ -80,7 +80,7 @@ const achievementIcons: Record<string, React.ReactElement> = {
   'Problem Solver': <CelebrationIcon />,
   'Acknowledged': <TaskAltIcon />,
   'Audience Pleaser': <ThumbUpIcon />,
-  'Review': <HowToVoteIcon />,
+  'Ambitious Reviewer': <HowToVoteIcon />,
   'Community Favorite': <FavoriteIcon />,
   'Ascension I': <StarBorderIcon />,
   'Ascension II': <StarPurple500Icon />,
@@ -95,8 +95,8 @@ const achievementIcons: Record<string, React.ReactElement> = {
 // Get the user's progress percentage toward the next rank
 const getProgress = (score: number) => {
   for (let i = 0; i < RANKING_TIERS.length - 1; i++) {
-    if (score >= RANKING_TIERS[i].minScore && score < RANKING_TIERS[i].maxScore) {
-      return RANKING_TIERS[i].maxScore - score;
+    if (score >= RANKING_TIERS[i].minScore && score <= RANKING_TIERS[i].maxScore) {
+      return RANKING_TIERS[i].maxScore - score + 1;
     }
   }
   // if user is at the highest rank, it will just return 0

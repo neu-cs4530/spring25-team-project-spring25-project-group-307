@@ -5,7 +5,12 @@ import {
   GameMovePayload,
   GameRequest,
   GetGamesRequest,
+  NimGameState,
 } from '../types/types';
+import UserModel from '../models/users.model';
+import grantAchievementToUser from '../services/achievement.service';
+import getUpdatedRank from '../utils/userstat.util';
+
 import findGames from '../services/game.service';
 import GameManager from '../services/games/gameManager';
 import { GAME_TYPES } from '../types/constants';
@@ -153,6 +158,16 @@ const gameController = (socket: FakeSOSocket) => {
       await game.saveGameState();
 
       if (game.state.status === 'OVER') {
+        const { winners } = game.state as NimGameState;
+        const winnerUsername = Array.isArray(winners) && winners.length === 1 ? winners[0] : null;
+
+        if (winnerUsername) {
+          const winnerUser = await UserModel.findOne({ username: winnerUsername });
+          if (winnerUser) {
+            await grantAchievementToUser(winnerUser._id.toString(), 'Nim Beginner');
+          }
+        }
+
         GameManager.getInstance().removeGame(gameID);
       }
     } catch (error) {

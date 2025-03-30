@@ -5,6 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { getMetaData } from '../../../tool';
 import { Comment, DatabaseComment } from '../../../types/types';
 import './index.css';
+import CommentVoteComponent from '../voteCommentComponent';
 import useUserContext from '../../../hooks/useUserContext';
 
 /**
@@ -50,6 +51,8 @@ const CommentSection = ({
       text,
       commentBy: user.username,
       commentDateTime: new Date(),
+      upVotes: [],
+      downVotes: [],
     };
 
     handleAddComment(newComment);
@@ -75,6 +78,7 @@ const CommentSection = ({
                       <small className='comment-meta'>
                         {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
                       </small>
+                      <CommentVoteComponent comment={comment} />
                     </div>
                     {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
                       <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>

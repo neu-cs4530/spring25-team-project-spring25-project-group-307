@@ -6,11 +6,15 @@ import { ObjectId } from 'mongodb';
  * - `text`: The content of the comment.
  * - `commentBy`: The author of the comment.
  * - `commentDateTime`: The timestamp when the comment was made.
+ * - `upVotes`: The upvotes for a comment made.
+ * - `downVotes`: The downvotes for a comment made.
  */
 export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
+  upVotes: string[];
+  downVotes: string[];
 }
 
 /**

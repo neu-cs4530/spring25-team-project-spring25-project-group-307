@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import api from './config';
-import { Comment, DatabaseComment } from '../types/types';
+import { Comment, DatabaseComment, VoteInterface } from '../types/types';
 
 const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
 
@@ -49,4 +49,26 @@ const deleteComment = async (cid: ObjectId): Promise<DatabaseComment> => {
   return res.data;
 };
 
-export { addComment, deleteComment };
+/**
+ * Upvotes a comment.
+ */
+const upvoteComment = async (cid: ObjectId, username: string): Promise<VoteInterface> => {
+  const res = await api.post(`${COMMENT_API_URL}/upvoteComment`, { cid, username });
+  if (res.status !== 200) {
+    throw new Error('Error while upvoting the comment');
+  }
+  return res.data;
+};
+
+/**
+ * Downvotes a comment.
+ */
+const downvoteComment = async (cid: ObjectId, username: string): Promise<VoteInterface> => {
+  const res = await api.post(`${COMMENT_API_URL}/downvoteComment`, { cid, username });
+  if (res.status !== 200) {
+    throw new Error('Error while downvoting the comment');
+  }
+  return res.data;
+};
+
+export { addComment, deleteComment, upvoteComment, downvoteComment };
