@@ -1,5 +1,4 @@
-import { Badge, Box, IconButton, Menu, MenuItem } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Notifications from './notifications';
 

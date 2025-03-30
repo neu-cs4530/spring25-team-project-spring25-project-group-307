@@ -1,4 +1,3 @@
-import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { useNavigate } from 'react-router-dom';
@@ -39,13 +38,6 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
     handleViewProfile,
     handleNavigateHome,
   } = useHeader();
-
-  const notifications = [
-    'You have a new message',
-    'Your answer was upvoted',
-    'New comment on your question',
-    'Community event happening tomorrow',
-  ];
 
   const navigate = useNavigate();
 

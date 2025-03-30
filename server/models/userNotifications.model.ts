@@ -1,6 +1,7 @@
 import mongoose, { Model } from 'mongoose';
-import userNotificationsSchema from './schema/userNotifications.schema';
 import { DatabaseUserNotifications } from '@fake-stack-overflow/shared';
+
+import userNotificationsSchema from './schema/userNotifications.schema';
 
 /**
  * Mongoose model for the `UserNotifications` collection.

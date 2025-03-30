@@ -3,6 +3,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useEffect, useState } from 'react';
 import { Notification } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
 import useUserContext from '../../../../hooks/useUserContext';
 import {
@@ -18,32 +19,35 @@ const Notifications = () => {
   const navigate = useNavigate();
   const open = Boolean(anchorEl);
 
-  const handleClickBell = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickBell = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const refreshNotifications = () => {
+  const refreshNotifications = useCallback(() => {
     getNotifications(user.username).then(notificationsResponse => {
       if (notificationsResponse) setNotifications(notificationsResponse.notifications);
     });
-  };
+  }, [user.username]);
 
-  const handleClickNotification = (notification: Notification) => {
-    navigate(`/question/${notification.questionId}`);
-    clearNotification(user.username, notification.questionId).then(() => {
-      refreshNotifications();
-      handleClose();
-    });
-  };
+  const handleClickNotification = useCallback(
+    (notification: Notification) => {
+      navigate(`/question/${notification.questionId}`);
+      clearNotification(user.username, notification.questionId).then(() => {
+        refreshNotifications();
+        handleClose();
+      });
+    },
+    [navigate, refreshNotifications, handleClose, user.username],
+  );
 
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     handleClose();
     clearAllNotifications(user.username).then(() => setNotifications([]));
-  };
+  }, [handleClose, user.username]);
 
   useEffect(() => {
     refreshNotifications();
@@ -55,7 +59,7 @@ const Notifications = () => {
     return () => {
       socket.off('preferencesUpdate');
     };
-  }, [socket, user.username]);
+  }, [socket, user.username, refreshNotifications]);
   return (
     <>
       <IconButton onClick={handleClickBell} color='inherit'>
