@@ -12,3 +12,4 @@ export * from './preferences';
 export * from './interest';
 export * from './feedItem';
 export * from './feed';
+export * from './notifications';

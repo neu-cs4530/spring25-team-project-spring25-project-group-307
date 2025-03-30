@@ -114,11 +114,12 @@ const answerController = (socket: FakeSOSocket) => {
       const communityQuestion = await getCommunityQuestion(status._id);
       if (!('error' in communityQuestion)) {
         const userNotificationManager = UserNotificationManager.getInstance();
-        await userNotificationManager.notifySpecificOnlineUsers(
+        userNotificationManager.notifySpecificOnlineUsers(
           communityQuestion.title,
           [status.askedBy],
           'Answers to my Questions',
           `Your question in ${communityQuestion.title} has a new answer. Check it out!`,
+          qid,
         );
       }
       // Populates the fields of the answer that was added and emits the new object

@@ -113,11 +113,12 @@ const commentController = (socket: FakeSOSocket) => {
         if (!('error' in communityQuestion)) {
           const userNotificationManager = UserNotificationManager.getInstance();
 
-          await userNotificationManager.notifySpecificOnlineUsers(
+          userNotificationManager.notifySpecificOnlineUsers(
             communityQuestion.title,
             [(populatedDoc as PopulatedDatabaseQuestion).askedBy],
             'Comments on my Questions',
             `Someone commented on your question in ${communityQuestion.title}. Check it out!`,
+            id,
           );
         }
       }
