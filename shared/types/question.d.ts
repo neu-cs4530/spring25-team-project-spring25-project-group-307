@@ -139,3 +139,15 @@ export interface VoteRequest extends Request {
     username: string;
   };
 }
+
+/**
+ * Interface for the request body when upvoting or downvoting an answer.
+ * - `aid`: The unique identifier of the question being voted on (body).
+ * - `username`: The username of the user casting the vote (body).
+ */
+export interface AnswerVoteRequest extends Request {
+  body: {
+    aid: string;
+    username: string;
+  };
+}
