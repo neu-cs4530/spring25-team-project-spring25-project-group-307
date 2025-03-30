@@ -1,9 +1,8 @@
 import { Badge, Box, Divider, IconButton, Link, Menu, MenuItem, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Notification } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
-import { useCallback } from 'react';
 
 import useUserContext from '../../../../hooks/useUserContext';
 import {
