@@ -46,6 +46,18 @@ export interface VoteUpdatePayload {
 }
 
 /**
+ * Payload for an answer vote update event.
+ * - `aid`: The unique identifier of the answer.
+ * - `upVotes`: An array of usernames who upvoted the question.
+ * - `downVotes`: An array of usernames who downvoted the question.
+ */
+export interface AnswerVoteUpdatePayload {
+  aid: string;
+  upVotes: string[];
+  downVotes: string[];
+}
+
+/**
  * Payload for a chat update event.
  * - `chat`: The updated chat object.
  * - `type`: The type of update (`'created'`, `'newMessage'`, or `'newParticipant'`).
@@ -122,11 +134,13 @@ export interface ClientToServerEvents {
  * - `gameUpdate`: Server sends updated game state.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
+ * - `answerVoteUpdate`: Server sends updated votes for an answer.
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
   answerUpdate: (result: AnswerUpdatePayload) => void;
   viewsUpdate: (question: PopulatedDatabaseQuestion) => void;
+  answerVoteUpdate: (vote: AnswerVoteUpdatePayload) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;

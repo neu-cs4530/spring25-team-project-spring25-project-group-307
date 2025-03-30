@@ -1,17 +1,32 @@
-/* All the CSS related to answers Page*/
 .answer {
-  flex-direction: row;
-  border-bottom: #000000 1px dashed;
+  padding: 16px;
+  border-bottom: 1px solid #ccc;
+  background-color: #fff;
 }
 
 .answerText {
-  width: 75%;
+  font-size: 16px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  margin-bottom: 8px;
 }
 
 .answerAuthor {
-  margin-left: 5%;
+  font-size: 14px;
+  color: #666;
 }
 
 .answer_author {
-  color: green;
+  font-weight: bold;
+}
+
+.answer_question_meta {
+  font-size: 12px;
+  color: #999;
+}
+
+.vote-container {
+  display: flex;
+  align-items: center;
+  padding: 12px;
 }

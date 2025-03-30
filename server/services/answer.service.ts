@@ -1,3 +1,4 @@
+import { QueryOptions } from 'mongoose';
 import {
   Answer,
   AnswerResponse,
@@ -6,6 +7,7 @@ import {
   PopulatedDatabaseAnswer,
   PopulatedDatabaseQuestion,
   QuestionResponse,
+  VoteResponse,
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
 import QuestionModel from '../models/questions.model';
@@ -86,5 +88,96 @@ export const addAnswerToQuestion = async (
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
+  }
+};
+
+/**
+ * Adds a vote to an answer (upvote or downvote).
+ * @param {string} aid - The answer ID
+ * @param {string} username - The voting user
+ * @param {'upvote' | 'downvote'} voteType - Vote type
+ * @returns {Promise<VoteResponse>} - Vote status
+ */
+export const addVoteToAnswer = async (
+  aid: string,
+  username: string,
+  voteType: 'upvote' | 'downvote',
+): Promise<VoteResponse> => {
+  let updateOperation: QueryOptions;
+
+  if (voteType === 'upvote') {
+    updateOperation = [
+      {
+        $set: {
+          upVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+              { $concatArrays: ['$upVotes', [username]] },
+            ],
+          },
+          downVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              '$downVotes',
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  } else {
+    updateOperation = [
+      {
+        $set: {
+          downVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+              { $concatArrays: ['$downVotes', [username]] },
+            ],
+          },
+          upVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              '$upVotes',
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  try {
+    const result: DatabaseAnswer | null = await AnswerModel.findByIdAndUpdate(
+      aid,
+      updateOperation,
+      { new: true },
+    );
+
+    if (!result) return { error: 'Answer not found' };
+
+    let msg = '';
+
+    if (voteType === 'upvote') {
+      msg = result.upVotes.includes(username)
+        ? 'Question upvoted successfully'
+        : 'Upvote cancelled successfully';
+    } else {
+      msg = result.downVotes.includes(username)
+        ? 'Question downvoted successfully'
+        : 'Downvote cancelled successfully';
+    }
+
+    return {
+      msg,
+      upVotes: result.upVotes || [],
+      downVotes: result.downVotes || [],
+    };
+  } catch (err) {
+    return {
+      error: voteType === 'upvote' ? 'Error when upvoting answer' : 'Error when downvoting answer',
+    };
   }
 };

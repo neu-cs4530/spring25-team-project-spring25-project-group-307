@@ -3,9 +3,10 @@ import { ObjectId } from 'mongodb';
 import { Box, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { handleHyperlink } from '../../../../tool';
+import AnswerVoteComponent from '../../voteAnswerComponent';
 import CommentSection from '../../commentSection';
 import './index.css';
-import { Comment, DatabaseComment } from '../../../../types/types';
+import { PopulatedDatabaseAnswer, Comment, DatabaseComment } from '../../../../types/types';
 
 /**
  * Interface representing the props for the AnswerView component.
@@ -25,6 +26,7 @@ interface AnswerProps {
   handleDeleteComment: (commentId: ObjectId) => void;
   handleDeleteAnswer: () => void;
   currentRole: string;
+  answer: PopulatedDatabaseAnswer;
 }
 
 /**
@@ -46,6 +48,7 @@ const AnswerView = ({
   handleDeleteComment,
   handleDeleteAnswer,
   currentRole,
+  answer,
 }: AnswerProps) => {
   const [commentList, setCommentList] = useState(comments);
 
@@ -65,21 +68,28 @@ const AnswerView = ({
   };
 
   return (
-    <div className='answer right_padding'>
-      <Box sx={{ display: 'flex' }}>
-        <div id='answerText' className='answerText'>
-          {handleHyperlink(text)}
-        </div>
-        <div className='answerAuthor'>
-          <div className='answer_author'>{ansBy}</div>
-          <div className='answer_question_meta'>{meta}</div>
-        </div>
-        {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
-          <IconButton sx={{ ml: 2 }} onClick={handleDeleteAnswer}>
-            <DeleteIcon />
-          </IconButton>
-        ) : null}
+    <div className='answer'>
+      <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
+        <AnswerVoteComponent answer={answer} />
+
+        <Box>
+          <div className='answerText'>{handleHyperlink(text)}</div>
+
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div className='answerAuthor'>
+              <div className='answer_author'>{ansBy}</div>
+              <div className='answer_question_meta'>{meta}</div>
+            </div>
+
+            {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
+              <IconButton onClick={handleDeleteAnswer}>
+                <DeleteIcon />
+              </IconButton>
+            )}
+          </Box>
+        </Box>
       </Box>
+
       <CommentSection
         comments={commentList}
         handleAddComment={handleAddComment}

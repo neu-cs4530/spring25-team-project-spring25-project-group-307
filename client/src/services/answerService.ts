@@ -1,5 +1,5 @@
 import { ObjectId } from 'mongodb';
-import { Answer, PopulatedDatabaseAnswer } from '../types/types';
+import { Answer, PopulatedDatabaseAnswer, VoteInterface } from '../types/types';
 import api from './config';
 
 const ANSWER_API_URL = `${process.env.REACT_APP_SERVER_URL}/answer`;
@@ -29,4 +29,36 @@ const deleteAnswer = async (aid: ObjectId): Promise<PopulatedDatabaseAnswer> => 
   return res.data;
 };
 
-export { addAnswer, deleteAnswer };
+/**
+ * Upvotes an answer.
+ *
+ * @param aid - The answer ID to upvote.
+ * @param username - The username of the user performing the upvote.
+ * @returns VoteInterface containing updated vote data.
+ */
+const upvoteAnswer = async (aid: ObjectId, username: string): Promise<VoteInterface> => {
+  const data = { aid, username };
+  const res = await api.post(`${ANSWER_API_URL}/upvoteAnswer`, data);
+  if (res.status !== 200) {
+    throw new Error('Error while upvoting the answer');
+  }
+  return res.data;
+};
+
+/**
+ * Downvotes an answer.
+ *
+ * @param aid - The answer ID to downvote.
+ * @param username - The username of the user performing the downvote.
+ * @returns VoteInterface containing updated vote data.
+ */
+const downvoteAnswer = async (aid: ObjectId, username: string): Promise<VoteInterface> => {
+  const data = { aid, username };
+  const res = await api.post(`${ANSWER_API_URL}/downvoteAnswer`, data);
+  if (res.status !== 200) {
+    throw new Error('Error while downvoting the answer');
+  }
+  return res.data;
+};
+
+export { addAnswer, deleteAnswer, upvoteAnswer, downvoteAnswer };
