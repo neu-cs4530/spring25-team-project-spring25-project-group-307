@@ -23,6 +23,7 @@ import preferencesController from './controllers/preferences.controller';
 import interestController from './controllers/interest.controller';
 import feedController from './controllers/feed.controller';
 import UserNotificationManager from './services/userNotificationManager';
+import userNotificationsController from './controllers/userNotifications.controller';
 
 dotenv.config();
 
@@ -103,6 +104,7 @@ app.use('/preferences', preferencesController());
 app.use('/interest', interestController(socket));
 app.use('/feed', feedController(socket));
 app.use('/feedItem', feedController(socket));
+app.use('/notifications', userNotificationsController());
 
 // Export the app instance
 export { app, server, startServer };

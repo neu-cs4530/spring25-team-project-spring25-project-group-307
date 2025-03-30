@@ -5,6 +5,7 @@ import {
 } from '@fake-stack-overflow/shared';
 import { DefaultEventsMap, Socket } from 'socket.io';
 import { getAllPreferencesForCommunity } from './preferences.service';
+import { addNotification } from './userNotifications.service';
 
 class UserNotificationManager {
   /**
@@ -108,6 +109,7 @@ class UserNotificationManager {
     userPreference: UserPreference,
     notificationMessage: string,
     skipUsers: string[],
+    questionId: string,
   ) {
     const loggedinUsers = this.getLoggedInUsers();
 
@@ -120,7 +122,10 @@ class UserNotificationManager {
         databasePeferences.userPreferences.includes(userPreference)
       ) {
         const clientSocket = this.getUserSocketByUsername(databasePeferences.username);
-        clientSocket?.emit('preferencesUpdate', notificationMessage);
+        addNotification(databasePeferences.username, {
+          message: notificationMessage,
+          questionId,
+        }).then(() => clientSocket?.emit('preferencesUpdate', notificationMessage));
       }
     });
   }
@@ -137,6 +142,7 @@ class UserNotificationManager {
     usernames: string[],
     userPreference: UserPreference,
     notificationMessage: string,
+    questionId: string,
   ) {
     const loggedinUsers = this.getLoggedInUsers();
 
@@ -149,7 +155,11 @@ class UserNotificationManager {
         databasePeferences.userPreferences.includes(userPreference)
       ) {
         const clientSocket = this.getUserSocketByUsername(databasePeferences.username);
-        clientSocket?.emit('preferencesUpdate', notificationMessage);
+
+        addNotification(databasePeferences.username, {
+          message: notificationMessage,
+          questionId,
+        }).then(() => clientSocket?.emit('preferencesUpdate', notificationMessage));
       }
     });
   }

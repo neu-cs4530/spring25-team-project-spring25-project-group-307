@@ -1,19 +1,24 @@
 import { Badge, Box, Divider, IconButton, Link, Menu, MenuItem, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Notification } from '@fake-stack-overflow/shared';
+import { useNavigate } from 'react-router-dom';
 
-export interface NotificationMenuItem {
-  message: string;
-}
+import useUserContext from '../../../../hooks/useUserContext';
+import {
+  clearAllNotifications,
+  clearNotification,
+  getNotifications,
+} from '../../../../services/userNotificationService';
+
 const Notifications = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notifications, setNotifications] = useState<NotificationMenuItem[]>([
-    { message: 'This is a test notification' },
-  ]);
-
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const { socket, user } = useUserContext();
+  const navigate = useNavigate();
   const open = Boolean(anchorEl);
 
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClickBell = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -21,13 +26,39 @@ const Notifications = () => {
     setAnchorEl(null);
   };
 
-  const handleClear = () => {
-    setNotifications([]);
-    handleClose();
+  const refreshNotifications = () => {
+    getNotifications(user.username).then(notificationsResponse => {
+      if (notificationsResponse) setNotifications(notificationsResponse.notifications);
+    });
   };
+
+  const handleClickNotification = (notification: Notification) => {
+    navigate(`/question/${notification.questionId}`);
+    clearNotification(user.username, notification.questionId).then(() => {
+      refreshNotifications();
+      handleClose();
+    });
+  };
+
+  const handleClear = () => {
+    handleClose();
+    clearAllNotifications(user.username).then(() => setNotifications([]));
+  };
+
+  useEffect(() => {
+    refreshNotifications();
+
+    socket.on('preferencesUpdate', () => {
+      refreshNotifications();
+    });
+
+    return () => {
+      socket.off('preferencesUpdate');
+    };
+  }, [socket, user.username]);
   return (
     <>
-      <IconButton onClick={handleClick} color='inherit'>
+      <IconButton onClick={handleClickBell} color='inherit'>
         <Badge badgeContent={notifications.length} color='error'>
           <NotificationsIcon />
         </Badge>
@@ -70,9 +101,19 @@ const Notifications = () => {
         </Box>
 
         {notifications.map((notification, index) => (
-          <MenuItem key={index} onClick={handleClose}>
-            {notification.message}
-          </MenuItem>
+          <Box
+            key={index}
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              width: '100%',
+              flexDirection: 'column',
+            }}>
+            <MenuItem onClick={() => handleClickNotification(notification)}>
+              {notification.message}
+            </MenuItem>
+            <Divider />
+          </Box>
         ))}
         {notifications.length === 0 ? (
           <MenuItem onClick={handleClose}>No new notifications...</MenuItem>

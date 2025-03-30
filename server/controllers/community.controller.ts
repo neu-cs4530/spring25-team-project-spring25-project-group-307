@@ -238,6 +238,7 @@ const communityController = (socket: FakeSOSocket) => {
             'All Questions',
             `A new question has been posted in ${community.title}. Check it out!`,
             [(question as DatabaseQuestion).askedBy],
+            (question as DatabaseQuestion)._id.toString(),
           );
         });
       }
