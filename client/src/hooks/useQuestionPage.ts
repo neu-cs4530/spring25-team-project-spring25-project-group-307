@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { AnswerUpdatePayload, OrderType, PopulatedDatabaseQuestion } from '../types/types';
-import { getCommunityQuestion, getQuestionsByFilter } from '../services/questionService';
+import { getPublicQuestion, getQuestionsByFilter } from '../services/questionService';
 
 /**
  * Custom hook for managing the question page state, filtering, and real-time updates.
@@ -50,13 +50,8 @@ const useQuestionPage = () => {
         // Filter out private questions
         const publicQuestions = await Promise.all(
           res.map(async q => {
-            const communityQuestion = await getCommunityQuestion(q._id).catch(err => null);
-
-            if (communityQuestion?.isPrivate) {
-              return null;
-            }
-
-            return q;
+            const communityQuestion = await getPublicQuestion(q._id).catch(error => null);
+            return communityQuestion;
           }),
         );
 

@@ -197,6 +197,33 @@ export const getQuestionById = async (qid: string): Promise<QuestionResponse> =>
 };
 
 /**
+ * Retrieves a populated database question by its ID.
+ * @param {string} qid - The question ID
+ * @returns {Promise<PopulatedDatabaseQuestion>} - The populated question or error message
+ */
+export const getPopulatedQuestionById = async (
+  qid: string,
+): Promise<PopulatedDatabaseQuestion | { error: string }> => {
+  try {
+    const res: PopulatedDatabaseQuestion | null = await QuestionModel.findById(qid).populate<{
+      tags: DatabaseTag[];
+      answers: PopulatedDatabaseAnswer[];
+      comments: DatabaseComment[];
+    }>([
+      { path: 'tags', model: TagModel },
+      { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },
+      { path: 'comments', model: CommentModel },
+    ]);
+    if (!res) {
+      throw new Error('Question not found');
+    }
+    return res;
+  } catch (error) {
+    return { error: 'Error when retrieving the question' };
+  }
+};
+
+/**
  * Adds a vote to a question.
  * @param {string} qid - The question ID
  * @param {string} username - The username who voted
@@ -309,6 +336,6 @@ export const getCommunityQuestion = async (qid: ObjectId): Promise<CommunityResp
 
     return community;
   } catch (error) {
-    return null;
+    return { error: 'Error when retrieving community question' };
   }
 };

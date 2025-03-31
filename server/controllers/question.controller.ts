@@ -20,6 +20,7 @@ import {
   saveQuestion,
   getCommunityQuestion,
   deleteQuestionById,
+  getPopulatedQuestionById,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
@@ -72,7 +73,10 @@ const questionController = (socket: FakeSOSocket) => {
    *
    * @returns A Promise that resolves to void.
    */
-  const getQuestionById = async (req: FindQuestionByIdRequest, res: Response): Promise<void> => {
+  const getQuestionByIdRoute = async (
+    req: FindQuestionByIdRequest,
+    res: Response,
+  ): Promise<void> => {
     const { qid } = req.params;
     const { username } = req.query;
 
@@ -292,20 +296,61 @@ const questionController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       const community: CommunityResponse = await getCommunityQuestion(req.params.qid);
+      if ('error' in community) {
+        throw new Error(community.error);
+      }
       res.json(community);
     } catch (error) {
       res.status(500).send(`Error when getting community question: ${(error as Error).message}`);
     }
   };
 
+  const getPublicQuestionRoute = async (
+    req: GetCommunityQuestionRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { qid } = req.params;
+
+    try {
+      // Fetch the question by ID
+      const question = await getPopulatedQuestionById(qid.toString());
+
+      if (!question || 'error' in question) {
+        res.status(404).json({ error: 'Question not found' });
+        return;
+      }
+
+      // Check if the question is part of a community
+      const community = await getCommunityQuestion(qid);
+
+      if ('error' in community) {
+        // If the question is not part of a community, return the question
+        res.json(question);
+        return;
+      }
+
+      // If the community is private, return null
+      if (community.isPrivate) {
+        res.json(null);
+        return;
+      }
+
+      // If the community is public, return the question
+      res.json(question);
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
-  router.get('/getQuestionById/:qid', getQuestionById);
+  router.get('/getQuestionById/:qid', getQuestionByIdRoute);
   router.post('/addQuestion', addQuestion);
   router.delete('/deleteQuestion/:qid', deleteQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);
+  router.get('/getPublicQuestion/:qid', getPublicQuestionRoute);
 
   return router;
 };
