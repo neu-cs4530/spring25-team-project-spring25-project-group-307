@@ -21,6 +21,28 @@ export const saveInterest = async (interest: Interest): Promise<InterestResponse
   }
 };
 
+export const updateInterestWeightMultiplicative = async (
+  userId: ObjectId,
+  tagId: ObjectId,
+  factor: number,
+): Promise<InterestResponse> => {
+  try {
+    const result = await InterestModel.findOneAndUpdate(
+      { userId, tagId },
+      { $mul: { weight: factor } },
+      { new: true },
+    );
+
+    if (!result) {
+      throw Error('Failed to update interest weight');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when updating interest weight: ${error}` };
+  }
+};
+
 export const deleteInterest = async (interest: Interest): Promise<InterestResponse> => {
   try {
     const result = await InterestModel.findOneAndDelete(interest);

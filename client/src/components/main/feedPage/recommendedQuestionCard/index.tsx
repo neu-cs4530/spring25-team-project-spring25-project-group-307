@@ -8,8 +8,11 @@ import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
 
 import { useEffect, useState } from 'react';
+import { IconButton, Menu, MenuItem } from '@mui/material';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import useUserContext from '../../../../hooks/useUserContext';
 import { joinCommunity, leaveCommunity } from '../../../../services/communityService';
+import { updateInterestsWeights } from '../../../../services/interestService';
 
 const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
@@ -21,6 +24,50 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const { user } = useUserContext();
 
   const [isAlreadyJoined, setIsAlreadyJoined] = useState(false);
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [hasInteractedWithInterests, setHasInteractedWithInterests] = useState(false);
+  const menuOpen = Boolean(anchorEl);
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleInterested = async () => {
+    await updateInterestsWeights(
+      user._id,
+      item.question.tags.map((tag: DatabaseTag) => tag._id),
+      true,
+    );
+    setHasInteractedWithInterests(true);
+    handleMenuClose();
+  };
+
+  const handleNotInterested = async () => {
+    await updateInterestsWeights(
+      user._id,
+      item.question.tags.map((tag: DatabaseTag) => tag._id),
+      false,
+    );
+    setHasInteractedWithInterests(true);
+    handleMenuClose();
+  };
+
+  const handleSave = () => {
+    console.log('Save Clicked');
+    // Call service function to update save
+    handleMenuClose();
+  };
+
+  const handleReport = () => {
+    console.log('Report Clicked');
+    // Call service function to update report
+    handleMenuClose();
+  };
 
   useEffect(() => {
     if (item.community) {
@@ -140,7 +187,68 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
           </Typography>
         </CardContent>
         <CardActions>
-          <Button size='small'>View Post</Button>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between', // Push "View Post" to the left and menu icon to the right
+              alignItems: 'center',
+              width: '100%', // Ensure the Box spans the full width of the card
+            }}>
+            {/* "View Post" Button */}
+            <Button size='small'>View Post</Button>
+
+            {/* 3-Dot Menu Icon */}
+            <IconButton
+              onClick={event => {
+                event.stopPropagation();
+                handleMenuOpen(event);
+              }}>
+              <MoreHorizIcon />
+            </IconButton>
+            {/* Dropdown Menu */}
+            <Menu
+              anchorEl={anchorEl}
+              open={menuOpen}
+              onClose={(event: React.MouseEvent<HTMLElement>) => {
+                event.stopPropagation();
+                handleMenuClose();
+              }}
+              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+              {!hasInteractedWithInterests && (
+                <MenuItem
+                  onClick={event => {
+                    event.stopPropagation();
+                    handleInterested();
+                  }}>
+                  Interested
+                </MenuItem>
+              )}
+              {!hasInteractedWithInterests && (
+                <MenuItem
+                  onClick={event => {
+                    event.stopPropagation();
+                    handleNotInterested();
+                  }}>
+                  Not Interested
+                </MenuItem>
+              )}
+              <MenuItem
+                onClick={event => {
+                  event.stopPropagation();
+                  handleSave();
+                }}>
+                Save
+              </MenuItem>
+              <MenuItem
+                onClick={event => {
+                  event.stopPropagation();
+                  handleReport();
+                }}>
+                Report
+              </MenuItem>
+            </Menu>
+          </Box>
         </CardActions>
         <Box sx={{ display: 'flex', gap: 2 }}>
           {item.question.tags.map((tag: DatabaseTag) => (

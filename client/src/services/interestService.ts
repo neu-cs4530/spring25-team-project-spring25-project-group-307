@@ -47,4 +47,18 @@ const updateInterests = async (username: string, interests: Interest[]): Promise
   await api.post(`${INTEREST_API_URL}/updateInterests`, { username, interests });
 };
 
-export { getInterestsByUser, getInterestsByTags, getInterestsByUserAndTags, updateInterests };
+const updateInterestsWeights = async (
+  userId: ObjectId,
+  tagIds: ObjectId[],
+  isInterested: boolean,
+): Promise<void> => {
+  await api.post(`${INTEREST_API_URL}/updateInterestsWeights`, { userId, tagIds, isInterested });
+};
+
+export {
+  getInterestsByUser,
+  getInterestsByTags,
+  getInterestsByUserAndTags,
+  updateInterests,
+  updateInterestsWeights,
+};

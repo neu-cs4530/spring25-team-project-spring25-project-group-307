@@ -1,4 +1,5 @@
 import express, { Request, Response, Router } from 'express';
+import { ObjectId } from 'mongodb';
 import { FakeSOSocket, UpdateInterestsRequest, InterestByUserIdRequest } from '../types/types';
 import {
   deleteInterest,
@@ -6,6 +7,7 @@ import {
   getInterestsByUserId,
   getInterestsByUserIdAndTagIds,
   saveInterest,
+  updateInterestWeightMultiplicative,
 } from '../services/interest.service';
 import { getUserByUsername } from '../services/user.service';
 
@@ -68,6 +70,47 @@ const interestController = (socket: FakeSOSocket) => {
       await Promise.all(
         interestsToSave.map(async interest => {
           await saveInterest(interest);
+        }),
+      );
+
+      res.status(200).send('Interests updated successfully');
+    } catch (error) {
+      res.status(500).send(`Error when updating interests: ${(error as Error).message}`);
+    }
+  };
+
+  // Request contains user id and list of tag ids
+  const updateInterestsWeights = async (req: Request, res: Response): Promise<void> => {
+    if (
+      req.body === undefined ||
+      req.body.userId === undefined ||
+      req.body.tagIds === undefined ||
+      req.body.isInterested === undefined
+    ) {
+      res.status(400).send('Invalid updateInterestsWeights body');
+      return;
+    }
+
+    const { userId, tagIds, isInterested } = req.body;
+
+    const factor = isInterested ? 2 : 0.5;
+
+    try {
+      // Get all interests for the user
+      const interests = await getInterestsByUserId(userId);
+
+      // Find the tagIds that are in the user's interests and update their weights
+      // For tagIds that are not in the user's interests, create a new interest with weight 1
+      await Promise.all(
+        tagIds.map(async (tagId: ObjectId) => {
+          const existingInterest = interests.find(
+            interest => interest.tagId.toString() === tagId.toString(),
+          );
+          if (existingInterest) {
+            await updateInterestWeightMultiplicative(userId, tagId, factor);
+          } else if (isInterested) {
+            await saveInterest({ userId, tagId, weight: 1, priority: 'moderate' });
+          }
         }),
       );
 
@@ -150,6 +193,7 @@ const interestController = (socket: FakeSOSocket) => {
   router.post('/getInterestsByTags', getInterestsByTags);
   router.get('/getInterestsByUser/:userId', getInterestsByUser);
   router.post('/getInterestsByUserAndTags', getInterestsByUserAndTags);
+  router.post('/updateInterestsWeights', updateInterestsWeights);
   return router;
 };
 
