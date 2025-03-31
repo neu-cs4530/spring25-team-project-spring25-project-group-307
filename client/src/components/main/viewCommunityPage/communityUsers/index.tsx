@@ -49,7 +49,7 @@ const CommunityUsers = ({
   userToAdd,
   handleSetUsername,
 }: CommunityUsersProps) => (
-  <Box sx={{ maxWidth: '800px' }}>
+  <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
     <HeaderCommunityUsers
       handleAddUser={handleAddUser}
       open={open}
@@ -57,6 +57,7 @@ const CommunityUsers = ({
       handleClose={handleClose}
       userToAdd={userToAdd}
       handleSetUsername={handleSetUsername}
+      communityUsers={[...(admins || []), ...(moderators || []), ...(members || [])]}
     />
     <TableContainer component={Paper}>
       <Table aria-label='simple table'>

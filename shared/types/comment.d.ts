@@ -6,11 +6,13 @@ import { ObjectId } from 'mongodb';
  * - `text`: The content of the comment.
  * - `commentBy`: The author of the comment.
  * - `commentDateTime`: The timestamp when the comment was made.
+ * - `replies`: An array of comments objectIds that are replies to this comment.
  */
 export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
+  replies?: ObjectId[];
 }
 
 /**
@@ -25,6 +27,14 @@ export interface DatabaseComment extends Comment {
 }
 
 /**
+ * Represents a fully populated comment from the database.
+ * - `replies`: An array of populated `DatabaseComment` objects.
+ */
+export interface PopulatedDatabaseComment extends Omit<DatabaseComment, 'replies'> {
+  replies?: DatabaseComment[];
+}
+
+/**
  * Interface extending the request body for adding a comment to a question or an answer.
  * - `id`: The unique identifier of the question or answer being commented on.
  * - `type`: The type of the comment, either 'question' or 'answer'.
@@ -33,7 +43,7 @@ export interface DatabaseComment extends Comment {
 export interface AddCommentRequest extends Request {
   body: {
     id: string;
-    type: 'question' | 'answer';
+    type: 'question' | 'answer' | 'comment';
     comment: Comment;
   };
 }
@@ -43,6 +53,16 @@ export interface AddCommentRequest extends Request {
  * - `cid`: The unique identifier of the comment being deleted.
  */
 export interface DeleteCommentRequest extends Request {
+  params: {
+    cid: string;
+  };
+}
+
+/**
+ * Interface extending the request body for getting a comment.
+ * - `cid`: The unique identifier of the comment being retrieved.
+ */
+export interface GetCommentRequest extends Request {
   params: {
     cid: string;
   };

@@ -2,7 +2,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { AnswerUpdatePayload, OrderType, PopulatedDatabaseQuestion } from '../types/types';
-import { getQuestionsByFilter } from '../services/questionService';
+import { getPublicQuestion, getQuestionsByFilter } from '../services/questionService';
 
 /**
  * Custom hook for managing the question page state, filtering, and real-time updates.
@@ -46,7 +46,21 @@ const useQuestionPage = () => {
     const fetchData = async () => {
       try {
         const res = await getQuestionsByFilter(questionOrder, search);
-        setQlist(res || []);
+
+        // Filter out private questions
+        const publicQuestions = await Promise.all(
+          res.map(async q => {
+            const communityQuestion = await getPublicQuestion(q._id).catch(error => null);
+            return communityQuestion;
+          }),
+        );
+
+        const filteredQuestions = publicQuestions.filter(
+          q => q !== null,
+        ) as PopulatedDatabaseQuestion[];
+
+        // Set the question list with only public questions
+        setQlist(filteredQuestions);
       } catch (error) {
         // eslint-disable-next-line no-console
         console.log(error);

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Grid2 } from '@mui/material';
+import { Box, Grid2 } from '@mui/material';
 import CommuntiyHeader from './header';
 import useCommunityPage from '../../../hooks/useCommunityPage';
 import CommunityView from './community';
@@ -28,7 +28,7 @@ const CommunityListPage = () => {
   } = useCommunityPage();
 
   return (
-    <div style={{ marginRight: '2%' }}>
+    <Box sx={{ mr: 2 }}>
       <CommuntiyHeader
         val={val}
         titleText={titleText}
@@ -60,7 +60,7 @@ const CommunityListPage = () => {
           <div className='bold_title right_padding'>No Communities Found</div>
         )}
       </div>
-    </div>
+    </Box>
   );
 };
 

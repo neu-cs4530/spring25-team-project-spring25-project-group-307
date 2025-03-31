@@ -25,6 +25,7 @@ interface AnswerProps {
   handleDeleteComment: (commentId: ObjectId) => void;
   handleDeleteAnswer: () => void;
   currentRole: string;
+  moderate?: boolean;
 }
 
 /**
@@ -46,6 +47,7 @@ const AnswerView = ({
   handleDeleteComment,
   handleDeleteAnswer,
   currentRole,
+  moderate,
 }: AnswerProps) => {
   const [commentList, setCommentList] = useState(comments);
 
@@ -74,7 +76,7 @@ const AnswerView = ({
           <div className='answer_author'>{ansBy}</div>
           <div className='answer_question_meta'>{meta}</div>
         </div>
-        {currentRole === 'ADMIN' || currentRole === 'MODERATOR' ? (
+        {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate ? (
           <IconButton sx={{ ml: 2 }} onClick={handleDeleteAnswer}>
             <DeleteIcon />
           </IconButton>
@@ -85,6 +87,7 @@ const AnswerView = ({
         handleAddComment={handleAddComment}
         handleDeleteComment={onDeleteComment}
         currentRole={currentRole}
+        moderate={moderate}
       />
     </div>
   );

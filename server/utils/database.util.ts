@@ -6,6 +6,7 @@ import {
   MessageInChat,
   PopulatedDatabaseAnswer,
   PopulatedDatabaseChat,
+  PopulatedDatabaseComment,
   PopulatedDatabaseQuestion,
 } from '../types/types';
 import AnswerModel from '../models/answers.model';
@@ -51,6 +52,13 @@ const populateAnswer = async (answerID: string): Promise<PopulatedDatabaseAnswer
     comments: DatabaseComment[];
   }>([{ path: 'comments', model: CommentModel }]);
 
+  return result;
+};
+
+const populateComment = async (chatID: string): Promise<PopulatedDatabaseComment | null> => {
+  const result = await CommentModel.findOne({ _id: chatID }).populate<{
+    replies: DatabaseComment[];
+  }>([{ path: 'replies', model: CommentModel }]);
   return result;
 };
 
@@ -110,16 +118,20 @@ const populateChat = async (chatID: string): Promise<PopulatedDatabaseChat | nul
  * Fetches and populates a question, answer, or chat document based on the provided ID and type.
  *
  * @param {string | undefined} id - The ID of the document to fetch.
- * @param {'question' | 'answer' | 'chat'} type - Specifies the type of document to fetch.
- * @returns {Promise<QuestionResponse | AnswerResponse | ChatResponse>} - A promise resolving to the populated document or an error message if the operation fails.
+ * @param {'question' | 'answer' | 'chat' | 'comment'} type - Specifies the type of document to fetch.
+ * @returns {Promise<QuestionResponse | AnswerResponse | ChatResponse | CommentResponse>} - A promise resolving to the populated document or an error message if the operation fails.
  */
 // eslint-disable is for testing purposes only, so that Jest spy functions can be used.
 // eslint-disable-next-line import/prefer-default-export
 export const populateDocument = async (
   id: string,
-  type: 'question' | 'answer' | 'chat',
+  type: 'question' | 'answer' | 'chat' | 'comment',
 ): Promise<
-  PopulatedDatabaseAnswer | PopulatedDatabaseChat | PopulatedDatabaseQuestion | { error: string }
+  | PopulatedDatabaseAnswer
+  | PopulatedDatabaseChat
+  | PopulatedDatabaseQuestion
+  | PopulatedDatabaseComment
+  | { error: string }
 > => {
   try {
     if (!id) {
@@ -137,6 +149,9 @@ export const populateDocument = async (
         break;
       case 'chat':
         result = await populateChat(id);
+        break;
+      case 'comment':
+        result = await populateComment(id);
         break;
       default:
         throw new Error('Invalid type provided.');

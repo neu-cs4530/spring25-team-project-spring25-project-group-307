@@ -1,6 +1,7 @@
 import React from 'react';
 import './index.css';
 import { DatabaseCommunity } from '@fake-stack-overflow/shared';
+import { Box, Stack, Typography } from '@mui/material';
 import AskQuestionButton from '../../askQuestionButton';
 import AskCommunityQuestion from '../../askCommunityQuestion';
 
@@ -24,15 +25,31 @@ interface AnswerHeaderProps {
  * @param title The title of the question or discussion thread.
  */
 const AnswerHeader = ({ ansCount, title, community }: AnswerHeaderProps) => (
-  <div id='answersHeader' className='space_between right_padding'>
-    <div className='bold_title'>{ansCount} answers</div>
-    <div className='bold_title answer_question_title'>{title}</div>
-    {community ? (
-      <AskCommunityQuestion communityID={community._id.toString()} />
-    ) : (
-      <AskQuestionButton />
-    )}
-  </div>
+  <Box sx={{ borderBottom: 1, borderColor: 'divider', mx: 2, mt: 2, pb: 2, px: 1 }}>
+    <Stack
+      direction='row'
+      alignItems='center'
+      justifyContent='space-between'
+      flexWrap='wrap'
+      spacing={2}>
+      {/* Answer Count */}
+      <Typography variant='h6' fontWeight='bold'>
+        {ansCount} answers
+      </Typography>
+
+      {/* Question Title */}
+      <Typography variant='h6' fontWeight='bold' textAlign='center' sx={{ flexGrow: 1 }}>
+        {title}
+      </Typography>
+
+      {/* Ask Question Button */}
+      {community ? (
+        <AskCommunityQuestion communityID={community._id.toString()} />
+      ) : (
+        <AskQuestionButton />
+      )}
+    </Stack>
+  </Box>
 );
 
 export default AnswerHeader;
