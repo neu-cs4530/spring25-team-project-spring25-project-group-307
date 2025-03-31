@@ -58,13 +58,13 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   };
 
   const handleSave = () => {
-    console.log('Save Clicked');
+    // console.log('Save Clicked');
     // Call service function to update save
     handleMenuClose();
   };
 
   const handleReport = () => {
-    console.log('Report Clicked');
+    // console.log('Report Clicked');
     // Call service function to update report
     handleMenuClose();
   };
