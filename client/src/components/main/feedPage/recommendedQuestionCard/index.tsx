@@ -98,7 +98,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                   variant='contained'
                   size='small'
                   sx={{ borderRadius: 20 }}
-                  disabled={item.community.isPublic}>
+                  disabled={item.community.isPrivate}>
                   View
                 </Button>
                 <Button
