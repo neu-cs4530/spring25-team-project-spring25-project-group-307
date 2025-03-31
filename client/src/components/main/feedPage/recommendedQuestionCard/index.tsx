@@ -7,8 +7,9 @@ import Box from '@mui/material/Box';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
 
+import { useEffect, useState } from 'react';
 import useUserContext from '../../../../hooks/useUserContext';
-import { joinCommunity } from '../../../../services/communityService';
+import { joinCommunity, leaveCommunity } from '../../../../services/communityService';
 
 const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
@@ -18,6 +19,38 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
     }
   };
   const { user } = useUserContext();
+
+  const [isAlreadyJoined, setIsAlreadyJoined] = useState(false);
+
+  useEffect(() => {
+    if (item.community) {
+      setIsAlreadyJoined(item.community.members.includes(user._id));
+    }
+  }, [item.community, user._id]);
+
+  const handleJoin = async () => {
+    try {
+      if (item.community) {
+        await joinCommunity(item.community.title, user.username);
+        setIsAlreadyJoined(true);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error joining community:', error);
+    }
+  };
+
+  const handleLeave = async () => {
+    try {
+      if (item.community) {
+        await leaveCommunity(item.community.title, user.username);
+        setIsAlreadyJoined(false);
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error leaving community:', error);
+    }
+  };
 
   return (
     <Box
@@ -49,20 +82,48 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                 p: 2,
                 borderBottom: '1px solid lightgrey',
               }}>
+              {/* Community Title */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Typography variant='subtitle1' fontWeight='bold'>
                   {item.community.title}
                 </Typography>
               </Box>
-              <Button
-                onClick={() => {
-                  if (item.community) joinCommunity(item.community.title, user.username);
-                }}
-                variant='contained'
-                size='small'
-                sx={{ borderRadius: 20 }}>
-                Join
-              </Button>
+              {/* Buttons Group */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Button
+                  onClick={event => {
+                    event.stopPropagation();
+                    navigate(`/community/${item.community._id}`);
+                  }}
+                  variant='contained'
+                  size='small'
+                  sx={{ borderRadius: 20 }}
+                  disabled={item.community.isPublic}>
+                  View
+                </Button>
+                <Button
+                  onClick={event => {
+                    event.stopPropagation();
+                    if (item.community) {
+                      if (isAlreadyJoined) {
+                        handleLeave();
+                      } else {
+                        handleJoin();
+                      }
+                    }
+                  }}
+                  variant='contained'
+                  size='small'
+                  sx={{
+                    'borderRadius': 20,
+                    'backgroundColor': isAlreadyJoined ? 'error.main' : 'primary.main',
+                    '&:hover': {
+                      backgroundColor: isAlreadyJoined ? 'error.dark' : 'primary.dark',
+                    },
+                  }}>
+                  {isAlreadyJoined ? 'Leave' : 'Join'}
+                </Button>
+              </Box>
             </Box>
           )}
 
