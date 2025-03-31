@@ -20,7 +20,6 @@ const useHeader = () => {
   const { setUser } = useLoginContext();
   const { user: currentUser } = useUserContext();
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
-  const [notificationAnchorEl, setNotificationAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const [val, setVal] = useState<string>('');
 
@@ -63,13 +62,8 @@ const useHeader = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleNotificationMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setNotificationAnchorEl(event.currentTarget);
-  };
-
   const handleClose = () => {
     setAnchorEl(null);
-    setNotificationAnchorEl(null);
   };
 
   const handleViewProfile = () => {
@@ -85,12 +79,10 @@ const useHeader = () => {
     val,
     setVal,
     anchorEl,
-    notificationAnchorEl,
     handleInputChange,
     handleKeyDown,
     handleSignOut,
     handleMenu,
-    handleNotificationMenu,
     handleClose,
     handleViewProfile,
     handleNavigateHome,

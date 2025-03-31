@@ -14,7 +14,6 @@ import {
   Tag,
   VoteResponse,
 } from '../../types/types';
-import UserModel from '../../models/users.model';
 
 const addVoteToQuestionSpy = jest.spyOn(questionUtil, 'addVoteToQuestion');
 const getQuestionsByOrderSpy: jest.SpyInstance = jest.spyOn(questionUtil, 'getQuestionsByOrder');

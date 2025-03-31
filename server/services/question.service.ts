@@ -183,6 +183,20 @@ export const deleteQuestionById = async (qid: string): Promise<QuestionResponse>
 };
 
 /**
+ * Retrieves a question from the database by its ID.
+ * @param {string} qid - The question ID
+ * @returns {Promise<QuestionResponse>} - The retrieved question or error message
+ */
+export const getQuestionById = async (qid: string): Promise<QuestionResponse> => {
+  try {
+    const result: DatabaseQuestion | null = await QuestionModel.findById(qid);
+    return result || { error: 'Question not found' };
+  } catch (error) {
+    return { error: 'Error when retrieving the question' };
+  }
+};
+
+/**
  * Adds a vote to a question.
  * @param {string} qid - The question ID
  * @param {string} username - The username who voted
@@ -283,10 +297,10 @@ export const addVoteToQuestion = async (
  * @param {string} qid - The question ID
  * @returns {Promise<CommunityResponse>}} - The community the question is in or null if the question is not in a community
  */
-export const getCommunityQuestion = async (qid: string): Promise<CommunityResponse> => {
+export const getCommunityQuestion = async (qid: ObjectId): Promise<CommunityResponse> => {
   try {
     const community: DatabaseCommunity | null = await CommunityModel.findOne({
-      questions: { $in: new ObjectId(qid) },
+      questions: { $in: qid },
     });
 
     if (!community) {

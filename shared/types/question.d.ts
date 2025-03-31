@@ -116,7 +116,7 @@ export interface FindQuestionByIdRequest extends Request {
 
 export interface GetCommunityQuestionRequest extends Request {
   params: {
-    qid: string;
+    qid: ObjectId;
   };
 }
 
