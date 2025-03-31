@@ -25,19 +25,23 @@ const useOptionsMenu = (communityTitle: string) => {
   );
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAnchorEl(null);
     setSubMenuAnchorEl(null);
   };
 
   const handleSubMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setSubMenuAnchorEl(event.currentTarget);
   };
 
   const allNewQuestionsCheckBoxOnChange = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setAllNewQuestionsChecked(prev => {
       const newValue = !prev;
       if (newValue) {
@@ -51,6 +55,7 @@ const useOptionsMenu = (communityTitle: string) => {
   };
 
   const answersToMyQuestionsCheckedOnChange = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setanswersToMyQuestionsChecked(prev => {
       const newValue = !prev;
       if (newValue) {
@@ -64,6 +69,7 @@ const useOptionsMenu = (communityTitle: string) => {
   };
 
   const commentsOnMyAnswersCheckedOnChange = (event: React.MouseEvent<HTMLElement>) => {
+    event.stopPropagation();
     setcommentsOnMyAnswersChecked(prev => {
       const newValue = !prev;
       if (newValue) {

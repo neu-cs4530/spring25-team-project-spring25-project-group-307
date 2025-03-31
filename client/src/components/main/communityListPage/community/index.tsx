@@ -22,9 +22,9 @@ import { DatabaseCommunity, Tag } from '../../../../types/types';
  */
 interface CommunityProps {
   community: DatabaseCommunity;
-  handleViewCommunity: (cid: ObjectId) => void;
-  handleJoinCommunity: (title: string) => void;
-  handleLeaveCommunity: (title: string) => void;
+  handleViewCommunity: (event: React.MouseEvent, cid: ObjectId) => void;
+  handleJoinCommunity: (event: React.MouseEvent, title: string) => void;
+  handleLeaveCommunity: (event: React.MouseEvent, title: string) => void;
   UserInCommunity: boolean;
   communityTags: Tag[];
 }
@@ -44,8 +44,8 @@ const CommunityView = ({
 }: CommunityProps) => (
   <Box>
     <Card
-      onClick={() =>
-        community.isPrivate && !UserInCommunity ? null : handleViewCommunity(community._id)
+      onClick={e =>
+        community.isPrivate && !UserInCommunity ? null : handleViewCommunity(e, community._id)
       }
       sx={{
         'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
@@ -76,20 +76,20 @@ const CommunityView = ({
         <CardActions>
           {UserInCommunity ? (
             <Button
-              onClick={() => handleLeaveCommunity(community.title)}
+              onClick={e => handleLeaveCommunity(e, community.title)}
               size='small'
               color='error'>
               Leave
             </Button>
           ) : (
             <Button
-              onClick={() => handleJoinCommunity(community.title)}
+              onClick={e => handleJoinCommunity(e, community.title)}
               size='small'
               color='primary'>
               Join
             </Button>
           )}
-          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
+          <Button onClick={e => handleViewCommunity(e, community._id)} size='small' color='primary'>
             View
           </Button>
         </CardActions>

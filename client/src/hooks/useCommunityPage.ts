@@ -104,8 +104,9 @@ const useCommunityPage = () => {
     fetchTagFilterList();
   }, [communityList]);
 
-  const handleJoinCommunity = async (title: string) => {
+  const handleJoinCommunity = async (event: React.MouseEvent, title: string) => {
     // TODO: in the future this should go view the comunity just joined
+    event.stopPropagation();
 
     joinCommunity(title, currentUser.username).then(
       () => getCommunities().then(communities => setCommunityList(communities)),
@@ -117,7 +118,8 @@ const useCommunityPage = () => {
     );
   };
 
-  const handleLeaveCommunity = async (title: string) => {
+  const handleLeaveCommunity = async (event: React.MouseEvent, title: string) => {
+    event.stopPropagation();
     if (!viewJoined) {
       leaveCommunity(title, currentUser.username).then(
         () =>
@@ -140,7 +142,7 @@ const useCommunityPage = () => {
     }
   };
 
-  const handleViewCommunity = (cid: ObjectId) => {
+  const handleViewCommunity = (event: React.MouseEvent, cid: ObjectId) => {
     navigate(`/community/${cid}`);
   };
 
