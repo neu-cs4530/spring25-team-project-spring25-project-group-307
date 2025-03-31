@@ -295,6 +295,6 @@ export const getCommunityQuestion = async (qid: string): Promise<CommunityRespon
 
     return community;
   } catch (error) {
-    return { error: 'Error when fetching community for question' };
+    return null;
   }
 };

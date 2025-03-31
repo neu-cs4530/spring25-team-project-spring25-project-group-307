@@ -62,7 +62,7 @@ export interface PopulatedDatabaseCommunity
 /**
  * Type representing possible responses for a Community-related operation.
  */
-export type CommunityResponse = DatabaseCommunity | { error: string };
+export type CommunityResponse = DatabaseCommunity | null;
 
 /**
  * Represents an achievement.

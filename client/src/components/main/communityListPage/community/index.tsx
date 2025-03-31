@@ -41,7 +41,18 @@ const CommunityView = ({
   communityTags,
 }: CommunityProps) => (
   <Box>
-    <Card>
+    <Card
+      onClick={() =>
+        community.isPrivate && !UserInCommunity ? null : handleViewCommunity(community._id)
+      }
+      sx={{
+        'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
+        'borderRadius': '10px',
+        '&:hover': {
+          backgroundColor: community.isPrivate && !UserInCommunity ? 'inherit' : 'action.hover',
+        },
+        'opacity': community.isPrivate && !UserInCommunity ? 0.5 : 1,
+      }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
@@ -75,11 +86,9 @@ const CommunityView = ({
               Join
             </Button>
           )}
-          {UserInCommunity ? (
-            <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
-              View
-            </Button>
-          ) : null}
+          <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
+            View
+          </Button>
         </CardActions>
       ) : null}
       {communityTags.length > 0 && (

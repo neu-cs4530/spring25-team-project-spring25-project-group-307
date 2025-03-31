@@ -291,9 +291,6 @@ const questionController = (socket: FakeSOSocket) => {
   ): Promise<void> => {
     try {
       const community: CommunityResponse = await getCommunityQuestion(req.params.qid);
-      if ('error' in community) {
-        throw new Error(community.error);
-      }
       res.json(community);
     } catch (error) {
       res.status(500).send(`Error when getting community question: ${(error as Error).message}`);
