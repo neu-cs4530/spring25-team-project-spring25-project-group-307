@@ -4,6 +4,7 @@ import './index.css';
 import { io } from 'socket.io-client';
 import { useEffect, useState } from 'react';
 import { ThemeProvider, createTheme } from '@mui/material';
+import { AchievementProvider } from './contexts/AchievementContext';
 import FakeStackOverflow from './components/fakestackoverflow';
 import { FakeSOSocket } from './types/types';
 
@@ -47,7 +48,9 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <Router>
-        <FakeStackOverflow socket={socket} />
+        <AchievementProvider>
+          <FakeStackOverflow socket={socket} />
+        </AchievementProvider>
       </Router>
     </ThemeProvider>
   );

@@ -81,6 +81,7 @@ const answerController = (socket: FakeSOSocket) => {
 
     const { qid } = req.body;
     const ansInfo: Answer = req.body.ans;
+    const unlocked: string[] = [];
 
     try {
       const ansFromDb = await saveAnswer(ansInfo);
@@ -107,14 +108,17 @@ const answerController = (socket: FakeSOSocket) => {
         const newScore = user.score + 10;
         const newRank = getUpdatedRank(newScore);
         if (currentRank !== newRank && newRank === 'Common Contributor') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension I');
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension I');
+          if (a) unlocked.push(a);
         }
         const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
         if (user.responsesGiven === 0) {
-          await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+          const a = await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+          if (a) unlocked.push(a);
         }
         if (user.responsesGiven === 5) {
-          await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+          const a = await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+          if (a) unlocked.push(a);
         }
         await UserModel.updateOne(
           { username: ansInfo.ansBy },
@@ -143,7 +147,7 @@ const answerController = (socket: FakeSOSocket) => {
         qid: new ObjectId(qid),
         answer: populatedAns as PopulatedDatabaseAnswer,
       });
-      res.json(ansFromDb);
+      res.json({ ...ansFromDb, unlockedAchievements: unlocked });
     } catch (err) {
       res.status(500).send(`Error when adding answer: ${(err as Error).message}`);
     }
