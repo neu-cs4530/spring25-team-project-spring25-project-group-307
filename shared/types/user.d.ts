@@ -31,7 +31,7 @@ export interface User extends UserCredentials {
   // adding the ranking, score and achievements fields
   ranking: string;
   score: number;
-  achievements: ObjectId[];
+  achievements: string[];
   // adding questions asked and responses given fields
   // adding last login field
   questionsAsked: number;

@@ -1,6 +1,8 @@
+import { QueryOptions } from 'mongoose';
 import {
   Answer,
   AnswerResponse,
+  VoteResponse,
   DatabaseAnswer,
   DatabaseQuestion,
   PopulatedDatabaseAnswer,
@@ -86,5 +88,101 @@ export const addAnswerToQuestion = async (
     return result;
   } catch (error) {
     return { error: 'Error when adding answer to question' };
+  }
+};
+
+/**
+ * Adds a vote to an answer.
+ * @param {string} aid - The answer ID
+ * @param {string} username - The username who voted
+ * @param {'upvote' | 'downvote'} voteType - The vote type
+ * @returns {Promise<VoteResponse>} - The updated vote result
+ */
+export const addVoteToAnswer = async (
+  aid: string,
+  username: string,
+  voteType: 'upvote' | 'downvote',
+): Promise<VoteResponse> => {
+  let updateOperation: QueryOptions;
+
+  if (voteType === 'upvote') {
+    updateOperation = [
+      {
+        $set: {
+          upVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+              { $concatArrays: ['$upVotes', [username]] },
+            ],
+          },
+          downVotes: {
+            $cond: [
+              { $in: [username, '$upVotes'] },
+              '$downVotes',
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  } else {
+    updateOperation = [
+      {
+        $set: {
+          downVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              { $filter: { input: '$downVotes', as: 'd', cond: { $ne: ['$$d', username] } } },
+              { $concatArrays: ['$downVotes', [username]] },
+            ],
+          },
+          upVotes: {
+            $cond: [
+              { $in: [username, '$downVotes'] },
+              '$upVotes',
+              { $filter: { input: '$upVotes', as: 'u', cond: { $ne: ['$$u', username] } } },
+            ],
+          },
+        },
+      },
+    ];
+  }
+
+  try {
+    const result: DatabaseAnswer | null = await AnswerModel.findOneAndUpdate(
+      { _id: aid },
+      updateOperation,
+      { new: true },
+    );
+
+    if (!result) {
+      return { error: 'Answer not found!' };
+    }
+
+    let msg = '';
+
+    if (voteType === 'upvote') {
+      msg = result.upVotes.includes(username)
+        ? 'Answer upvoted successfully'
+        : 'Upvote cancelled successfully';
+    } else {
+      msg = result.downVotes.includes(username)
+        ? 'Answer downvoted successfully'
+        : 'Downvote cancelled successfully';
+    }
+
+    return {
+      msg,
+      upVotes: result.upVotes || [],
+      downVotes: result.downVotes || [],
+    };
+  } catch (err) {
+    return {
+      error:
+        voteType === 'upvote'
+          ? 'Error when adding upvote to answer'
+          : 'Error when adding downvote to answer',
+    };
   }
 };

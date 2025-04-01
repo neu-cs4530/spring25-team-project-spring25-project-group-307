@@ -7,6 +7,8 @@ import {
   PopulatedDatabaseAnswer,
   DeleteAnswerRequest,
 } from '../types/types';
+
+import grantAchievementToUser from '../services/achievement.service';
 import { addAnswerToQuestion, deleteAnswerById, saveAnswer } from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
@@ -93,12 +95,21 @@ const answerController = (socket: FakeSOSocket) => {
       }
 
       const user = await UserModel.findOne({ username: ansInfo.ansBy });
-
+      const currentRank = user?.ranking;
       if (user) {
         const newScore = user.score + 10;
         const newRank = getUpdatedRank(newScore);
-        const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
+        if (currentRank !== newRank && newRank === 'Common Contributor') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension I');
+        }
 
+        if (user.responsesGiven === 0) {
+          await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+        }
+        if (user.responsesGiven === 4) {
+          await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+        }
+        const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
         await UserModel.updateOne(
           { username: ansInfo.ansBy },
           {

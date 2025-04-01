@@ -117,6 +117,7 @@ const AnswerPage = () => {
           handleDeleteAnswer={() => handleDeleteAnswer(a._id)}
           currentRole={currentRole}
           moderate={moderate}
+          answer={a}
         />
       ))}
       <Button

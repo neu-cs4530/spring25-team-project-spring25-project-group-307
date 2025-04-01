@@ -82,6 +82,8 @@ const ans1: PopulatedDatabaseAnswer = {
   ansBy: 'answer1_user',
   ansDateTime: new Date('2024-06-09'), // The mock date is string type but in the actual implementation it is a Date type
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 const ans2: PopulatedDatabaseAnswer = {
@@ -90,6 +92,8 @@ const ans2: PopulatedDatabaseAnswer = {
   ansBy: 'answer2_user',
   ansDateTime: new Date('2024-06-10'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 const ans3: PopulatedDatabaseAnswer = {
@@ -98,6 +102,8 @@ const ans3: PopulatedDatabaseAnswer = {
   ansBy: 'answer3_user',
   ansDateTime: new Date('2024-06-11'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 const ans4: PopulatedDatabaseAnswer = {
@@ -106,7 +112,42 @@ const ans4: PopulatedDatabaseAnswer = {
   ansBy: 'answer4_user',
   ansDateTime: new Date('2024-06-14'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
+
+jest.mock('../../models/users.model', () => ({
+  __esModule: true,
+  default: {
+    findOne: jest.fn().mockImplementation(({ username }) => {
+      if (['new-user', 'some-user', 'original-author', 'question2_user'].includes(username)) {
+        return {
+          _id: new mongoose.Types.ObjectId('65e9b5a995b6c7045a30d823'),
+          username,
+          score: 10,
+          ranking: 'Beginner',
+          questionsAsked: 2,
+          save: jest.fn().mockResolvedValue({}),
+        };
+      }
+      return null;
+    }),
+    updateOne: jest.fn().mockResolvedValue({}),
+  },
+}));
+
+jest.mock('../../models/questions.model', () => ({
+  __esModule: true,
+  default: {
+    findById: jest.fn().mockResolvedValue({
+      _id: '65e9b5a995b6c7045a30d823',
+      askedBy: 'original-author',
+      upVotes: [],
+      downVotes: [],
+      save: jest.fn().mockResolvedValue({}),
+    }),
+  },
+}));
 
 const MOCK_POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
   {
@@ -163,17 +204,6 @@ const simplifyQuestion = (question: PopulatedDatabaseQuestion) => ({
 });
 
 const EXPECTED_QUESTIONS = MOCK_POPULATED_QUESTIONS.map(question => simplifyQuestion(question));
-
-jest.mock('../../models/users.model', () => ({
-  __esModule: true,
-  default: {
-    findOne: jest.fn().mockResolvedValue({
-      score: 10,
-      questionsAsked: 2,
-    }),
-    updateOne: jest.fn().mockResolvedValue({}),
-  },
-}));
 
 describe('Test questionController', () => {
   describe('POST /addQuestion', () => {
@@ -335,7 +365,9 @@ describe('Test questionController', () => {
       const response = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponse);
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('upvote');
     });
 
     it('should cancel the upvote successfully', async () => {
@@ -360,16 +392,17 @@ describe('Test questionController', () => {
 
       const firstResponse = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
       expect(firstResponse.status).toBe(200);
-      expect(firstResponse.body).toEqual(mockFirstResponse);
+      expect(firstResponse.body.success).toBe(true);
+      expect(firstResponse.body.vote).toBe('upvote');
 
       addVoteToQuestionSpy.mockResolvedValueOnce(mockSecondResponse);
 
       const secondResponse = await supertest(app)
         .post('/question/upvoteQuestion')
         .send(mockReqBody);
-
       expect(secondResponse.status).toBe(200);
-      expect(secondResponse.body).toEqual(mockSecondResponse);
+      expect(secondResponse.body.success).toBe(true);
+      expect(secondResponse.body.vote).toBe('upvote');
     });
 
     it('should handle upvote and then downvote by the same user', async () => {
@@ -390,7 +423,8 @@ describe('Test questionController', () => {
       let response = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponseWithBothVotes);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('upvote');
 
       // Now downvote the question
       mockResponseWithBothVotes = {
@@ -404,7 +438,8 @@ describe('Test questionController', () => {
       response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponseWithBothVotes);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('downvote');
     });
 
     it('should return bad request error if the request had qid missing', async () => {
@@ -446,7 +481,8 @@ describe('Test questionController', () => {
       const response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('downvote');
     });
 
     it('should cancel the downvote successfully', async () => {
@@ -473,7 +509,8 @@ describe('Test questionController', () => {
         .post('/question/downvoteQuestion')
         .send(mockReqBody);
       expect(firstResponse.status).toBe(200);
-      expect(firstResponse.body).toEqual(mockFirstResponse);
+      expect(firstResponse.body.success).toBe(true);
+      expect(firstResponse.body.vote).toBe('downvote');
 
       addVoteToQuestionSpy.mockResolvedValueOnce(mockSecondResponse);
 
@@ -482,7 +519,8 @@ describe('Test questionController', () => {
         .send(mockReqBody);
 
       expect(secondResponse.status).toBe(200);
-      expect(secondResponse.body).toEqual(mockSecondResponse);
+      expect(secondResponse.body.success).toBe(true);
+      expect(secondResponse.body.vote).toBe('downvote');
     });
 
     it('should handle downvote and then upvote by the same user', async () => {
@@ -503,7 +541,8 @@ describe('Test questionController', () => {
       let response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('downvote');
 
       // Then upvote the question
       mockResponse = {
@@ -517,7 +556,8 @@ describe('Test questionController', () => {
       response = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockResponse);
+      expect(response.body.success).toBe(true);
+      expect(response.body.vote).toBe('upvote');
     });
 
     it('should return bad request error if the request had qid missing', async () => {

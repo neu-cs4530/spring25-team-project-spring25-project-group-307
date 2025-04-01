@@ -5,7 +5,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { handleHyperlink } from '../../../../tool';
 import CommentSection from '../../commentSection';
 import './index.css';
-import { Comment, DatabaseComment } from '../../../../types/types';
+import { Comment, DatabaseComment, PopulatedDatabaseAnswer } from '../../../../types/types';
 
 /**
  * Interface representing the props for the AnswerView component.
@@ -26,6 +26,7 @@ interface AnswerProps {
   handleDeleteAnswer: () => void;
   currentRole: string;
   moderate?: boolean;
+  answer: PopulatedDatabaseAnswer;
 }
 
 /**
@@ -48,6 +49,7 @@ const AnswerView = ({
   handleDeleteAnswer,
   currentRole,
   moderate,
+  answer,
 }: AnswerProps) => {
   const [commentList, setCommentList] = useState(comments);
 
