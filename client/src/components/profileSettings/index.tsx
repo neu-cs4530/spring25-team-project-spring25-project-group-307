@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './index.css';
 import MilitaryTechIcon from '@mui/icons-material/MilitaryTech';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
@@ -55,7 +55,10 @@ const ProfileSettings: React.FC = () => {
     handleUpdateBiography,
     handleUpdateInterests,
     handleDeleteUser,
+    handleResetInterestsWeights,
   } = useProfileSettings();
+
+  const [showInterestHelpMessage, setShowInterestHelpMessage] = useState(false);
 
   if (loading) {
     return (
@@ -161,14 +164,22 @@ const ProfileSettings: React.FC = () => {
                         ))}
                       </Grid2>
                       {canEditProfile && (
-                        <button
-                          className='login-button'
-                          style={{ marginLeft: '1rem' }}
-                          onClick={() => {
-                            setEditInterestsMode(true);
-                          }}>
-                          Edit
-                        </button>
+                        <div>
+                          <button
+                            className='login-button'
+                            style={{ marginLeft: '1rem' }}
+                            onClick={() => {
+                              setEditInterestsMode(true);
+                            }}>
+                            Edit
+                          </button>
+                          <button
+                            className='delete-button'
+                            style={{ marginLeft: '1rem' }}
+                            onClick={handleResetInterestsWeights}>
+                            Reset Weights
+                          </button>
+                        </div>
                       )}
                     </div>
                   )}
@@ -182,6 +193,8 @@ const ProfileSettings: React.FC = () => {
                               label={tag.name}
                               clickable
                               color={getTagColor(tag)}
+                              onMouseEnter={() => setShowInterestHelpMessage(true)}
+                              onMouseLeave={() => setShowInterestHelpMessage(false)}
                               onClick={() => {
                                 if (
                                   newInterests.some(
@@ -248,6 +261,12 @@ const ProfileSettings: React.FC = () => {
                           Cancel
                         </button>
                       </div>
+                      {showInterestHelpMessage && (
+                        <div className='floating-message'>
+                          Left-click to select as general interest, right-click to select as super
+                          interest.
+                        </div>
+                      )}
                     </div>
                   )}
                   {/* ---- User Statistics ---- */}

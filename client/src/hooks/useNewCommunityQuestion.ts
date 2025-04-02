@@ -104,6 +104,7 @@ const useNewCommunityQuestion = () => {
       downVotes: [],
       views: [],
       comments: [],
+      reportedBy: [],
     };
 
     const res = await addQuestion(question);

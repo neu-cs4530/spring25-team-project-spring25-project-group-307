@@ -15,6 +15,7 @@ const mockUser: User = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date(),
+  savedQuestions: [],
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -28,6 +29,7 @@ const mockSafeUser: SafeDatabaseUser = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date(),
+  savedQuestions: [],
 };
 
 const mockUserJSONResponse = {
@@ -41,6 +43,7 @@ const mockUserJSONResponse = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date().toISOString(),
+  savedQuestions: [],
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -72,6 +75,7 @@ describe('Test userController', () => {
         score: 0,
         responsesGiven: 0,
         questionsAsked: 0,
+        savedQuestions: [],
       });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
@@ -83,6 +87,7 @@ describe('Test userController', () => {
         lastLogin: expect.any(Date),
         ranking: 'Newcomer Newbie',
         score: 0,
+        savedQuestions: [],
       });
     });
 

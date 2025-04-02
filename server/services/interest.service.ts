@@ -21,6 +21,28 @@ export const saveInterest = async (interest: Interest): Promise<InterestResponse
   }
 };
 
+export const updateInterestWeightMultiplicative = async (
+  userId: ObjectId,
+  tagId: ObjectId,
+  factor: number,
+): Promise<InterestResponse> => {
+  try {
+    const result = await InterestModel.findOneAndUpdate(
+      { userId, tagId },
+      { $mul: { weight: factor } },
+      { new: true },
+    );
+
+    if (!result) {
+      throw Error('Failed to update interest weight');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when updating interest weight: ${error}` };
+  }
+};
+
 export const deleteInterest = async (interest: Interest): Promise<InterestResponse> => {
   try {
     const result = await InterestModel.findOneAndDelete(interest);
@@ -52,6 +74,36 @@ export const deleteInterestsByUserId = async (aUserId: ObjectId): Promise<Delete
 export const getInterestsByUserId = async (aUserId: ObjectId): Promise<Interest[]> => {
   try {
     return await InterestModel.find({ userId: aUserId });
+  } catch (error) {
+    return [];
+  }
+};
+
+export const resetInterestsWeightsByUserId = async (aUserId: ObjectId): Promise<Interest[]> => {
+  try {
+    const interests = await InterestModel.find({ userId: aUserId });
+
+    const bulkOperations = interests.map(interest => {
+      let weight = 0;
+      if (interest.priority === 'moderate') {
+        weight = 1;
+      } else if (interest.priority === 'high') {
+        weight = 2;
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: interest._id },
+          update: { $set: { weight } },
+        },
+      };
+    });
+
+    if (bulkOperations.length > 0) {
+      await InterestModel.bulkWrite(bulkOperations);
+    }
+
+    return interests;
   } catch (error) {
     return [];
   }

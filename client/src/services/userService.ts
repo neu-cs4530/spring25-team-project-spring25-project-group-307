@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ObjectId } from 'mongodb';
 import { UserCredentials, SafeDatabaseUser } from '../types/types';
 import api from './config';
 
@@ -123,6 +124,34 @@ const updateBiography = async (
   return res.data;
 };
 
+const addSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/addSavedQuestion`, {
+    username,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding saved question');
+  }
+  return res.data;
+};
+
+const removeSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/removeSavedQuestion`, {
+    username,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when removing saved question');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -131,4 +160,6 @@ export {
   deleteUser,
   resetPassword,
   updateBiography,
+  addSavedQuestion,
+  removeSavedQuestion,
 };

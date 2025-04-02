@@ -20,6 +20,8 @@ import {
   saveQuestion,
   getCommunityQuestion,
   deleteQuestionById,
+  addReportToQuestion,
+  removeReportFromQuestion,
   getPopulatedQuestionById,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
@@ -28,6 +30,7 @@ import grantAchievementToUser from '../services/achievement.service';
 import QuestionModel from '../models/questions.model';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
+import { getUserByUsername } from '../services/user.service';
 
 const questionController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -380,6 +383,58 @@ const questionController = (socket: FakeSOSocket) => {
     }
   };
 
+  const addReportToQuestionRoute = async (
+    req: FindQuestionByIdRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { qid } = req.params;
+    const { username } = req.body;
+
+    try {
+      const user = await getUserByUsername(username);
+
+      if ('error' in user) {
+        throw new Error('User not found');
+      }
+
+      const result = await addReportToQuestion(qid, user._id.toString());
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.json(result);
+    } catch (err) {
+      res.status(500).send(`Error when reporting question: ${(err as Error).message}`);
+    }
+  };
+
+  const removeReportFromQuestionRoute = async (
+    req: FindQuestionByIdRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { qid } = req.params;
+    const { username } = req.body;
+
+    try {
+      const user = await getUserByUsername(username);
+
+      if ('error' in user) {
+        throw new Error('User not found');
+      }
+
+      const result = await removeReportFromQuestion(qid, user._id.toString());
+
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      res.json(result);
+    } catch (err) {
+      res.status(500).send(`Error when removing report from question: ${(err as Error).message}`);
+    }
+  };
+
   const getPublicQuestionRoute = async (
     req: GetCommunityQuestionRequest,
     res: Response,
@@ -425,6 +480,8 @@ const questionController = (socket: FakeSOSocket) => {
   router.post('/upvoteQuestion', upvoteQuestion);
   router.post('/downvoteQuestion', downvoteQuestion);
   router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);
+  router.post('/addReportToQuestion/:qid', addReportToQuestionRoute);
+  router.post('/removeReportFromQuestion/:qid', removeReportFromQuestionRoute);
   router.get('/getPublicQuestion/:qid', getPublicQuestionRoute);
 
   return router;

@@ -1,11 +1,14 @@
 import express, { Request, Response, Router } from 'express';
+import { ObjectId } from 'mongodb';
 import { FakeSOSocket, UpdateInterestsRequest, InterestByUserIdRequest } from '../types/types';
 import {
-  deleteInterestsByUserId,
+  deleteInterest,
   getInterestsByTagIds,
   getInterestsByUserId,
   getInterestsByUserIdAndTagIds,
+  resetInterestsWeightsByUserId,
   saveInterest,
+  updateInterestWeightMultiplicative,
 } from '../services/interest.service';
 import { getUserByUsername } from '../services/user.service';
 
@@ -46,13 +49,69 @@ const interestController = (socket: FakeSOSocket) => {
         return;
       }
 
-      // Delete the user's existing interests
-      await deleteInterestsByUserId(user._id);
+      const existingInterests = await getInterestsByUserId(user._id);
+
+      // Compare existing interests with new interests. Do not update shared interests. If an interest is in existing but not in new, delete it. If an interest is in new but not in existing, save it.
+      const interestsToDelete = existingInterests.filter(
+        existingInterest =>
+          !interests.some(newInterest => newInterest.tagId === existingInterest.tagId),
+      );
+      const interestsToSave = interests.filter(
+        newInterest =>
+          !existingInterests.some(existingInterest => newInterest.tagId === existingInterest.tagId),
+      );
+
+      await Promise.all(
+        interestsToDelete.map(async interest => {
+          await deleteInterest(interest);
+        }),
+      );
 
       // Save the new interests
       await Promise.all(
-        interests.map(async interest => {
+        interestsToSave.map(async interest => {
           await saveInterest(interest);
+        }),
+      );
+
+      res.status(200).send('Interests updated successfully');
+    } catch (error) {
+      res.status(500).send(`Error when updating interests: ${(error as Error).message}`);
+    }
+  };
+
+  // Request contains user id and list of tag ids
+  const updateInterestsWeights = async (req: Request, res: Response): Promise<void> => {
+    if (
+      req.body === undefined ||
+      req.body.userId === undefined ||
+      req.body.tagIds === undefined ||
+      req.body.isInterested === undefined
+    ) {
+      res.status(400).send('Invalid updateInterestsWeights body');
+      return;
+    }
+
+    const { userId, tagIds, isInterested } = req.body;
+
+    const factor = isInterested ? 2 : 0.5;
+
+    try {
+      // Get all interests for the user
+      const interests = await getInterestsByUserId(userId);
+
+      // Find the tagIds that are in the user's interests and update their weights
+      // For tagIds that are not in the user's interests, create a new interest with weight 1
+      await Promise.all(
+        tagIds.map(async (tagId: ObjectId) => {
+          const existingInterest = interests.find(
+            interest => interest.tagId.toString() === tagId.toString(),
+          );
+          if (existingInterest) {
+            await updateInterestWeightMultiplicative(userId, tagId, factor);
+          } else if (isInterested) {
+            await saveInterest({ userId, tagId, weight: 1, priority: 'moderate' });
+          }
         }),
       );
 
@@ -102,6 +161,17 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  const resetInterestsWeightsByUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { userId } = req.body;
+      const interests = await resetInterestsWeightsByUserId(userId);
+
+      res.status(200).json(interests);
+    } catch (error) {
+      res.status(500).send(`Error when resetting interests: ${(error as Error).message}`);
+    }
+  };
+
   /**
    * Retrieves interests based on a user ID and a list of tag IDs.
    * @param req The request containing the user ID and tag IDs in the body.
@@ -135,6 +205,8 @@ const interestController = (socket: FakeSOSocket) => {
   router.post('/getInterestsByTags', getInterestsByTags);
   router.get('/getInterestsByUser/:userId', getInterestsByUser);
   router.post('/getInterestsByUserAndTags', getInterestsByUserAndTags);
+  router.post('/updateInterestsWeights', updateInterestsWeights);
+  router.post('/resetInterestsWeightsByUser', resetInterestsWeightsByUser);
   return router;
 };
 
