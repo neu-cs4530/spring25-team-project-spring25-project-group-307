@@ -37,6 +37,7 @@ export interface User extends UserCredentials {
   questionsAsked: number;
   responsesGiven: number;
   lastLogin?: Date;
+  savedQuestions: ObjectId[];
 }
 
 /**

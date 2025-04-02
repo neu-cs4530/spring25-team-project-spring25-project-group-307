@@ -207,6 +207,7 @@ async function userCreate(
     questionsAsked: 0,
     responsesGiven: 0,
     lastLogin: new Date(),
+    savedQuestions: [],
   };
 
   return await UserModel.create(userDetail);

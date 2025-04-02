@@ -13,6 +13,11 @@ import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import useUserContext from '../../../../hooks/useUserContext';
 import { joinCommunity, leaveCommunity } from '../../../../services/communityService';
 import { updateInterestsWeights } from '../../../../services/interestService';
+import {
+  addSavedQuestion,
+  getUserByUsername,
+  removeSavedQuestion,
+} from '../../../../services/userService';
 
 const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
@@ -27,6 +32,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [hasInteractedWithInterests, setHasInteractedWithInterests] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const menuOpen = Boolean(anchorEl);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -57,9 +63,15 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
     handleMenuClose();
   };
 
-  const handleSave = () => {
-    // console.log('Save Clicked');
-    // Call service function to update save
+  const handleSave = async () => {
+    await addSavedQuestion(user.username, item.question._id);
+    setIsSaved(true);
+    handleMenuClose();
+  };
+
+  const handleUnsave = async () => {
+    await removeSavedQuestion(user.username, item.question._id);
+    setIsSaved(false);
     handleMenuClose();
   };
 
@@ -74,6 +86,23 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
       setIsAlreadyJoined(item.community.members.includes(user._id));
     }
   }, [item.community, user._id]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const data = await getUserByUsername(user.username);
+        setIsSaved(
+          data.savedQuestions.some(
+            savedQuestionId => savedQuestionId.toString() === item.question._id.toString(),
+          ),
+        );
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error('Error fetching user data:', error);
+      }
+    };
+    fetchUserData();
+  }, [item.question._id, user.username]);
 
   const handleJoin = async () => {
     try {
@@ -233,13 +262,23 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                   Not Interested
                 </MenuItem>
               )}
-              <MenuItem
-                onClick={event => {
-                  event.stopPropagation();
-                  handleSave();
-                }}>
-                Save
-              </MenuItem>
+              {isSaved ? (
+                <MenuItem
+                  onClick={event => {
+                    event.stopPropagation();
+                    handleUnsave();
+                  }}>
+                  Unsave
+                </MenuItem>
+              ) : (
+                <MenuItem
+                  onClick={event => {
+                    event.stopPropagation();
+                    handleSave();
+                  }}>
+                  Save
+                </MenuItem>
+              )}
               <MenuItem
                 onClick={event => {
                   event.stopPropagation();

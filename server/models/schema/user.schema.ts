@@ -65,7 +65,12 @@ const userSchema: Schema = new Schema(
         ref: 'Achievement',
       },
     ],
-    default: [],
+    savedQuestions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Question',
+      },
+    ],
   },
   { collection: 'User' },
 );
