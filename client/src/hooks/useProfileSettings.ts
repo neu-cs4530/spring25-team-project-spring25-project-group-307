@@ -9,7 +9,11 @@ import {
 } from '../services/userService';
 import { DatabaseTag, Interest, SafeDatabaseUser } from '../types/types';
 import useUserContext from './useUserContext';
-import { getInterestsByUser, updateInterests } from '../services/interestService';
+import {
+  getInterestsByUser,
+  resetInterestsWeightsByUser,
+  updateInterests,
+} from '../services/interestService';
 import { getAllTags, getTagsByIds } from '../services/tagService';
 import { refresh } from '../services/feedService';
 
@@ -163,6 +167,18 @@ const useProfileSettings = () => {
     }
   };
 
+  const handleResetInterestsWeights = async () => {
+    if (!userData) return;
+    try {
+      await resetInterestsWeightsByUser(userData._id);
+      setSuccessMessage('Interests weights reset!');
+      setErrorMessage(null);
+    } catch (error) {
+      setErrorMessage('Failed to reset interests weights.');
+      setSuccessMessage(null);
+    }
+  };
+
   /**
    * Handler for deleting the user (triggers confirmation modal)
    */
@@ -226,6 +242,7 @@ const useProfileSettings = () => {
     handleUpdateBiography,
     handleUpdateInterests,
     handleDeleteUser,
+    handleResetInterestsWeights,
   };
 };
 

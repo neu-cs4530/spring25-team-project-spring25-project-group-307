@@ -14,6 +14,10 @@ const getInterestsByUser = async (userId: ObjectId): Promise<Interest[]> => {
   return res.data;
 };
 
+const resetInterestsWeightsByUser = async (userId: ObjectId): Promise<void> => {
+  await api.post(`${INTEREST_API_URL}/resetInterestsWeightsByUser`, { userId });
+};
+
 /**
  * Function to get interests by tags
  * @param tagIds - The tag IDs to retrieve interests from
@@ -61,4 +65,5 @@ export {
   getInterestsByUserAndTags,
   updateInterests,
   updateInterestsWeights,
+  resetInterestsWeightsByUser,
 };

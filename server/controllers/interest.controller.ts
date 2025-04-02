@@ -6,6 +6,7 @@ import {
   getInterestsByTagIds,
   getInterestsByUserId,
   getInterestsByUserIdAndTagIds,
+  resetInterestsWeightsByUserId,
   saveInterest,
   updateInterestWeightMultiplicative,
 } from '../services/interest.service';
@@ -160,6 +161,17 @@ const interestController = (socket: FakeSOSocket) => {
     }
   };
 
+  const resetInterestsWeightsByUser = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { userId } = req.body;
+      const interests = await resetInterestsWeightsByUserId(userId);
+
+      res.status(200).json(interests);
+    } catch (error) {
+      res.status(500).send(`Error when resetting interests: ${(error as Error).message}`);
+    }
+  };
+
   /**
    * Retrieves interests based on a user ID and a list of tag IDs.
    * @param req The request containing the user ID and tag IDs in the body.
@@ -194,6 +206,7 @@ const interestController = (socket: FakeSOSocket) => {
   router.get('/getInterestsByUser/:userId', getInterestsByUser);
   router.post('/getInterestsByUserAndTags', getInterestsByUserAndTags);
   router.post('/updateInterestsWeights', updateInterestsWeights);
+  router.post('/resetInterestsWeightsByUser', resetInterestsWeightsByUser);
   return router;
 };
 

@@ -79,6 +79,36 @@ export const getInterestsByUserId = async (aUserId: ObjectId): Promise<Interest[
   }
 };
 
+export const resetInterestsWeightsByUserId = async (aUserId: ObjectId): Promise<Interest[]> => {
+  try {
+    const interests = await InterestModel.find({ userId: aUserId });
+
+    const bulkOperations = interests.map(interest => {
+      let weight = 0;
+      if (interest.priority === 'moderate') {
+        weight = 1;
+      } else if (interest.priority === 'high') {
+        weight = 2;
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: interest._id },
+          update: { $set: { weight } },
+        },
+      };
+    });
+
+    if (bulkOperations.length > 0) {
+      await InterestModel.bulkWrite(bulkOperations);
+    }
+
+    return interests;
+  } catch (error) {
+    return [];
+  }
+};
+
 export const getInterestsByTagIds = async (tagIds: ObjectId[]): Promise<Interest[]> => {
   try {
     return await InterestModel.find({ tagId: { $in: tagIds } });
