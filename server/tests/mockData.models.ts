@@ -80,6 +80,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b5a995b6c7045a30d823'),
@@ -93,6 +94,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b9b44c052f0a08ecade0'),
@@ -106,6 +108,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b716ff0e892116b2de09'),
@@ -119,6 +122,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
 ];
 
@@ -138,6 +142,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b5a995b6c7045a30d823'),
@@ -155,6 +160,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b9b44c052f0a08ecade0'),
@@ -168,6 +174,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b716ff0e892116b2de09'),
@@ -181,6 +188,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
 ];
 
@@ -195,6 +203,7 @@ export const user: User = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -208,4 +217,5 @@ export const safeUser: SafeDatabaseUser = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
 };
