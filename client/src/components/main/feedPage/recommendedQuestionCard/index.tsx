@@ -18,6 +18,7 @@ import {
   getUserByUsername,
   removeSavedQuestion,
 } from '../../../../services/userService';
+import { addReportToQuestion } from '../../../../services/questionService';
 
 const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
@@ -33,6 +34,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [hasInteractedWithInterests, setHasInteractedWithInterests] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
+  const [hasReported, setHasReported] = useState(false);
   const menuOpen = Boolean(anchorEl);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -75,9 +77,8 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
     handleMenuClose();
   };
 
-  const handleReport = () => {
-    // console.log('Report Clicked');
-    // Call service function to update report
+  const handleReport = async () => {
+    await addReportToQuestion(item.question._id.toString(), user.username);
     handleMenuClose();
   };
 
@@ -86,6 +87,12 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
       setIsAlreadyJoined(item.community.members.includes(user._id));
     }
   }, [item.community, user._id]);
+
+  useEffect(() => {
+    if (item.question.reportedBy.includes(user._id)) {
+      setHasReported(true);
+    }
+  }, [item.question.reportedBy, user._id]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -279,13 +286,15 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                   Save
                 </MenuItem>
               )}
-              <MenuItem
-                onClick={event => {
-                  event.stopPropagation();
-                  handleReport();
-                }}>
-                Report
-              </MenuItem>
+              {!hasReported && (
+                <MenuItem
+                  onClick={event => {
+                    event.stopPropagation();
+                    handleReport();
+                  }}>
+                  Report
+                </MenuItem>
+              )}
             </Menu>
           </Box>
         </CardActions>

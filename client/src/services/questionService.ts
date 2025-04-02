@@ -120,6 +120,25 @@ const getCommunityQuestion = async (qid: ObjectId): Promise<DatabaseCommunity | 
   return res.data;
 };
 
+const addReportToQuestion = async (qid: string, username: string): Promise<QuestionResponse> => {
+  const res = await api.post(`${QUESTION_API_URL}/addReportToQuestion/${qid}`, { username });
+  if (res.status !== 200) {
+    throw new Error('Error when adding report to question');
+  }
+  return res.data;
+};
+
+const removeReportFromQuestion = async (
+  qid: string,
+  username: string,
+): Promise<QuestionResponse> => {
+  const res = await api.post(`${QUESTION_API_URL}/removeReportFromQuestion/${qid}`, { username });
+  if (res.status !== 200) {
+    throw new Error('Error when removing report from question');
+  }
+  return res.data;
+};
+
 export {
   getQuestionsByFilter,
   getQuestionById,
@@ -128,4 +147,6 @@ export {
   upvoteQuestion,
   downvoteQuestion,
   getCommunityQuestion,
+  addReportToQuestion,
+  removeReportFromQuestion,
 };

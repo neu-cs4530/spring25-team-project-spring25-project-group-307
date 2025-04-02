@@ -162,6 +162,7 @@ async function questionCreate(
   askDateTime: Date,
   views: string[],
   comments: Comment[],
+  reportedBy: User[]
 ): Promise<DatabaseQuestion> {
   if (
     title === '' ||
@@ -169,7 +170,8 @@ async function questionCreate(
     tags.length === 0 ||
     askedBy === '' ||
     askDateTime == null ||
-    comments == null
+    comments == null ||
+    reportedBy === null
   )
     throw new Error('Invalid Question Format');
   return await QuestionModel.create({
@@ -183,6 +185,7 @@ async function questionCreate(
     upVotes: [],
     downVotes: [],
     comments: comments,
+    reportedBy: reportedBy,
   });
 }
 
@@ -320,6 +323,7 @@ const populate = async () => {
       new Date('2022-01-20T03:00:00'),
       ['sana', 'abaya', 'alia'],
       [c9],
+      [],
     );
     await questionCreate(
       Q2_DESC,
@@ -330,6 +334,7 @@ const populate = async () => {
       new Date('2023-01-10T11:24:30'),
       ['mackson3332'],
       [c10],
+      [],
     );
     await questionCreate(
       Q3_DESC,
@@ -340,6 +345,7 @@ const populate = async () => {
       new Date('2023-02-18T01:02:15'),
       ['monkeyABC', 'elephantCDE'],
       [c11],
+      [],
     );
     await questionCreate(
       Q4_DESC,
@@ -350,6 +356,7 @@ const populate = async () => {
       new Date('2023-03-10T14:28:01'),
       [],
       [c12],
+      [],
     );
 
     console.log('Database populated');

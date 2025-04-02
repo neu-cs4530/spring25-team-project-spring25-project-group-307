@@ -129,7 +129,14 @@ export const getAllQuestionsInOrderAndSaveToFeed = async (
   userId: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
   try {
-    const questions = await QuestionModel.find({});
+    // Find questions where length of reportedBy array is less than 2
+    const questions = await QuestionModel.aggregate([
+      {
+        $match: {
+          $expr: { $lt: [{ $size: '$reportedBy' }, 2] },
+        },
+      },
+    ]);
 
     const weightedQuestions = await calculateWeightedQuestions(questions, userId);
 
