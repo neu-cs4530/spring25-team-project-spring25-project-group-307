@@ -108,6 +108,7 @@ const QuestionBody = ({ views, text, askby, meta, question, user }: QuestionBody
 
   const handleReport = async () => {
     await addReportToQuestion(question._id.toString(), user.username);
+    setHasReported(true);
   };
 
   return (

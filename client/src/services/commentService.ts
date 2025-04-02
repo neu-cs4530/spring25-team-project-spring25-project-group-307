@@ -1,6 +1,6 @@
 import { ObjectId } from 'mongodb';
 import api from './config';
-import { Comment, DatabaseComment } from '../types/types';
+import { Comment, DatabaseComment, PopulatedDatabaseComment } from '../types/types';
 
 const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
 
@@ -12,7 +12,7 @@ const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
  */
 interface AddCommentRequestBody {
   id?: string;
-  type: 'question' | 'answer';
+  type: 'question' | 'answer' | 'comment';
   comment: Comment;
 }
 
@@ -26,7 +26,7 @@ interface AddCommentRequestBody {
  */
 const addComment = async (
   id: string,
-  type: 'question' | 'answer',
+  type: 'question' | 'answer' | 'comment',
   comment: Comment,
 ): Promise<DatabaseComment> => {
   const reqBody: AddCommentRequestBody = {
@@ -49,4 +49,18 @@ const deleteComment = async (cid: ObjectId): Promise<DatabaseComment> => {
   return res.data;
 };
 
-export { addComment, deleteComment };
+/**
+ * Gets the populated replies for a specific comment.
+ * @param cid - The ID of the comment for which to fetch replies.
+ * @returns The populated replies for the specified comment.
+ * @throws Error if the request fails or the response status is not 200.
+ */
+const getReplies = async (cid: string): Promise<PopulatedDatabaseComment> => {
+  const res = await api.get(`${COMMENT_API_URL}/getComment/${cid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching replies for the comment');
+  }
+  return res.data;
+};
+
+export { addComment, deleteComment, getReplies };

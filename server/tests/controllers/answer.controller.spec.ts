@@ -5,10 +5,44 @@ import { app } from '../../app';
 import * as answerUtil from '../../services/answer.service';
 import * as databaseUtil from '../../utils/database.util';
 import UserModel from '../../models/users.model';
+import CommunityModel from '../../models/communities.model';
+import userNotificationManager from '../../services/userNotificationManager';
+import * as questionService from '../../services/question.service';
 
 const saveAnswerSpy = jest.spyOn(answerUtil, 'saveAnswer');
 const addAnswerToQuestionSpy = jest.spyOn(answerUtil, 'addAnswerToQuestion');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
+
+const mockNotify = jest.fn();
+jest.spyOn(userNotificationManager, 'getInstance').mockReturnValue({
+  notifySpecificOnlineUsers: mockNotify,
+  notifyOnlineUsersInCommunity: jest.fn(),
+  getLoggedInUsers: jest.fn().mockReturnValue([]),
+  getUserSocketByUsername: jest.fn().mockReturnValue(null),
+  addInitialConnection: jest.fn(),
+  updateConnectionUserLogin: jest.fn(),
+  removeConnection: jest.fn(),
+  _socketIdToUser: new Map(),
+  _socketIdToSocket: new Map(),
+} as unknown as ReturnType<typeof userNotificationManager.getInstance>);
+
+jest.mock('../../services/achievement.service', () => ({
+  __esModule: true,
+  default: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.spyOn(questionService, 'getCommunityQuestion').mockResolvedValue({
+  _id: new mongoose.Types.ObjectId(),
+  title: 'Mock Community',
+  description: 'A test community',
+  isPrivate: false,
+  admins: [],
+  moderators: [],
+  members: [],
+  questions: [],
+  pinnedQuestions: [],
+  tags: [],
+});
 
 describe('POST /addAnswer', () => {
   it('should add a new answer to the question', async () => {
@@ -29,6 +63,8 @@ describe('POST /addAnswer', () => {
       ansBy: 'dummyUserId',
       ansDateTime: new Date('2024-06-03'),
       comments: [],
+      upVotes: [],
+      downVotes: [],
     };
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
 
@@ -64,19 +100,22 @@ describe('POST /addAnswer', () => {
 
     const findOneSpy = jest.spyOn(UserModel, 'findOne');
     findOneSpy.mockResolvedValueOnce({
+      _id: new mongoose.Types.ObjectId(),
       username: 'dummyUserId',
       score: 0,
       ranking: 'Newcomer Newbie',
       responsesGiven: 0,
     });
-    const updateOneSpy = jest.spyOn(UserModel, 'updateOne');
-    updateOneSpy.mockResolvedValueOnce({
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValue({
       acknowledged: true,
       matchedCount: 1,
       modifiedCount: 1,
       upsertedCount: 0,
       upsertedId: null,
     });
+
+    const findOneSpyCommunity = jest.spyOn(CommunityModel, 'findOne');
+    findOneSpyCommunity.mockResolvedValueOnce(null);
 
     const response = await supertest(app).post('/answer/addAnswer').send(mockReqBody);
 
@@ -87,6 +126,8 @@ describe('POST /addAnswer', () => {
       ansBy: 'dummyUserId',
       ansDateTime: mockAnswer.ansDateTime.toISOString(),
       comments: [],
+      upVotes: [],
+      downVotes: [],
     });
   });
 
@@ -187,6 +228,8 @@ describe('POST /addAnswer', () => {
       ansBy: 'dummyUserId',
       ansDateTime: new Date('2024-06-03'),
       comments: [],
+      upVotes: [],
+      downVotes: [],
     };
 
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);
@@ -214,6 +257,8 @@ describe('POST /addAnswer', () => {
       ansBy: 'dummyUserId',
       ansDateTime: new Date('2024-06-03'),
       comments: [],
+      upVotes: [],
+      downVotes: [],
     };
 
     const mockQuestion = {

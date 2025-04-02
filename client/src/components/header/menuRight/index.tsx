@@ -1,6 +1,6 @@
-import { Badge, Box, IconButton, Menu, MenuItem } from '@mui/material';
-import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import Notifications from './notifications';
 
 /**
  * Interface representing the props for the MenuRight component.
@@ -15,9 +15,6 @@ import AccountCircle from '@mui/icons-material/AccountCircle';
  * handleSignOut - The function to handle the sign out action.
  */
 interface MenuRightProps {
-  notifications: string[];
-  notificationAnchorEl: null | HTMLElement;
-  handleNotificationMenu: (event: React.MouseEvent<HTMLElement>) => void;
   handleClose: () => void;
   anchorEl: null | HTMLElement;
   handleMenu: (event: React.MouseEvent<HTMLElement>) => void;
@@ -31,44 +28,15 @@ interface MenuRightProps {
  * provides options to view the user profile and sign out.
  */
 const MenuRight = ({
-  notifications,
-  notificationAnchorEl,
-  handleNotificationMenu,
   handleClose,
   anchorEl,
   handleMenu,
   handleViewProfile,
   handleSignOut,
 }: MenuRightProps) => (
-  <Box>
-    <IconButton
-      size='large'
-      aria-label='notifications'
-      color='inherit'
-      onClick={handleNotificationMenu}>
-      <Badge badgeContent={notifications.length} color='error'>
-        <NotificationsIcon />
-      </Badge>
-    </IconButton>
-    <Menu
-      id='notification-menu'
-      anchorEl={notificationAnchorEl}
-      open={Boolean(notificationAnchorEl)}
-      onClose={handleClose}
-      anchorOrigin={{
-        vertical: 'bottom',
-        horizontal: 'right',
-      }}
-      transformOrigin={{
-        vertical: 'top',
-        horizontal: 'right',
-      }}>
-      {notifications.map((notification, index) => (
-        <MenuItem key={index} onClick={handleClose}>
-          {notification}
-        </MenuItem>
-      ))}
-    </Menu>
+  <Box sx={{ display: 'flex' }}>
+    <Notifications />
+
     <IconButton
       size='large'
       aria-label='account of current user'

@@ -22,9 +22,12 @@ import {
   deleteQuestionById,
   addReportToQuestion,
   removeReportFromQuestion,
+  getPopulatedQuestionById,
 } from '../services/question.service';
 import { processTags } from '../services/tag.service';
 import { populateDocument } from '../utils/database.util';
+import grantAchievementToUser from '../services/achievement.service';
+import QuestionModel from '../models/questions.model';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
 import { getUserByUsername } from '../services/user.service';
@@ -75,7 +78,10 @@ const questionController = (socket: FakeSOSocket) => {
    *
    * @returns A Promise that resolves to void.
    */
-  const getQuestionById = async (req: FindQuestionByIdRequest, res: Response): Promise<void> => {
+  const getQuestionByIdRoute = async (
+    req: FindQuestionByIdRequest,
+    res: Response,
+  ): Promise<void> => {
     const { qid } = req.params;
     const { username } = req.query;
 
@@ -172,12 +178,19 @@ const questionController = (socket: FakeSOSocket) => {
         const newScore = user.score + 5;
         const newRank = getUpdatedRank(newScore);
         const newQuestionsAsked = user.questionsAsked + 1;
+        if (user.questionsAsked === 0) {
+          await grantAchievementToUser(user._id.toString(), 'First Step');
+        }
+        if (user.questionsAsked === 5) {
+          await grantAchievementToUser(user._id.toString(), 'Curious Thinker');
+        }
         await UserModel.updateOne(
           { username: question.askedBy },
           { $set: { score: newScore, ranking: newRank, questionsAsked: newQuestionsAsked } },
         );
       }
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
+
       res.json(populatedQuestion);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -238,21 +251,88 @@ const questionController = (socket: FakeSOSocket) => {
     const { qid, username } = req.body;
 
     try {
-      let status;
-
-      if (type === 'upvote') {
-        status = await addVoteToQuestion(qid, username, type);
-      } else {
-        status = await addVoteToQuestion(qid, username, type);
+      const question = await QuestionModel.findById(qid);
+      if (!question) {
+        res.status(404).send('Question not found');
+        return;
       }
 
-      if (status && 'error' in status) {
-        throw new Error(status.error);
+      const voter = await UserModel.findOne({ username });
+      const recipient = await UserModel.findOne({ username: question.askedBy });
+
+      if (!voter || !recipient) {
+        res.status(404).send('User not found');
+        return;
+      }
+
+      const wasUpvoted = question.upVotes.includes(username);
+      const wasDownvoted = question.downVotes.includes(username);
+
+      question.upVotes = question.upVotes.filter(u => u !== username);
+      question.downVotes = question.downVotes.filter(u => u !== username);
+
+      const result = await addVoteToQuestion(qid, username, type);
+      if ('error' in result) {
+        throw new Error(result.error);
+      }
+
+      let voterDelta = 0;
+      let recipientDelta = 0;
+      if (type === 'upvote') {
+        const updatedQuestion = await QuestionModel.findById(qid);
+        if (updatedQuestion && updatedQuestion.upVotes.length === 5) {
+          await grantAchievementToUser(recipient._id.toString(), 'Community Favorite');
+        }
+        if (wasUpvoted) {
+          voterDelta = -1;
+          recipientDelta = -5;
+        } else if (wasDownvoted) {
+          voterDelta = +2;
+          recipientDelta = +7;
+        } else {
+          // First time upvote
+          voterDelta = +1;
+          recipientDelta = +5;
+        }
+      } else if (type === 'downvote') {
+        if (wasDownvoted) {
+          // Cancel downvote
+          voterDelta = +1;
+          recipientDelta = +2;
+        } else if (wasUpvoted) {
+          // From upvote → downvote
+          voterDelta = -2;
+          recipientDelta = -7;
+        } else {
+          // First time downvote
+          voterDelta = -1;
+          recipientDelta = -2;
+        }
+      }
+
+      if (voter._id.equals(recipient._id)) {
+        voter.score += voterDelta + recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        await voter.save();
+      } else {
+        voter.score += voterDelta;
+        recipient.score += recipientDelta;
+
+        voter.ranking = getUpdatedRank(voter.score);
+        recipient.ranking = getUpdatedRank(recipient.score);
+
+        await voter.save();
+        await recipient.save();
       }
 
       // Emit the updated vote counts to all connected clients
-      socket.emit('voteUpdate', { qid, upVotes: status.upVotes, downVotes: status.downVotes });
-      res.json(status);
+      socket.emit('voteUpdate', { qid, upVotes: result.upVotes, downVotes: result.downVotes });
+      res.json({
+        success: true,
+        vote: type,
+        voterScore: voter.score,
+        recipientScore: recipient.score,
+      });
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
     }
@@ -355,9 +435,46 @@ const questionController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getPublicQuestionRoute = async (
+    req: GetCommunityQuestionRequest,
+    res: Response,
+  ): Promise<void> => {
+    const { qid } = req.params;
+
+    try {
+      // Fetch the question by ID
+      const question = await getPopulatedQuestionById(qid.toString());
+
+      if (!question || 'error' in question) {
+        res.status(404).json({ error: 'Question not found' });
+        return;
+      }
+
+      // Check if the question is part of a community
+      const community = await getCommunityQuestion(qid);
+
+      if ('error' in community) {
+        // If the question is not part of a community, return the question
+        res.json(question);
+        return;
+      }
+
+      // If the community is private, return null
+      if (community.isPrivate) {
+        res.json(null);
+        return;
+      }
+
+      // If the community is public, return the question
+      res.json(question);
+    } catch (error) {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router
   router.get('/getQuestion', getQuestionsByFilter);
-  router.get('/getQuestionById/:qid', getQuestionById);
+  router.get('/getQuestionById/:qid', getQuestionByIdRoute);
   router.post('/addQuestion', addQuestion);
   router.delete('/deleteQuestion/:qid', deleteQuestion);
   router.post('/upvoteQuestion', upvoteQuestion);
@@ -365,6 +482,7 @@ const questionController = (socket: FakeSOSocket) => {
   router.get('/getCommunityQuestion/:qid', getCommunityQuestionRoute);
   router.post('/addReportToQuestion/:qid', addReportToQuestionRoute);
   router.post('/removeReportFromQuestion/:qid', removeReportFromQuestionRoute);
+  router.get('/getPublicQuestion/:qid', getPublicQuestionRoute);
 
   return router;
 };

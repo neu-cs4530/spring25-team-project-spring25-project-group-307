@@ -139,6 +139,19 @@ const removeReportFromQuestion = async (
   return res.data;
 };
 
+/**
+ * Function to determine if the question is a public question.
+ * @param qid - The question to determine if it is public.
+ * @returns the question if it is public or null if the question is not public
+ */
+const getPublicQuestion = async (qid: ObjectId): Promise<PopulatedDatabaseQuestion | null> => {
+  const res = await api.get(`${QUESTION_API_URL}/getPublicQuestion/${qid}`);
+  if (res.status !== 200) {
+    return null;
+  }
+  return res.data;
+};
+
 export {
   getQuestionsByFilter,
   getQuestionById,
@@ -149,4 +162,5 @@ export {
   getCommunityQuestion,
   addReportToQuestion,
   removeReportFromQuestion,
+  getPublicQuestion,
 };

@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import {
   DatabaseAnswer,
   DatabaseComment,
+  DatabaseCommunity,
   DatabaseQuestion,
   DatabaseTag,
   PopulatedDatabaseQuestion,
@@ -41,6 +42,8 @@ export const ans1: DatabaseAnswer = {
   ansBy: 'ansBy1',
   ansDateTime: new Date('2023-11-18T09:24:00'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 export const ans2: DatabaseAnswer = {
@@ -49,6 +52,8 @@ export const ans2: DatabaseAnswer = {
   ansBy: 'ansBy2',
   ansDateTime: new Date('2023-11-20T09:24:00'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 export const ans3: DatabaseAnswer = {
@@ -57,6 +62,8 @@ export const ans3: DatabaseAnswer = {
   ansBy: 'ansBy3',
   ansDateTime: new Date('2023-11-19T09:24:00'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 export const ans4: DatabaseAnswer = {
@@ -65,6 +72,8 @@ export const ans4: DatabaseAnswer = {
   ansBy: 'ansBy4',
   ansDateTime: new Date('2023-11-19T09:24:00'),
   comments: [],
+  upVotes: [],
+  downVotes: [],
 };
 
 export const QUESTIONS: DatabaseQuestion[] = [
@@ -219,3 +228,70 @@ export const safeUser: SafeDatabaseUser = {
   lastLogin: new Date('2024-12-03'),
   savedQuestions: [],
 };
+
+export const safeUser2: SafeDatabaseUser = {
+  _id: new ObjectId(),
+  username: 'user2',
+  dateJoined: new Date('2024-12-03'),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
+  questionsAsked: 0,
+  responsesGiven: 0,
+  lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+};
+
+export const safeUser3: SafeDatabaseUser = {
+  _id: new ObjectId(),
+  username: 'user3',
+  dateJoined: new Date('2024-12-03'),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 0,
+  achievements: [],
+  questionsAsked: 0,
+  responsesGiven: 0,
+  lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+};
+
+export const COMMUNITIES: DatabaseCommunity[] = [
+  {
+    _id: new ObjectId('65e9b5a995b6c7045a30d823'),
+    title: 'Community 1',
+    description: 'Description 1',
+    isPrivate: false,
+    admins: [],
+    moderators: [],
+    members: [safeUser._id, safeUser2._id],
+    pinnedQuestions: [],
+    questions: [],
+    tags: [tag1._id, tag2._id],
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6dc'),
+    title: 'Community 2',
+    description: 'Description 2',
+    isPrivate: true,
+    admins: [],
+    moderators: [safeUser._id],
+    members: [],
+    pinnedQuestions: [],
+    questions: [],
+    tags: [tag1._id],
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6dd'),
+    title: 'Community 3',
+    description: 'Description 3',
+    isPrivate: false,
+    admins: [safeUser2._id],
+    moderators: [],
+    members: [],
+    pinnedQuestions: [],
+    questions: [],
+    tags: [],
+  },
+];

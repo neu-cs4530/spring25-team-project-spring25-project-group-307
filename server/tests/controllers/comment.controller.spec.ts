@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { app } from '../../app';
 import * as commentUtil from '../../services/comment.service';
 import * as databaseUtil from '../../utils/database.util';
+import CommunityModel from '../../models/communities.model';
 
 const saveCommentSpy = jest.spyOn(commentUtil, 'saveComment');
 const addCommentSpy = jest.spyOn(commentUtil, 'addComment');
@@ -60,6 +61,9 @@ describe('POST /addComment', () => {
       reportedBy: [],
     });
 
+    const findOneSpyCommunity = jest.spyOn(CommunityModel, 'findOne');
+    findOneSpyCommunity.mockResolvedValueOnce(null);
+
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 
     expect(response.status).toBe(200);
@@ -99,6 +103,8 @@ describe('POST /addComment', () => {
       ansBy: 'dummyUserId',
       ansDateTime: new Date('2024-06-03'),
       comments: [mockComment._id],
+      upVotes: [],
+      downVotes: [],
     });
 
     popDocSpy.mockResolvedValueOnce({
@@ -107,6 +113,8 @@ describe('POST /addComment', () => {
       ansBy: 'dummyUserId',
       ansDateTime: new Date('2024-06-03'),
       comments: [mockComment],
+      upVotes: [],
+      downVotes: [],
     });
 
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);

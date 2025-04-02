@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { Community, FakeSOSocket } from '../types/types';
+import { Community, DatabaseQuestion, FakeSOSocket } from '../types/types';
 import {
   getCommunities,
   getCommunitiesBySearch,
@@ -19,6 +19,8 @@ import {
   getCommunitiesByTag,
 } from '../services/community.service';
 import { processTags } from '../services/tag.service';
+import UserNotificationManager from '../services/userNotificationManager';
+import { getQuestionById } from '../services/question.service';
 
 const communityController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -225,6 +227,22 @@ const communityController = (socket: FakeSOSocket) => {
     try {
       // Add the question to the community
       const community = await addQuestionToCommunity(req.body.communityId, req.body.questionId);
+
+      // only emit if user is in community and has subsribed to this event
+      // skip the user who asked the question
+      if (community !== null) {
+        getQuestionById(req.body.questionId).then(question => {
+          const userNotificationManager = UserNotificationManager.getInstance();
+          userNotificationManager.notifyOnlineUsersInCommunity(
+            community.title,
+            'All Questions',
+            `A new question has been posted in ${community.title}. Check it out!`,
+            [(question as DatabaseQuestion).askedBy],
+            (question as DatabaseQuestion)._id.toString(),
+          );
+        });
+      }
+
       res.json(community);
     } catch (error) {
       res.status(500).send(`Error when adding question to community: ${(error as Error).message}`);

@@ -20,6 +20,8 @@ describe('Answer model', () => {
         ansBy: 'dummyUserId',
         ansDateTime: new Date('2024-06-06'),
         comments: [],
+        upVotes: [],
+        downVotes: [],
       };
       const mockDBAnswer = {
         ...mockAnswer,
@@ -34,6 +36,8 @@ describe('Answer model', () => {
       expect(result.text).toEqual(mockAnswer.text);
       expect(result.ansBy).toEqual(mockAnswer.ansBy);
       expect(result.ansDateTime).toEqual(mockAnswer.ansDateTime);
+      expect(result.upVotes).toEqual(mockAnswer.upVotes);
+      expect(result.downVotes).toEqual(mockAnswer.downVotes);
     });
   });
 

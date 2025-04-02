@@ -1,16 +1,18 @@
-import Card from '@mui/material/Card';
-import LockIcon from '@mui/icons-material/Lock';
 import {
   Box,
   Button,
   CardActions,
   CardContent,
+  Typography,
+  Card,
   Chip,
   Divider,
   Stack,
-  Typography,
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
+import LockIcon from '@mui/icons-material/Lock';
+import OptionsMenu from './optionsMenu';
+
 import { DatabaseCommunity, Tag } from '../../../../types/types';
 
 /**
@@ -20,9 +22,9 @@ import { DatabaseCommunity, Tag } from '../../../../types/types';
  */
 interface CommunityProps {
   community: DatabaseCommunity;
-  handleViewCommunity: (cid: ObjectId) => void;
-  handleJoinCommunity: (title: string) => void;
-  handleLeaveCommunity: (title: string) => void;
+  handleViewCommunity: (event: React.MouseEvent, cid: ObjectId) => void;
+  handleJoinCommunity: (event: React.MouseEvent, title: string) => void;
+  handleLeaveCommunity: (event: React.MouseEvent, title: string) => void;
   UserInCommunity: boolean;
   communityTags: Tag[];
 }
@@ -41,12 +43,24 @@ const CommunityView = ({
   communityTags,
 }: CommunityProps) => (
   <Box>
-    <Card>
+    <Card
+      onClick={e =>
+        community.isPrivate && !UserInCommunity ? null : handleViewCommunity(e, community._id)
+      }
+      sx={{
+        'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
+        'borderRadius': '10px',
+        '&:hover': {
+          backgroundColor: community.isPrivate && !UserInCommunity ? 'inherit' : 'action.hover',
+        },
+        'opacity': community.isPrivate && !UserInCommunity ? 0.5 : 1,
+      }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
           <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
+          {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
           {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
         </Box>
         <Typography variant='h5' component='div'>
@@ -62,24 +76,22 @@ const CommunityView = ({
         <CardActions>
           {UserInCommunity ? (
             <Button
-              onClick={() => handleLeaveCommunity(community.title)}
+              onClick={e => handleLeaveCommunity(e, community.title)}
               size='small'
               color='error'>
               Leave
             </Button>
           ) : (
             <Button
-              onClick={() => handleJoinCommunity(community.title)}
+              onClick={e => handleJoinCommunity(e, community.title)}
               size='small'
               color='primary'>
               Join
             </Button>
           )}
-          {UserInCommunity ? (
-            <Button onClick={() => handleViewCommunity(community._id)} size='small' color='primary'>
-              View
-            </Button>
-          ) : null}
+          <Button onClick={e => handleViewCommunity(e, community._id)} size='small' color='primary'>
+            View
+          </Button>
         </CardActions>
       ) : null}
       {communityTags.length > 0 && (

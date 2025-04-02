@@ -27,22 +27,22 @@ export const saveComment = async (comment: Comment): Promise<CommentResponse> =>
 
 /**
  * Adds a comment to a question or answer.
- * @param {string} id - The ID of the question or answer.
- * @param {'question' | 'answer'} type - The type of the item to comment on.
+ * @param {string} id - The ID of the question or answer or comment.
+ * @param {'question' | 'answer' | 'comment'} type - The type of the item to comment on.
  * @param {DatabaseComment} comment - The comment to add.
- * @returns {Promise<QuestionResponse | AnswerResponse>} - The updated item or an error message.
+ * @returns {Promise<QuestionResponse | AnswerResponse | CommentResponse>} - The updated item or an error message.
  */
 export const addComment = async (
   id: string,
-  type: 'question' | 'answer',
+  type: 'question' | 'answer' | 'comment',
   comment: DatabaseComment,
-): Promise<QuestionResponse | AnswerResponse> => {
+): Promise<QuestionResponse | AnswerResponse | CommentResponse> => {
   try {
     if (!comment || !comment.text || !comment.commentBy || !comment.commentDateTime) {
       throw new Error('Invalid comment');
     }
 
-    let result: DatabaseQuestion | DatabaseAnswer | null;
+    let result: DatabaseQuestion | DatabaseAnswer | DatabaseComment | null;
 
     if (type === 'question') {
       result = await QuestionModel.findOneAndUpdate(
@@ -50,10 +50,16 @@ export const addComment = async (
         { $push: { comments: { $each: [comment._id] } } },
         { new: true },
       );
-    } else {
+    } else if (type === 'answer') {
       result = await AnswerModel.findOneAndUpdate(
         { _id: id },
         { $push: { comments: { $each: [comment._id] } } },
+        { new: true },
+      );
+    } else {
+      result = await CommentModel.findOneAndUpdate(
+        { _id: id },
+        { $push: { replies: { $each: [comment._id] } } },
         { new: true },
       );
     }
@@ -75,9 +81,37 @@ export const addComment = async (
  */
 export const deleteCommentById = async (cid: string): Promise<CommentResponse> => {
   try {
+    // delete the comment itself
     const result: DatabaseComment | null = await CommentModel.findByIdAndDelete(cid);
-    return result || { error: 'Comment not found' };
+    if (!result) {
+      throw new Error('Comment not found');
+    }
+
+    // Remove the comment from `replies` arrays in other comments
+    await CommentModel.updateMany({ replies: cid }, { $pull: { replies: cid } });
+
+    // Remove the comment from `comments` arrays in questions
+    await QuestionModel.updateMany({ comments: cid }, { $pull: { comments: cid } });
+
+    // Remove the comment from `comments` arrays in answers
+    await AnswerModel.updateMany({ comments: cid }, { $pull: { comments: cid } });
+
+    return result;
   } catch (error) {
     return { error: 'Error when deleting a comment' };
+  }
+};
+
+/**
+ * Retrieves a comment from the database.
+ * @param {string} cid - The ID of the comment to retrieve.
+ * @returns {Promise<CommentResponse>} - The retrieved comment or an error message.
+ */
+export const getCommentById = async (cid: string): Promise<CommentResponse> => {
+  try {
+    const res: DatabaseComment | null = await CommentModel.findById(cid);
+    return res || { error: 'Comment not found' };
+  } catch (error) {
+    return { error: 'Error when retrieving a comment' };
   }
 };

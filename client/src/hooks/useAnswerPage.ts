@@ -7,6 +7,7 @@ import {
   PopulatedDatabaseQuestion,
   PopulatedDatabaseAnswer,
   DatabaseCommunity,
+  PopulatedDatabaseComment,
 } from '../types/types';
 import useUserContext from './useUserContext';
 import { addComment, deleteComment } from '../services/commentService';
@@ -220,8 +221,8 @@ const useAnswerPage = () => {
       result,
       type,
     }: {
-      result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer;
-      type: 'question' | 'answer';
+      result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer | PopulatedDatabaseComment;
+      type: 'question' | 'answer' | 'comment';
     }) => {
       if (type === 'question') {
         const questionResult = result as PopulatedDatabaseQuestion;
