@@ -12,6 +12,7 @@ import VoteComponent from '../voteComponent';
 import CommentSection from '../commentSection';
 import useAnswerPage from '../../../hooks/useAnswerPage';
 import DeleteQuestionComponent from '../deleteQuestionComponent';
+import useUserContext from '../../../hooks/useUserContext';
 
 /**
  * AnswerPage component that displays the full content of a question along with its answers.
@@ -31,6 +32,8 @@ const AnswerPage = () => {
     handleDeleteQuestionGlobal,
     currentRole,
   } = useAnswerPage();
+
+  const { user } = useUserContext();
 
   if (!question) {
     return null;
@@ -66,6 +69,8 @@ const AnswerPage = () => {
         text={question.text}
         askby={question.askedBy}
         meta={getMetaData(new Date(question.askDateTime))}
+        question={question}
+        user={user}
       />
       <CommentSection
         comments={question.comments}
