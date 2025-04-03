@@ -6,8 +6,8 @@ import {
   Typography,
   Card,
   Chip,
-  Divider,
   Stack,
+  Tooltip,
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import LockIcon from '@mui/icons-material/Lock';
@@ -54,6 +54,7 @@ const CommunityView = ({
           backgroundColor: community.isPrivate && !UserInCommunity ? 'inherit' : 'action.hover',
         },
         'opacity': community.isPrivate && !UserInCommunity ? 0.5 : 1,
+        'boxShadow': 2,
       }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -66,49 +67,78 @@ const CommunityView = ({
         <Typography variant='h5' component='div'>
           {community.title}
         </Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
+        <Typography
+          sx={{
+            color: 'text.secondary',
+            mb: 1.5,
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}>
+          {community.description}
+        </Typography>
         <Typography variant='body2'>
           {`${community.members.length + community.admins.length + community.moderators.length} members`}
         </Typography>
         <Typography variant='body2'>{community.questions.length} questions</Typography>
       </CardContent>
-      {(community.isPrivate && UserInCommunity) || !community.isPrivate ? (
-        <CardActions>
-          {UserInCommunity ? (
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}>
+        {(community.isPrivate && UserInCommunity) || !community.isPrivate ? (
+          <CardActions>
+            {UserInCommunity ? (
+              <Button
+                onClick={e => handleLeaveCommunity(e, community.title)}
+                size='small'
+                color='error'>
+                Leave
+              </Button>
+            ) : (
+              <Button
+                onClick={e => handleJoinCommunity(e, community.title)}
+                size='small'
+                color='primary'>
+                Join
+              </Button>
+            )}
             <Button
-              onClick={e => handleLeaveCommunity(e, community.title)}
-              size='small'
-              color='error'>
-              Leave
-            </Button>
-          ) : (
-            <Button
-              onClick={e => handleJoinCommunity(e, community.title)}
+              onClick={e => handleViewCommunity(e, community._id)}
               size='small'
               color='primary'>
-              Join
+              View
             </Button>
-          )}
-          <Button onClick={e => handleViewCommunity(e, community._id)} size='small' color='primary'>
-            View
-          </Button>
-        </CardActions>
-      ) : null}
-      {communityTags.length > 0 && (
-        <Box>
-          <Divider />
-          <Box sx={{ p: 2 }}>
-            <Typography gutterBottom variant='body2' sx={{ fontWeight: 'bold' }}>
-              Tags
-            </Typography>
-            <Stack direction='row' sx={{ flexWrap: 'wrap' }}>
-              {communityTags.map(tag => (
-                <Chip key={tag.name} label={tag.name} size='small' sx={{ mr: 1, mt: 1 }} />
-              ))}
-            </Stack>
-          </Box>
-        </Box>
-      )}
+          </CardActions>
+        ) : null}
+        {communityTags.length > 0 && (
+          <Stack direction='row' sx={{ flexWrap: 'nowrap', overflow: 'hidden' }}>
+            {communityTags.slice(0, 2).map(tag => (
+              <Chip
+                key={tag.name}
+                label={tag.name}
+                size='small'
+                sx={{ mr: 1, mt: 1, whiteSpace: 'nowrap' }}
+              />
+            ))}
+            {communityTags.length > 2 && (
+              <Tooltip
+                title={communityTags
+                  .slice(2)
+                  .map(tag => tag.name)
+                  .join(', ')}
+                arrow>
+                <Chip
+                  label={`+${communityTags.length - 2} more`}
+                  size='small'
+                  sx={{ mr: 1, mt: 1 }}
+                />
+              </Tooltip>
+            )}
+          </Stack>
+        )}
+      </Box>
     </Card>
   </Box>
 );

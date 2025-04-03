@@ -119,7 +119,7 @@ const useQuestionPage = () => {
     };
   }, [questionOrder, search, socket]);
 
-  return { titleText, qlist, setQuestionOrder };
+  return { questionOrder, titleText, qlist, setQuestionOrder };
 };
 
 export default useQuestionPage;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ObjectId } from 'mongodb';
 import PushPinIcon from '@mui/icons-material/PushPin';
-import { Box, IconButton } from '@mui/material';
+import { Box, Card, CardActions, CardContent, Chip, IconButton, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './index.css';
 import { getMetaData } from '../../../../tool';
@@ -58,59 +58,90 @@ const QuestionView = ({
   };
 
   return (
-    <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-      <div
-        className='question right_padding'
-        style={{ flexGrow: 1 }}
+    <Card
+      sx={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginBottom: 2,
+        borderRadius: 5,
+        boxShadow: 3,
+      }}>
+      <CardContent
+        sx={{
+          'flexGrow': 1,
+          'cursor': 'pointer',
+          'display': 'flex',
+          'justifyContent': 'space-between',
+          'transition': 'background-color 0.3s',
+          'px': 3,
+          '&:hover': {
+            backgroundColor: 'action.hover',
+          },
+        }}
         onClick={() => {
           if (question._id) {
             handleAnswer(question._id);
           }
         }}>
-        <div className='postStats'>
-          <div>{question.answers.length || 0} answers</div>
-          <div>{question.views.length} views</div>
-        </div>
-        <div className='question_mid'>
-          <div className='postTitle'>{question.title}</div>
-          <div className='question_tags'>
+        <Box sx={{ width: '15%' }}>
+          <Typography variant='body2'>{question.answers.length || 0} answers</Typography>
+          <Typography variant='body2'>{question.views.length} views</Typography>
+        </Box>
+        <Box sx={{ width: '65%' }}>
+          <Typography variant='h6' sx={{ fontWeight: 550, marginBottom: 2 }}>
+            {question.title}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
             {question.tags.map(tag => (
-              <button
+              <Chip
                 key={String(tag._id)}
-                className='question_tag_button'
+                label={tag.name}
+                size='small'
                 onClick={e => {
                   e.stopPropagation();
                   clickTag(tag.name);
-                }}>
-                {tag.name}
-              </button>
+                }}
+                sx={{ padding: 1 }}
+              />
             ))}
-          </div>
-        </div>
-        <div className='lastActivity'>
-          <div className='question_author'>{question.askedBy}</div>
-          <div>&nbsp;</div>
-          <div className='question_meta'>asked {getMetaData(new Date(question.askDateTime))}</div>
-        </div>
-      </div>
-      {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') ? (
-        <IconButton
-          onClick={() => {
-            if (handleTogglePinQuestion) {
-              handleTogglePinQuestion(question);
-            }
-          }}
-          color={pinnedQuestion ? 'secondary' : 'default'}>
-          <PushPinIcon />
-        </IconButton>
-      ) : (
-        pinnedQuestion && (
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <PushPinIcon color='secondary' />
           </Box>
-        )
-      )}
-    </Box>
+        </Box>
+        <Box
+          sx={{
+            width: '20%',
+            textAlign: 'right',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+          }}>
+          <Typography component='span' variant='body2' color='primary.main'>
+            {question.askedBy}{' '}
+          </Typography>
+          <Typography component='span' variant='body2' color='text.secondary'>
+            asked {getMetaData(new Date(question.askDateTime))}
+          </Typography>
+        </Box>
+        {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') ? (
+          <CardActions>
+            <IconButton
+              onClick={() => {
+                if (handleTogglePinQuestion) {
+                  handleTogglePinQuestion(question);
+                }
+              }}
+              color={pinnedQuestion ? 'secondary' : 'default'}>
+              <PushPinIcon />
+            </IconButton>
+          </CardActions>
+        ) : (
+          pinnedQuestion && (
+            <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: 2 }}>
+              <PushPinIcon color='secondary' />
+            </Box>
+          )
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
