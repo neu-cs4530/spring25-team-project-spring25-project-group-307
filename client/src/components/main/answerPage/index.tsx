@@ -90,15 +90,14 @@ const AnswerPage = () => {
       <AnswerHeader
         ansCount={question.answers.length}
         title={question.title}
-        community={community}
+        question={question}
+        user={user}
       />
       <QuestionBody
         views={question.views.length}
         text={question.text}
         askby={question.askedBy}
         meta={getMetaData(new Date(question.askDateTime))}
-        question={question}
-        user={user}
       />
       <CommentSection
         comments={question.comments}
