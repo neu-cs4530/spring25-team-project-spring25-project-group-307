@@ -18,6 +18,8 @@ const EmbededQuestionView = ({ question }: { question: PopulatedDatabaseQuestion
         'cursor': 'pointer',
         'transition': 'background-color 0.3s ease',
         '&:hover': { backgroundColor: '#f5f5f5' },
+        'display': 'flex',
+        'width': '100%',
       }}>
       <CardContent>
         <Typography variant='h5' component='div' gutterBottom>

@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
+import SendIcon from '@mui/icons-material/Send';
 
 import { useEffect, useState } from 'react';
 import { IconButton, Menu, MenuItem } from '@mui/material';
@@ -19,6 +20,7 @@ import {
   removeSavedQuestion,
 } from '../../../../services/userService';
 import { addReportToQuestion } from '../../../../services/questionService';
+import SharePopup from '../../sharePopup';
 
 const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const navigate = useNavigate();
@@ -36,6 +38,8 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
   const [isSaved, setIsSaved] = useState(false);
   const [hasReported, setHasReported] = useState(false);
   const menuOpen = Boolean(anchorEl);
+
+  const [sharePopupOpen, setSharePopupOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -143,6 +147,13 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
         alignItems: 'center',
         p: 2,
       }}>
+      <SharePopup
+        open={sharePopupOpen}
+        onClose={() => {
+          setSharePopupOpen(false);
+        }}
+        questionId={item.question._id}
+      />
       <Card
         onClick={viewQuestion}
         sx={{
@@ -231,7 +242,16 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
               width: '100%', // Ensure the Box spans the full width of the card
             }}>
             {/* "View Post" Button */}
-            <Button size='small'>View Post</Button>
+            <Box>
+              <Button size='small'>View Post</Button>
+              <IconButton
+                onClick={event => {
+                  event.stopPropagation();
+                  setSharePopupOpen(true);
+                }}>
+                <SendIcon color='primary' />
+              </IconButton>
+            </Box>
 
             {/* 3-Dot Menu Icon */}
             <IconButton
