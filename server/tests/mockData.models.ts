@@ -34,6 +34,8 @@ export const com1: DatabaseComment = {
   text: 'com1',
   commentBy: 'com_by1',
   commentDateTime: new Date('2023-11-18T09:25:00'),
+  upVotes: [],
+  downVotes: [],
 };
 
 export const ans1: DatabaseAnswer = {
@@ -89,6 +91,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b5a995b6c7045a30d823'),
@@ -102,6 +105,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b9b44c052f0a08ecade0'),
@@ -115,6 +119,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b716ff0e892116b2de09'),
@@ -128,6 +133,7 @@ export const QUESTIONS: DatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
 ];
 
@@ -147,6 +153,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b5a995b6c7045a30d823'),
@@ -164,6 +171,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b9b44c052f0a08ecade0'),
@@ -177,6 +185,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new ObjectId('65e9b716ff0e892116b2de09'),
@@ -190,6 +199,7 @@ export const POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
 ];
 
@@ -204,6 +214,10 @@ export const user: User = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -217,6 +231,10 @@ export const safeUser: SafeDatabaseUser = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser2: SafeDatabaseUser = {
@@ -230,6 +248,10 @@ export const safeUser2: SafeDatabaseUser = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser3: SafeDatabaseUser = {
@@ -243,6 +265,10 @@ export const safeUser3: SafeDatabaseUser = {
   questionsAsked: 0,
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const COMMUNITIES: DatabaseCommunity[] = [

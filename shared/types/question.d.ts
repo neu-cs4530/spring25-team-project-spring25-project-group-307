@@ -38,6 +38,7 @@ export interface Question {
   upVotes: string[];
   downVotes: string[];
   comments: Comment[];
+  reportedBy: User[];
 }
 
 /**
@@ -52,6 +53,7 @@ export interface DatabaseQuestion extends Omit<Question, 'tags' | 'answers' | 'c
   tags: ObjectId[];
   answers: ObjectId[];
   comments: ObjectId[];
+  reportedBy: ObjectId[];
 }
 
 /**

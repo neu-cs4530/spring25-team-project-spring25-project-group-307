@@ -47,6 +47,10 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       questionsAsked: result.questionsAsked,
       responsesGiven: result.responsesGiven,
       lastLogin: result.lastLogin,
+      savedQuestions: result.savedQuestions,
+      upVotesGiven: result.upVotesGiven,
+      downVotesGiven: result.downVotesGiven,
+      nimGameWins: result.nimGameWins,
     };
 
     return safeUser;
@@ -212,5 +216,47 @@ export const getUserById = async (id: ObjectId): Promise<UserResponse> => {
     return user;
   } catch (error) {
     return { error: `Error occurred when finding user: ${error}` };
+  }
+};
+
+export const addUserSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<UserResponse> => {
+  try {
+    const updatedUser: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      { $push: { savedQuestions: questionId } },
+      { new: true },
+    ).select('-password');
+
+    if (!updatedUser) {
+      throw Error('Error updating user');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+export const removeUserSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<UserResponse> => {
+  try {
+    const updatedUser: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      { $pull: { savedQuestions: questionId } },
+      { new: true },
+    ).select('-password');
+
+    if (!updatedUser) {
+      throw Error('Error updating user');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating user: ${error}` };
   }
 };

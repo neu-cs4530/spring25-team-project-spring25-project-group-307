@@ -339,3 +339,65 @@ export const getCommunityQuestion = async (qid: ObjectId): Promise<CommunityResp
     return { error: 'Error when retrieving community question' };
   }
 };
+
+export const addReportToQuestion = async (
+  qid: string,
+  userId: string,
+): Promise<QuestionResponse> => {
+  try {
+    const question = await QuestionModel.findOne({ _id: new ObjectId(qid) });
+
+    if (!question) {
+      return { error: 'Question not found!' };
+    }
+
+    if (question.reportedBy.includes(new ObjectId(userId))) {
+      return { error: 'Question already reported!' };
+    }
+
+    const result: DatabaseQuestion | null = await QuestionModel.findOneAndUpdate(
+      { _id: new ObjectId(qid) },
+      { $push: { reportedBy: new ObjectId(userId) } },
+      { new: true },
+    );
+
+    if (!result) {
+      return { error: 'Question not found!' };
+    }
+
+    return result;
+  } catch (error) {
+    return { error: 'Error when adding report to question' };
+  }
+};
+
+export const removeReportFromQuestion = async (
+  qid: string,
+  userId: string,
+): Promise<QuestionResponse> => {
+  try {
+    const question = await QuestionModel.findOne({ _id: new ObjectId(qid) });
+
+    if (!question) {
+      return { error: 'Question not found!' };
+    }
+
+    if (!question.reportedBy.includes(new ObjectId(userId))) {
+      return { error: 'Question not reported!' };
+    }
+
+    const result: DatabaseQuestion | null = await QuestionModel.findOneAndUpdate(
+      { _id: new ObjectId(qid) },
+      { $pull: { reportedBy: new ObjectId(userId) } },
+      { new: true },
+    );
+
+    if (!result) {
+      return { error: 'Question not found!' };
+    }
+
+    return result;
+  } catch (error) {
+    return { error: 'Error when removing report from question' };
+  }
+};

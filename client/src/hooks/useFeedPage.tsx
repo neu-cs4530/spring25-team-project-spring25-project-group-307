@@ -20,10 +20,6 @@ const useFeedPage = () => {
       setIsFetching(true);
       setIsQuestionsLoading(true);
 
-      await new Promise(resolve => {
-        setTimeout(resolve, 1000);
-      });
-
       const newQuestions = await getNext(currentUser._id, limit);
 
       setFeedItems(prev => [...prev, ...newQuestions]);

@@ -53,6 +53,7 @@ const mockQuestion: Question = {
   upVotes: [],
   downVotes: [],
   comments: [],
+  reportedBy: [],
 };
 
 const mockDatabaseQuestion: DatabaseQuestion = {
@@ -67,6 +68,7 @@ const mockDatabaseQuestion: DatabaseQuestion = {
   upVotes: [],
   downVotes: [],
   comments: [],
+  reportedBy: [],
 };
 
 const mockPopulatedQuestion: PopulatedDatabaseQuestion = {
@@ -162,6 +164,7 @@ const MOCK_POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new mongoose.Types.ObjectId('65e9b5a995b6c7045a30d823'),
@@ -175,6 +178,7 @@ const MOCK_POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
   {
     _id: new mongoose.Types.ObjectId('34e9b58910afe6e94fc6e99f'),
@@ -188,6 +192,7 @@ const MOCK_POPULATED_QUESTIONS: PopulatedDatabaseQuestion[] = [
     upVotes: [],
     downVotes: [],
     comments: [],
+    reportedBy: [],
   },
 ];
 
@@ -315,6 +320,7 @@ describe('Test questionController', () => {
         upVotes: [],
         downVotes: [],
         comments: [],
+        reportedBy: [],
       };
 
       const result: PopulatedDatabaseQuestion = {

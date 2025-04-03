@@ -80,6 +80,7 @@ describe('POST /addAnswer', () => {
       downVotes: [],
       answers: [mockAnswer._id],
       comments: [],
+      reportedBy: [],
     });
 
     popDocSpy.mockResolvedValueOnce({
@@ -94,6 +95,7 @@ describe('POST /addAnswer', () => {
       downVotes: [],
       answers: [mockAnswer],
       comments: [],
+      reportedBy: [],
     });
 
     const findOneSpy = jest.spyOn(UserModel, 'findOne');
@@ -271,6 +273,7 @@ describe('POST /addAnswer', () => {
       downVotes: [],
       answers: [mockAnswer._id],
       comments: [],
+      reportedBy: [],
     };
 
     saveAnswerSpy.mockResolvedValueOnce(mockAnswer);

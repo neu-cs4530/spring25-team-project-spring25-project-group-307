@@ -8,6 +8,8 @@ import { Schema } from 'mongoose';
  * - `ansBy`: The username of the user who provided the answer.
  * - `ansDateTime`: The date and time when the answer was given.
  * - `comments`: Comments that have been added to the answer by users.
+ * - `upVotes`: upVotes that are from users for answers.
+ * - `downVotes`: downVotes that are from users for answers.
  */
 const answerSchema: Schema = new Schema(
   {

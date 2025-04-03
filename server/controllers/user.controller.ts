@@ -8,10 +8,12 @@ import {
   UpdateBiographyRequest,
 } from '../types/types';
 import {
+  addUserSavedQuestion,
   deleteUserByUsername,
   getUserByUsername,
   getUsersList,
   loginUser,
+  removeUserSavedQuestion,
   saveUser,
   updateUser,
 } from '../services/user.service';
@@ -66,6 +68,10 @@ const userController = (socket: FakeSOSocket) => {
       questionsAsked: 0,
       responsesGiven: 0,
       lastLogin: new Date(),
+      savedQuestions: [],
+      nimGameWins: 0,
+      upVotesGiven: 0,
+      downVotesGiven: 0,
     };
 
     try {
@@ -242,6 +248,48 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const addSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, questionId } = req.body;
+
+      const updatedUser = await addUserSavedQuestion(username, questionId);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding saved question: ${error}`);
+    }
+  };
+
+  const removeSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { username, questionId } = req.body;
+
+      const updatedUser = await removeUserSavedQuestion(username, questionId);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when removing saved question: ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -250,6 +298,8 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.patch('/addSavedQuestion', addSavedQuestion);
+  router.patch('/removeSavedQuestion', removeSavedQuestion);
   return router;
 };
 

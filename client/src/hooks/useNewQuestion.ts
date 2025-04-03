@@ -102,6 +102,7 @@ const useNewQuestion = () => {
       downVotes: [],
       views: [],
       comments: [],
+      reportedBy: [],
     };
 
     const res = await addQuestion(question);

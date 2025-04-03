@@ -7,12 +7,16 @@ import { ObjectId } from 'mongodb';
  * - `commentBy`: The author of the comment.
  * - `commentDateTime`: The timestamp when the comment was made.
  * - `replies`: An array of comments objectIds that are replies to this comment.
+ * - `upVotes` : The upvotes for a comment made.
+ * - `downVotes` : The downvotes for a comment made.
  */
 export interface Comment {
   text: string;
   commentBy: string;
   commentDateTime: Date;
   replies?: ObjectId[];
+  upVotes: string[];
+  downVotes: string[];
 }
 
 /**
@@ -73,3 +77,15 @@ export interface GetCommentRequest extends Request {
  * - Either a `DatabaseComment` object or an error message.
  */
 export type CommentResponse = DatabaseComment | { error: string };
+
+/**
+ * Interface for the request body when upvoting or downvoting a comment.
+ * - `cid`: The unique identifier of the comment being voted on (body).
+ * - `username`: The username of the user casting the vote (body).
+ */
+export interface CommentVoteRequest extends Request {
+  body: {
+    cid: string;
+    username: string;
+  };
+}
