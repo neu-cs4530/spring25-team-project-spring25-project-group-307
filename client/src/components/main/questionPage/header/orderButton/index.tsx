@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { ToggleButton } from '@mui/material';
 import { OrderType } from '../../../../../types/types';
 import { orderTypeDisplayName } from '../../../../../types/constants';
 
@@ -11,7 +12,6 @@ import { orderTypeDisplayName } from '../../../../../types/constants';
  */
 interface OrderButtonProps {
   orderType: OrderType;
-  setQuestionOrder: (order: OrderType) => void;
 }
 
 /**
@@ -22,14 +22,10 @@ interface OrderButtonProps {
  * @param orderType - The label for the button and the value passed to setQuestionOrder function.
  * @param setQuestionOrder - Callback function to set the order of questions based on the input message.
  */
-const OrderButton = ({ orderType, setQuestionOrder }: OrderButtonProps) => (
-  <button
-    className='btn'
-    onClick={() => {
-      setQuestionOrder(orderType);
-    }}>
+const OrderButton = ({ orderType }: OrderButtonProps) => (
+  <ToggleButton value={orderType} aria-label='text alignment' sx={{ px: 2 }}>
     {orderTypeDisplayName[orderType]}
-  </button>
+  </ToggleButton>
 );
 
 export default OrderButton;

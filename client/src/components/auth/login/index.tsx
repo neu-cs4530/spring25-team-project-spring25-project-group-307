@@ -60,7 +60,7 @@ const Login = () => {
         justifyContent: 'center',
         alignItems: 'center',
       }}>
-      <Paper elevation={10} sx={paperStyle}>
+      <Paper elevation={5} sx={paperStyle}>
         <FormControl onSubmit={handleSubmit} component='form' noValidate>
           <Typography
             variant='h4'

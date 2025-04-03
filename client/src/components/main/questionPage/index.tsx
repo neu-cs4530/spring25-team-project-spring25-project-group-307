@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { Box } from '@mui/material';
 import QuestionHeader from './header';
 import QuestionView from './question';
 import useQuestionPage from '../../../hooks/useQuestionPage';
@@ -10,20 +11,21 @@ import useQuestionPage from '../../../hooks/useQuestionPage';
  * It includes a header with order buttons and a button to ask a new question.
  */
 const QuestionPage = () => {
-  const { titleText, qlist, setQuestionOrder } = useQuestionPage();
+  const { questionOrder, titleText, qlist, setQuestionOrder } = useQuestionPage();
 
   return (
     <>
       <QuestionHeader
         titleText={titleText}
         qcnt={qlist.length}
+        questionOrder={questionOrder}
         setQuestionOrder={setQuestionOrder}
       />
-      <div id='question_list' className='question_list'>
+      <Box sx={{ padding: '0% 5%' }}>
         {qlist.map(q => (
           <QuestionView question={q} key={String(q._id)} />
         ))}
-      </div>
+      </Box>
       {titleText === 'Search Results' && !qlist.length && (
         <div className='bold_title right_padding'>No Questions Found</div>
       )}
