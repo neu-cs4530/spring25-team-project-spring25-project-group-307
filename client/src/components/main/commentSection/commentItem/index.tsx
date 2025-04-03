@@ -4,6 +4,7 @@ import { Box, Button, Card, CardContent, IconButton, Typography } from '@mui/mat
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DatabaseComment, Comment } from '@fake-stack-overflow/shared';
 import { getMetaData } from '../../../../tool';
+import CommentVoteComponent from '../../voteCommentComponent';
 import { addComment, getReplies } from '../../../../services/commentService';
 import useUserContext from '../../../../hooks/useUserContext';
 
@@ -40,6 +41,8 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
       text: replyText,
       commentBy: user.username,
       commentDateTime: new Date(),
+      upVotes: [],
+      downVotes: [],
     };
 
     const res = await addComment(comment._id.toString(), 'comment', newReply);
@@ -84,6 +87,9 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
             <Typography variant='caption'>
               {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
             </Typography>
+            <Box sx={{ mt: 1 }}>
+              <CommentVoteComponent comment={comment} />
+            </Box>
           </CardContent>
         </Card>
         {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate ? (

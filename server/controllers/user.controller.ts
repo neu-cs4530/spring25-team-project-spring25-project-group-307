@@ -69,6 +69,9 @@ const userController = (socket: FakeSOSocket) => {
       responsesGiven: 0,
       lastLogin: new Date(),
       savedQuestions: [],
+      nimGameWins: 0,
+      upVotesGiven: 0,
+      downVotesGiven: 0,
     };
 
     try {

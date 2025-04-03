@@ -60,13 +60,17 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
         <SearchBar handleInputChange={handleInputChange} handleKeyDown={handleKeyDown} val={val} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <IconButton
-            size='large'
-            aria-label='leaderboard'
-            color='inherit'
+            size='medium'
             onClick={handleViewStatistics}
-            sx={{ paddingRight: 0 }}>
+            sx={{
+              'p': 1,
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              },
+            }}>
             <LeaderboardIcon sx={{ color: grey[50] }} />
           </IconButton>
+
           <MenuRight
             handleClose={handleClose}
             anchorEl={anchorEl}

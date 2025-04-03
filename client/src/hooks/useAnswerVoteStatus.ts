@@ -32,7 +32,29 @@ const useAnswerVoteStatus = ({ answer }: { answer: PopulatedDatabaseAnswer }) =>
 
     setCount((answer.upVotes || []).length - (answer.downVotes || []).length);
     setVoted(getVoteValue());
-  }, [answer, user.username, socket]);
+  }, [answer, user.username]);
+
+  // Socket listener for real-time updates
+  useEffect(() => {
+    const handleVoteUpdate = (payload: { aid: string; upVotes: string[]; downVotes: string[] }) => {
+      if (payload.aid !== String(answer._id)) return;
+
+      setCount(payload.upVotes.length - payload.downVotes.length);
+      if (payload.upVotes.includes(user.username)) {
+        setVoted(1);
+      } else if (payload.downVotes.includes(user.username)) {
+        setVoted(-1);
+      } else {
+        setVoted(0);
+      }
+    };
+
+    socket?.on('answerVoteUpdate', handleVoteUpdate);
+
+    return () => {
+      socket?.off('answerVoteUpdate', handleVoteUpdate);
+    };
+  }, [answer._id, user.username, socket]);
 
   return {
     count,

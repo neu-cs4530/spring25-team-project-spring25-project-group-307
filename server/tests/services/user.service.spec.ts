@@ -220,6 +220,9 @@ describe('updateUser', () => {
     responsesGiven: user.responsesGiven,
     lastLogin: user.lastLogin,
     savedQuestions: user.savedQuestions,
+    nimGameWins: user.nimGameWins,
+    upVotesGiven: user.upVotesGiven,
+    downVotesGiven: user.downVotesGiven,
   };
 
   const updates: Partial<User> = {

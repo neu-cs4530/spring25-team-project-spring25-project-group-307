@@ -1,5 +1,7 @@
+import { IconButton, Stack, Typography } from '@mui/material';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { downvoteAnswer, upvoteAnswer } from '../../../services/answerService';
-import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseAnswer } from '../../../types/types';
 import useAnswerVoteStatus from '../../../hooks/useAnswerVoteStatus';
@@ -37,24 +39,39 @@ const AnswerVoteComponent = ({ answer }: AnswerVoteComponentProps) => {
         }
       }
     } catch (error) {
-      // Handle error if needed
+      // Handle error
     }
   };
 
   return (
-    <div className='vote-container'>
-      <button
-        className={`vote-button ${voted === 1 ? 'vote-button-upvoted' : ''}`}
-        onClick={() => handleVote('upvote')}>
-        Upvote
-      </button>
-      <button
-        className={`vote-button ${voted === -1 ? 'vote-button-downvoted' : ''}`}
-        onClick={() => handleVote('downvote')}>
-        Downvote
-      </button>
-      <span className='vote-count'>{count}</span>
-    </div>
+    <Stack direction='row' alignItems='center' spacing={1}>
+      {/* Upvote Button */}
+      <IconButton
+        onClick={() => handleVote('upvote')}
+        color={voted === 1 ? 'primary' : 'default'}
+        sx={{
+          'transition': '0.3s',
+          '&:hover': { color: 'primary.main' },
+        }}>
+        <ThumbUpIcon />
+      </IconButton>
+
+      {/* Vote Count */}
+      <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+        {count}
+      </Typography>
+
+      {/* Downvote Button */}
+      <IconButton
+        onClick={() => handleVote('downvote')}
+        color={voted === -1 ? 'error' : 'default'}
+        sx={{
+          'transition': '0.3s',
+          '&:hover': { color: 'error.main' },
+        }}>
+        <ThumbDownIcon />
+      </IconButton>
+    </Stack>
   );
 };
 

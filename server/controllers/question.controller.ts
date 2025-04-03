@@ -178,10 +178,26 @@ const questionController = (socket: FakeSOSocket) => {
         const newScore = user.score + 5;
         const newRank = getUpdatedRank(newScore);
         const newQuestionsAsked = user.questionsAsked + 1;
+        const currentRank = user?.ranking;
+        if (currentRank !== newRank && newRank === 'Common Contributor') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension I');
+        }
+        if (currentRank !== newRank && newRank === 'Skill Solver') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension II');
+        }
+        if (currentRank !== newRank && newRank === 'Expert Explorer') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension III');
+        }
+        if (currentRank !== newRank && newRank === 'Mentor Maven') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension IV');
+        }
+        if (currentRank !== newRank && newRank === 'Master Maverick') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension V');
+        }
         if (user.questionsAsked === 0) {
           await grantAchievementToUser(user._id.toString(), 'First Step');
         }
-        if (user.questionsAsked === 5) {
+        if (user.questionsAsked === 4) {
           await grantAchievementToUser(user._id.toString(), 'Curious Thinker');
         }
         await UserModel.updateOne(
@@ -283,37 +299,64 @@ const questionController = (socket: FakeSOSocket) => {
         if (updatedQuestion && updatedQuestion.upVotes.length === 5) {
           await grantAchievementToUser(recipient._id.toString(), 'Community Favorite');
         }
+
         if (wasUpvoted) {
           voterDelta = -1;
           recipientDelta = -5;
+          voter.upVotesGiven -= 1;
         } else if (wasDownvoted) {
           voterDelta = +2;
           recipientDelta = +7;
+          voter.upVotesGiven += 1;
+          voter.downVotesGiven -= 1;
         } else {
           // First time upvote
           voterDelta = +1;
           recipientDelta = +5;
+          voter.upVotesGiven += 1;
         }
       } else if (type === 'downvote') {
         if (wasDownvoted) {
           // Cancel downvote
           voterDelta = +1;
           recipientDelta = +2;
+          voter.downVotesGiven -= 1;
         } else if (wasUpvoted) {
           // From upvote → downvote
           voterDelta = -2;
           recipientDelta = -7;
+          voter.upVotesGiven -= 1;
+          voter.downVotesGiven += 1;
         } else {
           // First time downvote
           voterDelta = -1;
           recipientDelta = -2;
+          voter.downVotesGiven += 1;
         }
       }
-
+      if (voter.upVotesGiven === 5) {
+        await grantAchievementToUser(voter._id.toString(), 'Diligent Reviewer');
+      }
+      const voterRankBefore = voter.ranking;
+      const recipientRankBefore = recipient.ranking;
       if (voter._id.equals(recipient._id)) {
         voter.score += voterDelta + recipientDelta;
         voter.ranking = getUpdatedRank(voter.score);
         await voter.save();
+        // Rank-up achievements (recipient)
+        if (voterRankBefore !== voter.ranking) {
+          if (voter.ranking === 'Common Contributor') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+          } else if (voter.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+          } else if (voter.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+          } else if (voter.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+          } else if (voter.ranking === 'Master Maverick') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+          }
+        }
       } else {
         voter.score += voterDelta;
         recipient.score += recipientDelta;
@@ -323,7 +366,39 @@ const questionController = (socket: FakeSOSocket) => {
 
         await voter.save();
         await recipient.save();
+
+        // Rank-up achievements (recipient)
+        if (voterRankBefore !== voter.ranking) {
+          if (voter.ranking === 'Common Contributor') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+          } else if (voter.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+          } else if (voter.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+          } else if (voter.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+          } else if (voter.ranking === 'Master Maverick') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+          }
+        }
+
+        if (recipientRankBefore !== recipient.ranking) {
+          if (recipient.ranking === 'Common Contributor') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension I');
+          } else if (recipient.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension II');
+          } else if (recipient.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension III');
+          } else if (recipient.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension IV');
+          } else if (recipient.ranking === 'Master Maverick') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension V');
+          }
+        }
       }
+
+      await voter.save();
+      await recipient.save();
 
       // Emit the updated vote counts to all connected clients
       socket.emit('voteUpdate', { qid, upVotes: result.upVotes, downVotes: result.downVotes });
@@ -332,6 +407,8 @@ const questionController = (socket: FakeSOSocket) => {
         vote: type,
         voterScore: voter.score,
         recipientScore: recipient.score,
+        upvotesGiven: voter.upVotesGiven,
+        downvotesGiven: voter.downVotesGiven,
       });
     } catch (err) {
       res.status(500).send(`Error when ${type}ing: ${(err as Error).message}`);
