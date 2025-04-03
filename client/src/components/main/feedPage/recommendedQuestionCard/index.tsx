@@ -152,6 +152,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
         onClose={() => {
           setSharePopupOpen(false);
         }}
+        questionId={item.question._id}
       />
       <Card
         onClick={viewQuestion}
