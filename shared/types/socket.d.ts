@@ -48,8 +48,8 @@ export interface VoteUpdatePayload {
 /**
  * Payload for an answer vote update event.
  * - `aid`: The unique identifier of the answer.
- * - `upVotes`: An array of usernames who upvoted the question.
- * - `downVotes`: An array of usernames who downvoted the question.
+ * - `upVotes`: An array of usernames who upvoted the answer.
+ * - `downVotes`: An array of usernames who downvoted the answer.
  */
 export interface AnswerVoteUpdatePayload {
   aid: string;
@@ -123,6 +123,18 @@ export interface ClientToServerEvents {
 }
 
 /**
+ * Payload for a comment vote update event.
+ * - `cid`: The unique identifier of the comment.
+ * - `upVotes`: An array of usernames who upvoted the comment.
+ * - `downVotes`: An array of usernames who downvoted the comment.
+ */
+export interface CommentVoteUpdatePayload {
+  cid: string;
+  upVotes: string[];
+  downVotes: string[];
+}
+
+/**
  * Interface representing the events the server can emit to the client.
  * - `questionUpdate`: Server sends updated question.
  * - `answerUpdate`: Server sends updated answer.
@@ -134,14 +146,16 @@ export interface ClientToServerEvents {
  * - `gameUpdate`: Server sends updated game state.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
- *  - `answerVoteUpdate`: Server sends updated votes for an answer.
+ * - `answerVoteUpdate`: Server sends updated votes for an answer.
+ * - `commentVoteUpdate`: Server sends updated votes for a comment.
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
   answerUpdate: (result: AnswerUpdatePayload) => void;
   viewsUpdate: (question: PopulatedDatabaseQuestion) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
-  answerVoteUpdate: (vote: VoteUpdatePayload) => void;
+  answerVoteUpdate: (vote: AnswerVoteUpdatePayload) => void;
+  commentVoteUpdate: (vote: CommentVoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;

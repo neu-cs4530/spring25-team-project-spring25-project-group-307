@@ -2,19 +2,25 @@ import express, { Response } from 'express';
 import { ObjectId } from 'mongodb';
 import {
   Answer,
+  AnswerVoteRequest,
   AddAnswerRequest,
   FakeSOSocket,
   PopulatedDatabaseAnswer,
   DeleteAnswerRequest,
 } from '../types/types';
-
 import grantAchievementToUser from '../services/achievement.service';
-import { addAnswerToQuestion, deleteAnswerById, saveAnswer } from '../services/answer.service';
+import {
+  addAnswerToQuestion,
+  deleteAnswerById,
+  saveAnswer,
+  addVoteToAnswer,
+} from '../services/answer.service';
 import { populateDocument } from '../utils/database.util';
 import UserModel from '../models/users.model';
 import getUpdatedRank from '../utils/userstat.util';
 import { getCommunityQuestion } from '../services/question.service';
 import UserNotificationManager from '../services/userNotificationManager';
+import AnswerModel from '../models/answers.model';
 
 const answerController = (socket: FakeSOSocket) => {
   const router = express.Router();
@@ -102,6 +108,18 @@ const answerController = (socket: FakeSOSocket) => {
         if (currentRank !== newRank && newRank === 'Common Contributor') {
           await grantAchievementToUser(user._id.toString(), 'Ascension I');
         }
+        if (currentRank !== newRank && newRank === 'Skill Solver') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension II');
+        }
+        if (currentRank !== newRank && newRank === 'Expert Explorer') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension III');
+        }
+        if (currentRank !== newRank && newRank === 'Mentor Maven') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension IV');
+        }
+        if (currentRank !== newRank && newRank === 'Master Maverick') {
+          await grantAchievementToUser(user._id.toString(), 'Ascension V');
+        }
 
         if (user.responsesGiven === 0) {
           await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
@@ -169,9 +187,205 @@ const answerController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Voting for an answer
+   * @param req The HTTP request object.
+   * @param res The HTTP response object.
+   * @param type The voting either up or down
+   * @returns A Promise that resolves to void.
+   */
+
+  const voteAnswer = async (
+    req: AnswerVoteRequest,
+    res: Response,
+    type: 'upvote' | 'downvote',
+  ): Promise<void> => {
+    if (!req.body.aid || !req.body.username) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
+    const { aid, username } = req.body;
+
+    try {
+      const answer = await AnswerModel.findById(aid);
+      if (!answer) {
+        res.status(404).send('Answer not found');
+        return;
+      }
+
+      const voter = await UserModel.findOne({ username });
+      const recipient = await UserModel.findOne({ username: answer.ansBy });
+
+      if (!voter || !recipient) {
+        res.status(404).send('User not found');
+        return;
+      }
+
+      const wasUpvoted = answer.upVotes.includes(username);
+      const wasDownvoted = answer.downVotes.includes(username);
+
+      answer.upVotes = answer.upVotes.filter(u => u !== username);
+      answer.downVotes = answer.downVotes.filter(u => u !== username);
+
+      const result = await addVoteToAnswer(aid, username, type);
+      if ('error' in result) throw new Error(result.error);
+
+      let voterDelta = 0;
+      let recipientDelta = 0;
+
+      if (type === 'upvote') {
+        const updatedAnswer = await AnswerModel.findById(aid);
+        if (updatedAnswer && updatedAnswer.upVotes.length === 5) {
+          await grantAchievementToUser(recipient._id.toString(), 'Audience Pleaser');
+        }
+
+        // Award achievement if the voter has upvoted 10 different answers
+        const upvotedAnswersCount = await AnswerModel.countDocuments({
+          upVotes: username,
+        });
+
+        if (upvotedAnswersCount === 10) {
+          await grantAchievementToUser(voter._id.toString(), 'Ambitious Reviewer');
+        }
+        if (wasUpvoted) {
+          voterDelta = -1;
+          recipientDelta = -10;
+          voter.upVotesGiven -= 1;
+        } else if (wasDownvoted) {
+          voterDelta = +2;
+          recipientDelta = +15;
+          voter.upVotesGiven += 1;
+          voter.downVotesGiven -= 1;
+        } else {
+          voterDelta = +1;
+          recipientDelta = +10;
+          voter.upVotesGiven += 1;
+        }
+      } else if (type === 'downvote') {
+        if (wasDownvoted) {
+          voterDelta = +1;
+          recipientDelta = +5;
+          voter.downVotesGiven -= 1;
+        } else if (wasUpvoted) {
+          voterDelta = -2;
+          recipientDelta = -15;
+          voter.upVotesGiven -= 1;
+          voter.downVotesGiven += 1;
+        } else {
+          voterDelta = -1;
+          recipientDelta = -5;
+          voter.downVotesGiven += 1;
+        }
+      }
+      if (voter.upVotesGiven === 5) {
+        await grantAchievementToUser(voter._id.toString(), 'Diligent Reviewer');
+      }
+
+      const voterRankBefore = voter.ranking;
+      const recipientRankBefore = recipient.ranking;
+      if (voter._id.equals(recipient._id)) {
+        voter.score += voterDelta + recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        await voter.save();
+        if (voterRankBefore !== voter.ranking) {
+          if (voter.ranking === 'Common Contributor') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+          } else if (voter.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+          } else if (voter.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+          } else if (voter.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+          } else if (voter.ranking === 'Master Maverick') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+          }
+        }
+      } else {
+        voter.score += voterDelta;
+        recipient.score += recipientDelta;
+        voter.ranking = getUpdatedRank(voter.score);
+        recipient.ranking = getUpdatedRank(recipient.score);
+        await voter.save();
+        await recipient.save();
+        // Rank-up achievements (recipient)
+        if (voterRankBefore !== voter.ranking) {
+          if (voter.ranking === 'Common Contributor') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+          } else if (voter.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+          } else if (voter.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+          } else if (voter.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+          } else if (voter.ranking === 'Master Maverick') {
+            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+          }
+        }
+
+        if (recipientRankBefore !== recipient.ranking) {
+          if (recipient.ranking === 'Common Contributor') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension I');
+          } else if (recipient.ranking === 'Skilled Solver') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension II');
+          } else if (recipient.ranking === 'Expert Explorer') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension III');
+          } else if (recipient.ranking === 'Mentor Maven') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension IV');
+          } else if (recipient.ranking === 'Master Maverick') {
+            await grantAchievementToUser(recipient._id.toString(), 'Ascension V');
+          }
+        }
+      }
+
+      socket.emit('answerVoteUpdate', {
+        aid,
+        upVotes: result.upVotes,
+        downVotes: result.downVotes,
+      });
+
+      res.json({
+        success: true,
+        vote: type,
+        voterScore: voter.score,
+        recipientScore: recipient.score,
+      });
+    } catch (err) {
+      res.status(500).send(`Error when ${type}ing answer: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * Handles upvoting an answer. The request must contain the answer ID (aid) and the username.
+   * If the request is invalid or an error occurs, the appropriate HTTP response status and message are returned.
+   *
+   * @param req The VoteRequest object containing the answer ID and the username.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const upvoteAnswer = async (req: AnswerVoteRequest, res: Response): Promise<void> => {
+    voteAnswer(req, res, 'upvote');
+  };
+
+  /**
+   * Handles downvoting an answer. The request must contain the question ID (qid) and the username.
+   * If the request is invalid or an error occurs, the appropriate HTTP response status and message are returned.
+   *
+   * @param req The VoteRequest object containing the question ID and the username.
+   * @param res The HTTP response object used to send back the result of the operation.
+   *
+   * @returns A Promise that resolves to void.
+   */
+  const downvoteAnswer = async (req: AnswerVoteRequest, res: Response): Promise<void> => {
+    voteAnswer(req, res, 'downvote');
+  };
+
   // add appropriate HTTP verbs and their endpoints to the router.
   router.post('/addAnswer', addAnswer);
   router.delete('/deleteAnswer/:aid', deleteAnswer);
+  router.post('/upvoteAnswer', upvoteAnswer);
+  router.post('/downvoteAnswer', downvoteAnswer);
 
   return router;
 };

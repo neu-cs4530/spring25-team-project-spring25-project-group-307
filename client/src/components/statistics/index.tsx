@@ -60,7 +60,7 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Curious Thinker', requirement: 'Ask 5 questions' },
   { name: 'Problem Solver', requirement: 'Answer 5 questions' },
   { name: 'Audience Pleaser', requirement: 'Get 5 upvotes on an answer' },
-  { name: 'Diligent Reviewer', requirement: 'Give 10 upvotes to other users' },
+  { name: 'Diligent Reviewer', requirement: 'Give 5 upvotes to other users' },
   { name: 'Community Favorite', requirement: 'Get 5 upvotes on a question' },
   { name: 'Ascension I', requirement: 'Reached Common Contributor' },
   { name: 'Ascension II', requirement: 'Reached Skilled Solver' },
@@ -69,7 +69,7 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Ascension V', requirement: 'Reached Master Maverick' },
   { name: 'Nim Beginner', requirement: 'Win one game of Nim' },
   { name: 'Nim Novice', requirement: 'Win 5 games of Nim' },
-  { name: 'Nim King', requirement: 'Win 25 games of Nim' },
+  { name: 'Nim King', requirement: 'Win 10 games of Nim' },
 ];
 
 const achievementIcons: Record<string, React.ReactElement> = {
@@ -133,7 +133,14 @@ const StatisticsSettings: React.FC = () => {
                     <MilitaryTechIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Rank' secondary={userData?.ranking} />
+                <ListItemText
+                  primary={<Typography variant='h6'>{userData?.ranking}</Typography>}
+                  secondary={
+                    <Typography variant='body2' color='textSecondary'>
+                      Rank
+                    </Typography>
+                  }
+                />
               </ListItem>
 
               <ListItem>
@@ -142,7 +149,14 @@ const StatisticsSettings: React.FC = () => {
                     <StarIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Score' secondary={userData?.score} />
+                <ListItemText
+                  primary={<Typography variant='h6'>{userData?.score}</Typography>}
+                  secondary={
+                    <Typography variant='body2' color='textSecondary'>
+                      Score
+                    </Typography>
+                  }
+                />
               </ListItem>
 
               <ListItem>
@@ -151,7 +165,14 @@ const StatisticsSettings: React.FC = () => {
                     <QuestionAnswerIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Questions Asked' secondary={userData?.questionsAsked} />
+                <ListItemText
+                  primary={<Typography variant='h6'>{userData?.questionsAsked}</Typography>}
+                  secondary={
+                    <Typography variant='body2' color='textSecondary'>
+                      Questions Asked
+                    </Typography>
+                  }
+                />
               </ListItem>
 
               <ListItem>
@@ -160,7 +181,14 @@ const StatisticsSettings: React.FC = () => {
                     <CommentIcon />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText primary='Responses Given' secondary={userData?.responsesGiven} />
+                <ListItemText
+                  primary={<Typography variant='h6'>{userData?.responsesGiven}</Typography>}
+                  secondary={
+                    <Typography variant='body2' color='textSecondary'>
+                      Responses Given
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
 

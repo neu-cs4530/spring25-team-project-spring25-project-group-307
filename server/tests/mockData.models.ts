@@ -34,6 +34,8 @@ export const com1: DatabaseComment = {
   text: 'com1',
   commentBy: 'com_by1',
   commentDateTime: new Date('2023-11-18T09:25:00'),
+  upVotes: [],
+  downVotes: [],
 };
 
 export const ans1: DatabaseAnswer = {
@@ -213,6 +215,9 @@ export const user: User = {
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
   savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -227,6 +232,9 @@ export const safeUser: SafeDatabaseUser = {
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
   savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser2: SafeDatabaseUser = {
@@ -241,6 +249,9 @@ export const safeUser2: SafeDatabaseUser = {
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
   savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const safeUser3: SafeDatabaseUser = {
@@ -255,6 +266,9 @@ export const safeUser3: SafeDatabaseUser = {
   responsesGiven: 0,
   lastLogin: new Date('2024-12-03'),
   savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
 };
 
 export const COMMUNITIES: DatabaseCommunity[] = [

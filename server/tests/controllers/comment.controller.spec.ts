@@ -4,10 +4,42 @@ import { app } from '../../app';
 import * as commentUtil from '../../services/comment.service';
 import * as databaseUtil from '../../utils/database.util';
 import CommunityModel from '../../models/communities.model';
+import UserModel from '../../models/users.model';
+import userNotificationManager from '../../services/userNotificationManager';
 
+const findUserSpy = jest.spyOn(UserModel, 'findOne');
+findUserSpy.mockResolvedValue({
+  _id: new mongoose.Types.ObjectId(),
+  username: 'dummyUserId',
+  score: 0,
+  ranking: 'Newbie',
+  questionsAsked: 0,
+  save: jest.fn().mockResolvedValue(true),
+});
 const saveCommentSpy = jest.spyOn(commentUtil, 'saveComment');
 const addCommentSpy = jest.spyOn(commentUtil, 'addComment');
 const popDocSpy = jest.spyOn(databaseUtil, 'populateDocument');
+
+jest.spyOn(UserModel, 'updateOne').mockResolvedValue({
+  acknowledged: true,
+  matchedCount: 1,
+  modifiedCount: 1,
+  upsertedCount: 0,
+  upsertedId: null,
+});
+
+const mockNotify = jest.fn();
+jest.spyOn(userNotificationManager, 'getInstance').mockReturnValue({
+  notifySpecificOnlineUsers: mockNotify,
+  notifyOnlineUsersInCommunity: jest.fn(),
+  getLoggedInUsers: jest.fn().mockReturnValue([]),
+  getUserSocketByUsername: jest.fn().mockReturnValue(null),
+  addInitialConnection: jest.fn(),
+  updateConnectionUserLogin: jest.fn(),
+  removeConnection: jest.fn(),
+  _socketIdToUser: new Map(),
+  _socketIdToSocket: new Map(),
+} as unknown as ReturnType<typeof userNotificationManager.getInstance>);
 
 describe('POST /addComment', () => {
   it('should add a new comment to the question', async () => {
@@ -28,6 +60,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: new Date('2024-06-03'),
+      upVotes: [],
+      downVotes: [],
     };
 
     saveCommentSpy.mockResolvedValueOnce(mockComment);
@@ -72,6 +106,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: mockComment.commentDateTime.toISOString(),
+      upVotes: [],
+      downVotes: [],
     });
   });
 
@@ -85,6 +121,8 @@ describe('POST /addComment', () => {
         text: 'This is a test comment',
         commentBy: 'dummyUserId',
         commentDateTime: new Date('2024-06-03'),
+        upVotes: [],
+        downVotes: [],
       },
     };
 
@@ -93,6 +131,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: new Date('2024-06-03'),
+      upVotes: [],
+      downVotes: [],
     };
 
     saveCommentSpy.mockResolvedValueOnce(mockComment);
@@ -125,6 +165,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: mockComment.commentDateTime.toISOString(),
+      upVotes: [],
+      downVotes: [],
     });
   });
 
@@ -306,6 +348,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: new Date('2024-06-03'),
+      upVotes: [],
+      downVotes: [],
     };
 
     saveCommentSpy.mockResolvedValueOnce(mockComment);
@@ -337,6 +381,8 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: new Date('2024-06-03'),
+      upVotes: [],
+      downVotes: [],
     };
 
     const mockQuestion = {

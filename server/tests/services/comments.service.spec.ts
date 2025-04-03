@@ -74,6 +74,8 @@ describe('Comment model', () => {
         commentDateTime: new Date(),
         text: '',
         commentBy: 'user123', // Missing commentDateTime
+        upVotes: [],
+        downVotes: [],
       };
 
       const qid = 'validQuestionId';

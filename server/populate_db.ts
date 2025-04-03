@@ -101,6 +101,8 @@ async function commentCreate(
   text: string,
   commentBy: string,
   commentDateTime: Date,
+  upVotes: string[],
+  downVotes: string[],
 ): Promise<DatabaseComment> {
   if (text === '' || commentBy === '' || commentDateTime == null)
     throw new Error('Invalid Comment Format');
@@ -108,6 +110,8 @@ async function commentCreate(
     text: text,
     commentBy: commentBy,
     commentDateTime: commentDateTime,
+    upVotes: upVotes,
+    downVotes,
   };
   return await CommentModel.create(commentDetail);
 }
@@ -166,7 +170,7 @@ async function questionCreate(
   askDateTime: Date,
   views: string[],
   comments: Comment[],
-  reportedBy: User[]
+  reportedBy: User[],
 ): Promise<DatabaseQuestion> {
   if (
     title === '' ||
@@ -215,6 +219,9 @@ async function userCreate(
     responsesGiven: 0,
     lastLogin: new Date(),
     savedQuestions: [],
+    nimGameWins: 0,
+    upVotesGiven: 0,
+    downVotesGiven: 0,
   };
 
   return await UserModel.create(userDetail);
@@ -296,18 +303,18 @@ const populate = async () => {
     const t5 = await tagCreate(T5_NAME, T5_DESC);
     const t6 = await tagCreate(T6_NAME, T6_DESC);
 
-    const c1 = await commentCreate(C1_TEXT, 'sana', new Date('2023-12-12T03:30:00'));
-    const c2 = await commentCreate(C2_TEXT, 'ihba001', new Date('2023-12-01T15:24:19'));
-    const c3 = await commentCreate(C3_TEXT, 'saltyPeter', new Date('2023-12-18T09:24:00'));
-    const c4 = await commentCreate(C4_TEXT, 'monkeyABC', new Date('2023-12-20T03:24:42'));
-    const c5 = await commentCreate(C5_TEXT, 'hamkalo', new Date('2023-12-23T08:24:00'));
-    const c6 = await commentCreate(C6_TEXT, 'azad', new Date('2023-12-22T17:19:00'));
-    const c7 = await commentCreate(C7_TEXT, 'hamkalo', new Date('2023-12-22T21:17:53'));
-    const c8 = await commentCreate(C8_TEXT, 'alia', new Date('2023-12-19T18:20:59'));
-    const c9 = await commentCreate(C9_TEXT, 'ihba001', new Date('2022-02-20T03:00:00'));
-    const c10 = await commentCreate(C10_TEXT, 'abhi3241', new Date('2023-02-10T11:24:30'));
-    const c11 = await commentCreate(C11_TEXT, 'Joji John', new Date('2023-03-18T01:02:15'));
-    const c12 = await commentCreate(C12_TEXT, 'abaya', new Date('2023-04-10T14:28:01'));
+    const c1 = await commentCreate(C1_TEXT, 'sana', new Date('2023-12-12T03:30:00'), [], []);
+    const c2 = await commentCreate(C2_TEXT, 'ihba001', new Date('2023-12-01T15:24:19'), [], []);
+    const c3 = await commentCreate(C3_TEXT, 'saltyPeter', new Date('2023-12-18T09:24:00'), [], []);
+    const c4 = await commentCreate(C4_TEXT, 'monkeyABC', new Date('2023-12-20T03:24:42'), [], []);
+    const c5 = await commentCreate(C5_TEXT, 'hamkalo', new Date('2023-12-23T08:24:00'), [], []);
+    const c6 = await commentCreate(C6_TEXT, 'azad', new Date('2023-12-22T17:19:00'), [], []);
+    const c7 = await commentCreate(C7_TEXT, 'hamkalo', new Date('2023-12-22T21:17:53'), [], []);
+    const c8 = await commentCreate(C8_TEXT, 'alia', new Date('2023-12-19T18:20:59'), [], []);
+    const c9 = await commentCreate(C9_TEXT, 'ihba001', new Date('2022-02-20T03:00:00'), [], []);
+    const c10 = await commentCreate(C10_TEXT, 'abhi3241', new Date('2023-02-10T11:24:30'), [], []);
+    const c11 = await commentCreate(C11_TEXT, 'Joji John', new Date('2023-03-18T01:02:15'), [], []);
+    const c12 = await commentCreate(C12_TEXT, 'abaya', new Date('2023-04-10T14:28:01'), [], []);
 
     const a1 = await answerCreate(A1_TXT, 'hamkalo', new Date('2023-11-20T03:24:42'), [c1], [], []);
     const a2 = await answerCreate(A2_TXT, 'azad', new Date('2023-11-23T08:24:00'), [c2], [], []);
