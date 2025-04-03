@@ -110,7 +110,7 @@ const AnswerHeader = ({ ansCount, title, question, user }: AnswerHeaderProps) =>
         direction='row'
         alignItems='center'
         justifyContent='space-between'
-        flexWrap='wrap'
+        flexWrap='nowrap'
         spacing={2}>
         {/* Answer Count */}
         <Typography variant='h6' fontWeight='bold'>
@@ -118,12 +118,27 @@ const AnswerHeader = ({ ansCount, title, question, user }: AnswerHeaderProps) =>
         </Typography>
 
         {/* Question Title */}
-        <Typography variant='h6' fontWeight='bold' textAlign='center' sx={{ flexGrow: 1 }}>
+        <Typography
+          variant='h6'
+          fontWeight='bold'
+          textAlign='center'
+          sx={{
+            flexGrow: 1,
+            flexShrink: 1,
+            flexBasis: '0%',
+            maxWidth: '60%',
+            overflowWrap: 'break-word',
+          }}>
           {title}
         </Typography>
 
         {/* Bookmark and Report Icons */}
-        <Stack className='question_icons' direction='row' spacing={2} alignItems='center'>
+        <Stack
+          className='question_icons'
+          direction='row'
+          spacing={2}
+          alignItems='center'
+          sx={{ flexShrink: 0 }}>
           <div
             className='bookmark_icon tooltip-container'
             onClick={isSaved ? handleUnsave : handleSave}>
