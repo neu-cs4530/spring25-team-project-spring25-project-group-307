@@ -57,7 +57,7 @@ const CommunityView = ({
       }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography gutterBottom sx={{ color: 'text.secondary', fontSize: 14 }}>
+          <Typography gutterBottom sx={{ p: 1, color: 'text.secondary', fontSize: 14 }}>
             Community
           </Typography>
           {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
