@@ -21,6 +21,7 @@ export interface AnswerUpdatePayload {
  */
 export interface GameUpdatePayload {
   gameInstance: GameInstance<GameState>;
+  unlockedAchievements?: string[];
 }
 
 /**
@@ -163,4 +164,5 @@ export interface ServerToClientEvents {
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
   preferencesUpdate: (updateMessage: string) => void;
+  gameAchievement: (payload: { unlockedAchievements: string[] }) => void;
 }

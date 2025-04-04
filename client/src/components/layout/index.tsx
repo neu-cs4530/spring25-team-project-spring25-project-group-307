@@ -1,7 +1,7 @@
 import './index.css';
 import { Outlet } from 'react-router-dom';
 import { Snackbar } from '@mui/material';
-
+import AchievementSnackbar from '../header/achievementUnlocked';
 import SideBarNav from '../main/sideBarNav';
 import useUserNotificationPreferenceUpdates from '../../hooks/useUserPreferenceUpdates';
 
@@ -19,6 +19,7 @@ const Layout = () => {
         autoHideDuration={6000}
         message={snackbarMessage}
       />
+      <AchievementSnackbar />
       <div id='main' className='main'>
         <SideBarNav />
         <div id='right_main' className='right_main'>

@@ -80,6 +80,7 @@ const answerController = (socket: FakeSOSocket) => {
 
     const { qid } = req.body;
     const ansInfo: Answer = req.body.ans;
+    const unlocked: string[] = [];
 
     try {
       const ansFromDb = await saveAnswer(ansInfo);
@@ -106,26 +107,33 @@ const answerController = (socket: FakeSOSocket) => {
         const newScore = user.score + 10;
         const newRank = getUpdatedRank(newScore);
         if (currentRank !== newRank && newRank === 'Common Contributor') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension I');
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension I');
+          if (a) unlocked.push(a);
         }
-        if (currentRank !== newRank && newRank === 'Skill Solver') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension II');
+        if (currentRank !== newRank && newRank === 'Skilled Solver') {
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension II');
+          if (a) unlocked.push(a);
         }
         if (currentRank !== newRank && newRank === 'Expert Explorer') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension III');
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension III');
+          if (a) unlocked.push(a);
         }
         if (currentRank !== newRank && newRank === 'Mentor Maven') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension IV');
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension IV');
+          if (a) unlocked.push(a);
         }
         if (currentRank !== newRank && newRank === 'Master Maverick') {
-          await grantAchievementToUser(user._id.toString(), 'Ascension V');
+          const a = await grantAchievementToUser(user._id.toString(), 'Ascension V');
+          if (a) unlocked.push(a);
         }
 
         if (user.responsesGiven === 0) {
-          await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+          const a = await grantAchievementToUser(user._id.toString(), 'Helpful Mind');
+          if (a) unlocked.push(a);
         }
         if (user.responsesGiven === 4) {
-          await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+          const a = await grantAchievementToUser(user._id.toString(), 'Problem Solver');
+          if (a) unlocked.push(a);
         }
         const newResponsesGiven = (user.responsesGiven ?? 0) + 1;
         await UserModel.updateOne(
@@ -156,7 +164,7 @@ const answerController = (socket: FakeSOSocket) => {
         qid: new ObjectId(qid),
         answer: populatedAns as PopulatedDatabaseAnswer,
       });
-      res.json(ansFromDb);
+      res.json({ ...ansFromDb, unlockedAchievements: unlocked });
     } catch (err) {
       res.status(500).send(`Error when adding answer: ${(err as Error).message}`);
     }
@@ -206,6 +214,7 @@ const answerController = (socket: FakeSOSocket) => {
     }
 
     const { aid, username } = req.body;
+    const unlocked: string[] = [];
 
     try {
       const answer = await AnswerModel.findById(aid);
@@ -235,10 +244,11 @@ const answerController = (socket: FakeSOSocket) => {
       let recipientDelta = 0;
 
       if (type === 'upvote') {
-        const updatedAnswer = await AnswerModel.findById(aid);
-        if (updatedAnswer && updatedAnswer.upVotes.length === 5) {
-          await grantAchievementToUser(recipient._id.toString(), 'Audience Pleaser');
-        }
+        // const updatedAnswer = await AnswerModel.findById(aid);
+        // if (updatedAnswer && updatedAnswer.upVotes.length === 5) {
+        // const a = await grantAchievementToUser(recipient._id.toString(), 'Audience Pleaser');
+        // if (a) unlocked.push(a);
+        // }
 
         // Award achievement if the voter has upvoted 10 different answers
         const upvotedAnswersCount = await AnswerModel.countDocuments({
@@ -246,7 +256,8 @@ const answerController = (socket: FakeSOSocket) => {
         });
 
         if (upvotedAnswersCount === 10) {
-          await grantAchievementToUser(voter._id.toString(), 'Ambitious Reviewer');
+          const a = await grantAchievementToUser(voter._id.toString(), 'Ambitious Reviewer');
+          if (a) unlocked.push(a);
         }
         if (wasUpvoted) {
           voterDelta = -1;
@@ -279,7 +290,8 @@ const answerController = (socket: FakeSOSocket) => {
         }
       }
       if (voter.upVotesGiven === 5) {
-        await grantAchievementToUser(voter._id.toString(), 'Diligent Reviewer');
+        const a = await grantAchievementToUser(voter._id.toString(), 'Diligent Reviewer');
+        if (a) unlocked.push(a);
       }
 
       const voterRankBefore = voter.ranking;
@@ -290,15 +302,20 @@ const answerController = (socket: FakeSOSocket) => {
         await voter.save();
         if (voterRankBefore !== voter.ranking) {
           if (voter.ranking === 'Common Contributor') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Skilled Solver') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Expert Explorer') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Mentor Maven') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Master Maverick') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+            if (a) unlocked.push(a);
           }
         }
       } else {
@@ -311,29 +328,39 @@ const answerController = (socket: FakeSOSocket) => {
         // Rank-up achievements (recipient)
         if (voterRankBefore !== voter.ranking) {
           if (voter.ranking === 'Common Contributor') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension I');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Skilled Solver') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension II');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Expert Explorer') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension III');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Mentor Maven') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension IV');
+            if (a) unlocked.push(a);
           } else if (voter.ranking === 'Master Maverick') {
-            await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+            const a = await grantAchievementToUser(voter._id.toString(), 'Ascension V');
+            if (a) unlocked.push(a);
           }
         }
 
         if (recipientRankBefore !== recipient.ranking) {
           if (recipient.ranking === 'Common Contributor') {
-            await grantAchievementToUser(recipient._id.toString(), 'Ascension I');
+            const a = await grantAchievementToUser(recipient._id.toString(), 'Ascension I');
+            if (a) unlocked.push(a);
           } else if (recipient.ranking === 'Skilled Solver') {
-            await grantAchievementToUser(recipient._id.toString(), 'Ascension II');
+            const a = await grantAchievementToUser(recipient._id.toString(), 'Ascension II');
+            if (a) unlocked.push(a);
           } else if (recipient.ranking === 'Expert Explorer') {
-            await grantAchievementToUser(recipient._id.toString(), 'Ascension III');
+            const a = await grantAchievementToUser(recipient._id.toString(), 'Ascension III');
+            if (a) unlocked.push(a);
           } else if (recipient.ranking === 'Mentor Maven') {
-            await grantAchievementToUser(recipient._id.toString(), 'Ascension IV');
+            const a = await grantAchievementToUser(recipient._id.toString(), 'Ascension IV');
+            if (a) unlocked.push(a);
           } else if (recipient.ranking === 'Master Maverick') {
-            await grantAchievementToUser(recipient._id.toString(), 'Ascension V');
+            const a = await grantAchievementToUser(recipient._id.toString(), 'Ascension V');
+            if (a) unlocked.push(a);
           }
         }
       }
@@ -345,10 +372,12 @@ const answerController = (socket: FakeSOSocket) => {
       });
 
       res.json({
-        success: true,
-        vote: type,
-        voterScore: voter.score,
-        recipientScore: recipient.score,
+        answer: {
+          msg: `${type} successful`,
+          upVotes: result.upVotes,
+          downVotes: result.downVotes,
+        },
+        unlockedAchievements: unlocked,
       });
     } catch (err) {
       res.status(500).send(`Error when ${type}ing answer: ${(err as Error).message}`);

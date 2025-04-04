@@ -79,7 +79,11 @@ export type QuestionResponse = DatabaseQuestion | { error: string };
 /**
  * Type representing an object with the vote success message, updated upVotes,
  */
-export type VoteInterface = { msg: string; upVotes: string[]; downVotes: string[] };
+export type VoteInterface = {
+  msg: string;
+  upVotes: string[];
+  downVotes: string[];
+};
 
 /**
  * Type representing possible responses for a vote-related operation.

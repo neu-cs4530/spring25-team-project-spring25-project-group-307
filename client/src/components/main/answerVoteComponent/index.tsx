@@ -5,6 +5,7 @@ import { downvoteAnswer, upvoteAnswer } from '../../../services/answerService';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseAnswer } from '../../../types/types';
 import useAnswerVoteStatus from '../../../hooks/useAnswerVoteStatus';
+import { useAchievement } from '../../../contexts/AchievementContext';
 
 /**
  * Interface represents the props for the AnswerVoteComponent.
@@ -23,6 +24,7 @@ interface AnswerVoteComponentProps {
 const AnswerVoteComponent = ({ answer }: AnswerVoteComponentProps) => {
   const { user } = useUserContext();
   const { count, voted } = useAnswerVoteStatus({ answer });
+  const { triggerAchievement } = useAchievement();
 
   /**
    * Function to handle upvoting or downvoting an answer.
@@ -32,11 +34,13 @@ const AnswerVoteComponent = ({ answer }: AnswerVoteComponentProps) => {
   const handleVote = async (type: string) => {
     try {
       if (answer._id) {
+        let response;
         if (type === 'upvote') {
-          await upvoteAnswer(answer._id, user.username);
+          response = await upvoteAnswer(answer._id, user.username);
         } else if (type === 'downvote') {
-          await downvoteAnswer(answer._id, user.username);
+          response = await downvoteAnswer(answer._id, user.username);
         }
+        response?.unlockedAchievements?.forEach(triggerAchievement);
       }
     } catch (error) {
       // Handle error
