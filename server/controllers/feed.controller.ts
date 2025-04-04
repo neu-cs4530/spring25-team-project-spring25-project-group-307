@@ -2,6 +2,7 @@ import express, { Router, Request, Response } from 'express';
 import { FakeSOSocket } from '../types/types';
 import {
   getAllQuestionsInOrderAndSaveToFeed,
+  getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex,
   getQuestionsForInfiniteScroll,
   updateFeedLastViewedRanking,
 } from '../services/feed.service';
@@ -59,6 +60,7 @@ const feedController = (socket: FakeSOSocket) => {
     }
 
     try {
+      await getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex(userId);
       const questions = await getQuestionsForInfiniteScroll(userId, limit);
 
       res.status(200).send(questions);

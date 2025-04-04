@@ -16,6 +16,7 @@ import FeedModel from '../models/feed.model';
 import { getInterestsByUserId } from './interest.service';
 import {
   deleteFeedItemsByFeedId,
+  deleteFeedItemsByFeedIdFromIndex,
   getFeedItemsByFeedIdAndRankingRange,
   saveFeedItem,
 } from './feedItem.service';
@@ -120,6 +121,113 @@ export const calculateWeightedQuestions = async (
 
     // Return only the original questions in the new order
     return weightedQuestions.map(item => item.question);
+  } catch (err) {
+    return [];
+  }
+};
+
+export const getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex = async (
+  userId: ObjectId,
+): Promise<DatabaseQuestion[]> => {
+  try {
+    const userFeed = await getFeedByUserId(userId);
+    if ('error' in userFeed) {
+      throw new Error('Feed not found');
+    }
+    const startIndex = userFeed.lastViewedRanking || 0;
+
+    const questions = await QuestionModel.aggregate([
+      {
+        $match: {
+          $expr: { $lt: [{ $size: '$reportedBy' }, 2] }, // Condition 1: Length of reportedBy array is less than 2
+        },
+      },
+      {
+        $lookup: {
+          from: 'FeedItem',
+          let: { questionId: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$feed', userFeed._id] }, // Match feedItems where feed matches the user's feed
+                    { $eq: ['$question', '$$questionId'] }, // Match feedItems where question matches the current question's _id
+                  ],
+                },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                viewedRanking: 1, // Only include the viewedRanking field
+              },
+            },
+          ],
+          as: 'feedItems',
+        },
+      },
+      {
+        $addFields: {
+          includeQuestion: {
+            $cond: {
+              if: { $gt: [{ $size: '$feedItems' }, 0] }, // If there are matching feedItems
+              then: {
+                $not: {
+                  $anyElementTrue: {
+                    $map: {
+                      input: '$feedItems',
+                      as: 'feedItem',
+                      in: { $lt: ['$$feedItem.viewedRanking', startIndex] }, // Exclude if any feedItem's viewedRanking is less than startIndex
+                    },
+                  },
+                },
+              },
+              else: true, // If there are no matching feedItems, include the question
+            },
+          },
+        },
+      },
+      {
+        $match: {
+          includeQuestion: true, // Only include questions where includeQuestion is true
+        },
+      },
+      {
+        $project: {
+          feedItems: 0, // Exclude the feedItems field
+          includeQuestion: 0, // Exclude the includeQuestion field
+        },
+      },
+    ]);
+
+    if (questions.length === 0) {
+      return [];
+    }
+
+    const weightedQuestions = await calculateWeightedQuestions(questions, userId);
+
+    await deleteFeedItemsByFeedIdFromIndex(userFeed._id, startIndex);
+
+    const communities = await Promise.all(
+      weightedQuestions.map(async aQuestion => {
+        const communityResult = await getCommunityQuestion(aQuestion._id);
+        return 'error' in communityResult ? undefined : communityResult;
+      }),
+    );
+
+    await Promise.all(
+      weightedQuestions.map((aQuestion, index) =>
+        saveFeedItem({
+          feed: userFeed,
+          question: aQuestion,
+          community: communities[index],
+          viewedRanking: startIndex + index,
+        }),
+      ),
+    );
+
+    return weightedQuestions;
   } catch (err) {
     return [];
   }

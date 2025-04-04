@@ -18,7 +18,6 @@ import CasinoIcon from '@mui/icons-material/Casino';
 import { Toolbar } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import Header from '../../header';
-import useFeedPage from '../../../hooks/useFeedPage';
 
 /**
  * The width of the drawer.
@@ -33,16 +32,10 @@ const DRAWERWIDTH = 240;
 const SideBarNav = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
-  const { setupFeed } = useFeedPage();
 
   const handleDrawerClose = () => {
     setIsClosing(true);
     setMobileOpen(false);
-  };
-
-  const handleFeedClick = async () => {
-    await setupFeed();
-    handleDrawerClose();
   };
 
   const handleDrawerTransitionEnd = () => {
@@ -147,7 +140,7 @@ const SideBarNav = () => {
                     component={NavLink}
                     to={link.path}
                     selected={link.path === window.location.pathname}
-                    onClick={link.title === 'Feed' ? handleFeedClick : handleDrawerClose}>
+                    onClick={handleDrawerClose}>
                     <ListItemIcon>{link.icon}</ListItemIcon>
                     <ListItemText primary={link.title} />
                   </ListItemButton>
