@@ -36,6 +36,7 @@ const Login = () => {
     'width': '480px',
     'margin': '20px auto',
     'border-radius': '10px',
+    'backgroundColor': '#FDFBF7',
   };
   const btnStyle = { 'padding': '10px 14px', 'border-radius': '10px' };
   const textFieldStyle = {

@@ -41,7 +41,7 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
       {/* Pinned Questions */}
       {pinnedQuestions.length > 0 ? (
         <>
-          <Typography variant='h6' sx={{ mt: 2 }}>
+          <Typography variant='h6' sx={{ mt: 3, mb: 1 }}>
             Pinned Questions
           </Typography>
           <Box>
@@ -60,7 +60,7 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
       ) : null}
 
       {/* Unpinned Questions */}
-      <Typography variant='h6' sx={{ mt: 2 }}>
+      <Typography variant='h6' sx={{ mt: 3, mb: 1 }}>
         Questions
       </Typography>
       {unpinnedQuestions.map(question => (

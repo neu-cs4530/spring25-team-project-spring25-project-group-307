@@ -60,23 +60,24 @@ const QuestionView = ({
   return (
     <Card
       sx={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginBottom: 2,
-        borderRadius: 5,
-        boxShadow: 3,
+        'display': 'flex',
+        'justifyContent': 'space-between',
+        'marginBottom': 2,
+        'borderRadius': 5,
+        'boxShadow': 3,
+        'backgroundColor': '#FDFBF7',
+        '&:hover': {
+          backgroundColor: '#F7F7F7',
+        },
       }}>
       <CardContent
         sx={{
-          'flexGrow': 1,
-          'cursor': 'pointer',
-          'display': 'flex',
-          'justifyContent': 'space-between',
-          'transition': 'background-color 0.3s',
-          'px': 3,
-          '&:hover': {
-            backgroundColor: 'action.hover',
-          },
+          flexGrow: 1,
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          transition: 'background-color 0.3s',
+          px: 3,
         }}
         onClick={() => {
           if (question._id) {
@@ -124,7 +125,8 @@ const QuestionView = ({
         {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') ? (
           <CardActions>
             <IconButton
-              onClick={() => {
+              onClick={event => {
+                event.stopPropagation();
                 if (handleTogglePinQuestion) {
                   handleTogglePinQuestion(question);
                 }
@@ -135,7 +137,7 @@ const QuestionView = ({
           </CardActions>
         ) : (
           pinnedQuestion && (
-            <Box sx={{ display: 'flex', alignItems: 'center', paddingRight: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', pl: 2 }}>
               <PushPinIcon color='secondary' />
             </Box>
           )
