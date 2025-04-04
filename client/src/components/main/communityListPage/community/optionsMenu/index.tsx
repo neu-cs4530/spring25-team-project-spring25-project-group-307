@@ -2,7 +2,7 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
-import { Checkbox, ListItemIcon, ListItemText } from '@mui/material';
+import { Box, Checkbox, ListItemIcon, ListItemText } from '@mui/material';
 import useOptionsMenu from '../../../../../hooks/useOptionsMenu';
 
 const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
@@ -22,7 +22,7 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
     commentsOnMyAnswersCheckedOnChange,
   } = useOptionsMenu(communityTitle);
   return (
-    <div>
+    <Box sx={{ p: 0 }}>
       <Button
         id='demo-positioned-button'
         aria-controls={menuOpen ? 'demo-positioned-menu' : undefined}
@@ -75,7 +75,7 @@ const OptionsMenu = ({ communityTitle }: { communityTitle: string }) => {
 
         {/* TODO: add more notification preferences here in future */}
       </Menu>
-    </div>
+    </Box>
   );
 };
 export default OptionsMenu;

@@ -1,5 +1,6 @@
 import { Box, IconButton, Typography } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
+import Pets from '@mui/icons-material/Pets';
 
 /**
  * Interface representing the props for the Menu component.
@@ -28,7 +29,15 @@ const MenuLeft = ({ handleDrawerToggle, handleNavigateHome }: MenuProps) => (
       <MenuIcon />
     </IconButton>
     <Typography variant='h6' component='div' sx={{ flexGrow: 1 }} onClick={handleNavigateHome}>
-      Fake Stack Overflow
+      <Typography
+        variant='h5'
+        sx={{
+          padding: '4px 0px',
+          textAlign: 'center',
+          fontWeight: 'bold',
+        }}>
+        HuskyFlow <Pets sx={{ verticalAlign: 'middle' }} />
+      </Typography>
     </Typography>
   </Box>
 );

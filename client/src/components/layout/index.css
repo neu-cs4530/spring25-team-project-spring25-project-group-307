@@ -16,7 +16,7 @@
 }
 
 .right_padding {
-  padding: 2% 0% 2% 2%;
+  padding: 2% 5% 2% 5%;
 }
 
 .bold_title {
@@ -31,7 +31,6 @@
   border: #000000 1px solid;
   font-size: 20px;
   padding: 10px 10px 10px 10px;
-  margin-right: 5%;
 }
 
 .bluebtn:hover {

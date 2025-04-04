@@ -6,8 +6,8 @@ import {
   Typography,
   Card,
   Chip,
-  Divider,
   Stack,
+  Tooltip,
 } from '@mui/material';
 import { ObjectId } from 'mongodb';
 import LockIcon from '@mui/icons-material/Lock';
@@ -42,36 +42,51 @@ const CommunityView = ({
   UserInCommunity,
   communityTags,
 }: CommunityProps) => (
-  <Box>
-    <Card
-      onClick={e =>
-        community.isPrivate && !UserInCommunity ? null : handleViewCommunity(e, community._id)
-      }
+  <Card
+    onClick={e =>
+      community.isPrivate && !UserInCommunity ? null : handleViewCommunity(e, community._id)
+    }
+    sx={{
+      'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
+      'borderRadius': '10px',
+      'backgroundColor': '#FDFBF7',
+      '&:hover': {
+        backgroundColor: community.isPrivate && !UserInCommunity ? 'none' : '#F7F7F7',
+      },
+      'opacity': community.isPrivate && !UserInCommunity ? 0.8 : 1,
+      'boxShadow': 2,
+    }}>
+    <CardContent>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+        <Typography gutterBottom sx={{ p: 1, color: 'text.secondary', fontSize: 14 }}>
+          Community
+        </Typography>
+        {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
+        {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
+      </Box>
+      <Typography variant='h5' component='div'>
+        {community.title}
+      </Typography>
+      <Typography
+        sx={{
+          color: 'text.secondary',
+          mb: 1.5,
+          overflow: 'hidden',
+          whiteSpace: 'nowrap',
+          textOverflow: 'ellipsis',
+        }}>
+        {community.description}
+      </Typography>
+      <Typography variant='body2'>
+        {`${community.members.length + community.admins.length + community.moderators.length} members`}
+      </Typography>
+      <Typography variant='body2'>{community.questions.length} questions</Typography>
+    </CardContent>
+    <Box
       sx={{
-        'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
-        'borderRadius': '10px',
-        '&:hover': {
-          backgroundColor: community.isPrivate && !UserInCommunity ? 'inherit' : 'action.hover',
-        },
-        'opacity': community.isPrivate && !UserInCommunity ? 0.5 : 1,
+        display: 'flex',
+        justifyContent: 'space-between',
       }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Typography gutterBottom sx={{ p: 1, color: 'text.secondary', fontSize: 14 }}>
-            Community
-          </Typography>
-          {UserInCommunity && <OptionsMenu communityTitle={community.title} />}
-          {community.isPrivate && !UserInCommunity ? <LockIcon color='primary' /> : null}
-        </Box>
-        <Typography variant='h5' component='div'>
-          {community.title}
-        </Typography>
-        <Typography sx={{ color: 'text.secondary', mb: 1.5 }}>{community.description}</Typography>
-        <Typography variant='body2'>
-          {`${community.members.length + community.admins.length + community.moderators.length} members`}
-        </Typography>
-        <Typography variant='body2'>{community.questions.length} questions</Typography>
-      </CardContent>
       {(community.isPrivate && UserInCommunity) || !community.isPrivate ? (
         <CardActions>
           {UserInCommunity ? (
@@ -93,24 +108,37 @@ const CommunityView = ({
             View
           </Button>
         </CardActions>
-      ) : null}
-      {communityTags.length > 0 && (
-        <Box>
-          <Divider />
-          <Box sx={{ p: 2 }}>
-            <Typography gutterBottom variant='body2' sx={{ fontWeight: 'bold' }}>
-              Tags
-            </Typography>
-            <Stack direction='row' sx={{ flexWrap: 'wrap' }}>
-              {communityTags.map(tag => (
-                <Chip key={tag.name} label={tag.name} size='small' sx={{ mr: 1, mt: 1 }} />
-              ))}
-            </Stack>
-          </Box>
-        </Box>
+      ) : (
+        <Box></Box>
       )}
-    </Card>
-  </Box>
+      {communityTags.length > 0 && (
+        <Stack direction='row' sx={{ flexWrap: 'nowrap', overflow: 'hidden', mb: 2, mr: 2 }}>
+          {communityTags.slice(0, 2).map(tag => (
+            <Chip
+              key={tag.name}
+              label={tag.name}
+              size='small'
+              sx={{ mr: 1, mt: 1, whiteSpace: 'nowrap' }}
+            />
+          ))}
+          {communityTags.length > 2 && (
+            <Tooltip
+              title={communityTags
+                .slice(2)
+                .map(tag => tag.name)
+                .join(', ')}
+              arrow>
+              <Chip
+                label={`+${communityTags.length - 2} more`}
+                size='small'
+                sx={{ mr: 1, mt: 1 }}
+              />
+            </Tooltip>
+          )}
+        </Stack>
+      )}
+    </Box>
+  </Card>
 );
 
 export default CommunityView;

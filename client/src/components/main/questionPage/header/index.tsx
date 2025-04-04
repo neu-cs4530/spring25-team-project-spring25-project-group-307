@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { ToggleButtonGroup } from '@mui/material';
 import OrderButton from './orderButton';
 import { OrderType } from '../../../../types/types';
 import { orderTypeDisplayName } from '../../../../types/constants';
@@ -13,6 +14,7 @@ import AskQuestionButton from '../../askQuestionButton';
  * setQuestionOrder - A function that sets the order of questions based on the selected message.
  */
 interface QuestionHeaderProps {
+  questionOrder: OrderType;
   titleText: string;
   qcnt: number;
   setQuestionOrder: (order: OrderType) => void;
@@ -27,7 +29,12 @@ interface QuestionHeaderProps {
  * @param qcnt - The number of questions displayed in the header.
  * @param setQuestionOrder - Function to set the order of questions based on input message.
  */
-const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderProps) => (
+const QuestionHeader = ({
+  questionOrder,
+  titleText,
+  qcnt,
+  setQuestionOrder,
+}: QuestionHeaderProps) => (
   <div>
     <div className='space_between right_padding'>
       <div className='bold_title'>{titleText}</div>
@@ -35,14 +42,22 @@ const QuestionHeader = ({ titleText, qcnt, setQuestionOrder }: QuestionHeaderPro
     </div>
     <div className='space_between right_padding'>
       <div id='question_count'>{qcnt} questions</div>
-      <div className='btns'>
-        {Object.keys(orderTypeDisplayName).map(order => (
-          <OrderButton
-            key={order}
-            orderType={order as OrderType}
-            setQuestionOrder={setQuestionOrder}
-          />
-        ))}
+      <div>
+        <ToggleButtonGroup
+          size='small'
+          color='primary'
+          value={questionOrder}
+          exclusive
+          onChange={(event, newOrder) => {
+            if (newOrder !== null) {
+              setQuestionOrder(newOrder);
+            }
+          }}
+          aria-label='text alignment'>
+          {Object.keys(orderTypeDisplayName).map(order => (
+            <OrderButton key={order} orderType={order as OrderType} />
+          ))}
+        </ToggleButtonGroup>
       </div>
     </div>
   </div>

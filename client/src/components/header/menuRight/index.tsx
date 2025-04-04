@@ -1,5 +1,7 @@
 import { Box, IconButton, Menu, MenuItem } from '@mui/material';
 import AccountCircle from '@mui/icons-material/AccountCircle';
+import LeaderboardIcon from '@mui/icons-material/Leaderboard';
+import { grey } from '@mui/material/colors';
 import Notifications from './notifications';
 
 /**
@@ -20,6 +22,7 @@ interface MenuRightProps {
   handleMenu: (event: React.MouseEvent<HTMLElement>) => void;
   handleViewProfile: () => void;
   handleSignOut: () => void;
+  handleViewStatistics: () => void;
 }
 
 /**
@@ -33,10 +36,17 @@ const MenuRight = ({
   handleMenu,
   handleViewProfile,
   handleSignOut,
+  handleViewStatistics,
 }: MenuRightProps) => (
   <Box sx={{ display: 'flex' }}>
+    <IconButton
+      size='large'
+      aria-label='leaderboard'
+      color='inherit'
+      onClick={handleViewStatistics}>
+      <LeaderboardIcon sx={{ color: grey[50] }} />
+    </IconButton>
     <Notifications />
-
     <IconButton
       size='large'
       aria-label='account of current user'

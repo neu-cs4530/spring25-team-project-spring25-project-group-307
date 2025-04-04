@@ -1,9 +1,6 @@
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { useNavigate } from 'react-router-dom';
-import { grey } from '@mui/material/colors';
-import IconButton from '@mui/material/IconButton';
-import LeaderboardIcon from '@mui/icons-material/Leaderboard';
 import Box from '@mui/material/Box';
 import MenuLeft from './menuLeft';
 import useHeader from '../../hooks/useHeader';
@@ -59,24 +56,13 @@ const Header = ({ handleDrawerToggle }: HeaderProps) => {
         <MenuLeft handleDrawerToggle={handleDrawerToggle} handleNavigateHome={handleNavigateHome} />
         <SearchBar handleInputChange={handleInputChange} handleKeyDown={handleKeyDown} val={val} />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          <IconButton
-            size='medium'
-            onClick={handleViewStatistics}
-            sx={{
-              'p': 1,
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              },
-            }}>
-            <LeaderboardIcon sx={{ color: grey[50] }} />
-          </IconButton>
-
           <MenuRight
             handleClose={handleClose}
             anchorEl={anchorEl}
             handleMenu={handleMenu}
             handleViewProfile={handleViewProfile}
             handleSignOut={handleSignOut}
+            handleViewStatistics={handleViewStatistics}
           />
         </Box>
       </Toolbar>

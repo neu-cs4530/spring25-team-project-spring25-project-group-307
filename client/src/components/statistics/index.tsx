@@ -122,7 +122,7 @@ const StatisticsSettings: React.FC = () => {
       <Grid container spacing={3} maxWidth='1200px'>
         {/* Left Side - User Statistics & Ranking Tiers */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
+          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2, backgroundColor: '#FDFBF7' }}>
             <Typography variant='h5' gutterBottom>
               {userData?.username} statistics
             </Typography>
@@ -242,7 +242,7 @@ const StatisticsSettings: React.FC = () => {
 
         {/* Right Side - Achievements List with Hover Tooltip */}
         <Grid item xs={12} md={6}>
-          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
+          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2, backgroundColor: '#FDFBF7' }}>
             <Typography variant='h6' align='center' gutterBottom>
               Achievements
             </Typography>

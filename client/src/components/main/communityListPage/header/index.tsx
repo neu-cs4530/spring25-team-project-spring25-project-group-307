@@ -63,7 +63,7 @@ const CommunityHeader = ({
         <span>All</span>
       </div>
     </div>
-    <Box sx={{ mx: 4 }}>
+    <Box sx={{ mx: '5%' }}>
       <Stack direction='row' spacing={1}>
         {tagFilterList.map(tag => (
           <Chip
