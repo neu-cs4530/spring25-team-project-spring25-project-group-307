@@ -85,14 +85,10 @@ const SharePopup: React.FC<SharePopupProps> = ({ open, onClose, questionId }) =>
       </Dialog>
       <Snackbar
         open={snackbarOpen}
-        autoHideDuration={4000} // Duration in milliseconds (3 seconds)
+        autoHideDuration={4000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} // Position
-      >
-        <Alert
-          severity='success'
-          sx={{ width: '100%', fontSize: '18px' }} // Full width with larger text
-        >
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+        <Alert severity='success' sx={{ width: '100%', fontSize: '18px' }}>
           Sent
         </Alert>
       </Snackbar>
