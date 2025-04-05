@@ -6,10 +6,12 @@ const RecommendedContentPanel = ({
   feedItems,
   onNavToCommunity,
   onNavToQuestion,
+  onJoinLeaveCommunity,
 }: {
   feedItems: Omit<FeedItem, '_id'>[];
   onNavToCommunity: (communityId: ObjectId) => void;
   onNavToQuestion: (questionId: ObjectId) => void;
+  onJoinLeaveCommunity: (communityId: ObjectId, isJoined: boolean) => void;
 }) => (
   <div>
     {feedItems.map(feedItem => (
@@ -18,6 +20,7 @@ const RecommendedContentPanel = ({
         item={feedItem}
         onNavToCommunity={onNavToCommunity}
         onNavToQuestion={onNavToQuestion}
+        onJoinLeaveCommunity={onJoinLeaveCommunity}
       />
     ))}
   </div>

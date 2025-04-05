@@ -110,6 +110,7 @@ const useFeedPage = () => {
 
   return {
     feedItems,
+    setFeedItems,
     isQuestionsLoading,
     pageEndElement,
     noMoreContent,

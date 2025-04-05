@@ -61,7 +61,7 @@ const AnswerPage = () => {
   return (
     <Box sx={{ maxWidth: '1000px', mx: 'auto', mt: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mx: 2 }}>
-        {community && (
+        {(community || fromFeed) && (
           <Button
             variant='outlined'
             startIcon={<ArrowBackIosIcon />}

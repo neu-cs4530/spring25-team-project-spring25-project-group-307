@@ -136,10 +136,14 @@ export const getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex = async (
     }
     const startIndex = userFeed.lastViewedRanking || 0;
 
+    // Find total number of users who have a feed
+    const totalUsersWithFeed = await FeedModel.countDocuments({});
+    const reportLimit = Math.max(5, Math.floor(totalUsersWithFeed / 100));
+
     const questions = await QuestionModel.aggregate([
       {
         $match: {
-          $expr: { $lt: [{ $size: '$reportedBy' }, 2] }, // Condition 1: Length of reportedBy array is less than 2
+          $expr: { $lt: [{ $size: '$reportedBy' }, reportLimit] }, // Condition 1: Length of reportedBy array is less than 2
         },
       },
       {
@@ -237,11 +241,13 @@ export const getAllQuestionsInOrderAndSaveToFeed = async (
   userId: ObjectId,
 ): Promise<DatabaseQuestion[]> => {
   try {
+    const totalUsersWithFeed = await FeedModel.countDocuments({});
+    const reportLimit = Math.max(5, Math.floor(totalUsersWithFeed / 100));
     // Find questions where length of reportedBy array is less than 2
     const questions = await QuestionModel.aggregate([
       {
         $match: {
-          $expr: { $lt: [{ $size: '$reportedBy' }, 2] },
+          $expr: { $lt: [{ $size: '$reportedBy' }, reportLimit] },
         },
       },
     ]);
