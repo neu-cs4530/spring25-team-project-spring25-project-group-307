@@ -1,6 +1,7 @@
 import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
 import { Box, Button, Typography } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import QuestionView from '../../questionPage/question';
 import AskCommunityQuestion from '../../askCommunityQuestion';
 
@@ -32,12 +33,15 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
       {fromFeed && (
         <Button
           variant='outlined'
+          startIcon={<ArrowBackIosIcon />}
+          sx={{
+            my: 2,
+          }}
           onClick={() => {
             navigate('/feed', {
               state: { fromFeed, scrollPosition, numFeedQuestionsBeforeNav },
             });
-          }}
-          sx={{ mb: 2 }}>
+          }}>
           Back to Feed
         </Button>
       )}

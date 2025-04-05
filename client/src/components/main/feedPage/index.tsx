@@ -25,6 +25,16 @@ const FeedPage = () => {
     });
   };
 
+  const handleNavigateToQuestion = (questionId: ObjectId) => {
+    const rightMain = document.querySelector('.right_main') as HTMLElement;
+    const scrollPosition = rightMain?.scrollTop || 0;
+    const numFeedQuestionsBeforeNav = feedItems.length;
+
+    navigate(`/question/${questionId}`, {
+      state: { fromFeed: true, scrollPosition, numFeedQuestionsBeforeNav },
+    });
+  };
+
   useEffect(() => {
     if (location.state?.fromFeed && !isQuestionsLoading) {
       const savedScrollPosition = location.state.scrollPosition || 0;
@@ -40,7 +50,11 @@ const FeedPage = () => {
 
   return (
     <>
-      <RecommendedContentPanel feedItems={feedItems} onNavToCommunity={handleNavigateToCommunity} />
+      <RecommendedContentPanel
+        feedItems={feedItems}
+        onNavToCommunity={handleNavigateToCommunity}
+        onNavToQuestion={handleNavigateToQuestion}
+      />
       <Box sx={{ width: '100%', typography: 'body1' }}>
         <Box ref={pageEndElement} sx={{ width: '100%', p: 2 }}></Box>
         {noMoreContent && (

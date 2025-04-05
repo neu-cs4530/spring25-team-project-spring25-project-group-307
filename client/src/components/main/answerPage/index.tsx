@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Box, Button } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import { ObjectId } from 'mongodb';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getMetaData } from '../../../tool';
 import AnswerView from './answer';
 import AnswerHeader from './header';
@@ -36,6 +37,13 @@ const AnswerPage = () => {
   const { user } = useUserContext();
   const [moderate, setModerate] = useState<boolean>(false);
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const fromFeed = location.state?.fromFeed || false;
+  const scrollPosition = location.state?.scrollPosition || 0;
+  const numFeedQuestionsBeforeNav = location.state?.numFeedQuestionsBeforeNav || 0;
+
   const handleClickModerate = () => {
     setModerate(!moderate);
   };
@@ -43,6 +51,12 @@ const AnswerPage = () => {
   if (!question) {
     return null;
   }
+
+  const handleReturnToFeed = () => {
+    navigate('/feed', {
+      state: { fromFeed, scrollPosition, numFeedQuestionsBeforeNav },
+    });
+  };
 
   return (
     <Box sx={{ maxWidth: '1000px', mx: 'auto', mt: 2 }}>
@@ -55,8 +69,8 @@ const AnswerPage = () => {
               my: 2,
               borderRadius: '8px',
             }}
-            onClick={handleReturnToCommunity}>
-            Go to Community
+            onClick={fromFeed ? handleReturnToFeed : handleReturnToCommunity}>
+            {fromFeed ? 'Back to Feed' : 'Go to Community'}
           </Button>
         )}
         {community && (currentRole === 'MODERATOR' || currentRole === 'ADMIN') && (

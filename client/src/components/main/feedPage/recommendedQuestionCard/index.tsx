@@ -5,7 +5,6 @@ import CardActions from '@mui/material/CardActions';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
-import { useNavigate } from 'react-router-dom';
 import { ObjectId } from 'mongodb';
 
 import { useEffect, useState } from 'react';
@@ -24,16 +23,12 @@ import { addReportToQuestion } from '../../../../services/questionService';
 const RecommendedQuestionCard = ({
   item,
   onNavToCommunity,
+  onNavToQuestion,
 }: {
   item: Omit<FeedItem, '_id'>;
   onNavToCommunity: (communityId: ObjectId) => void;
+  onNavToQuestion: (questionId: ObjectId) => void;
 }) => {
-  const navigate = useNavigate();
-  const viewQuestion = () => {
-    if ('_id' in item.question) {
-      navigate(`/question/${item.question._id}`);
-    }
-  };
   const { user } = useUserContext();
 
   const [isAlreadyJoined, setIsAlreadyJoined] = useState(false);
@@ -43,6 +38,10 @@ const RecommendedQuestionCard = ({
   const [isSaved, setIsSaved] = useState(false);
   const [hasReported, setHasReported] = useState(false);
   const menuOpen = Boolean(anchorEl);
+
+  const viewQuestion = () => {
+    onNavToQuestion(item.question._id);
+  };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);

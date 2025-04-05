@@ -5,9 +5,11 @@ import RecommendedQuestionCard from '../recommendedQuestionCard';
 const RecommendedContentPanel = ({
   feedItems,
   onNavToCommunity,
+  onNavToQuestion,
 }: {
   feedItems: Omit<FeedItem, '_id'>[];
   onNavToCommunity: (communityId: ObjectId) => void;
+  onNavToQuestion: (questionId: ObjectId) => void;
 }) => (
   <div>
     {feedItems.map(feedItem => (
@@ -15,6 +17,7 @@ const RecommendedContentPanel = ({
         key={feedItem.question._id}
         item={feedItem}
         onNavToCommunity={onNavToCommunity}
+        onNavToQuestion={onNavToQuestion}
       />
     ))}
   </div>
