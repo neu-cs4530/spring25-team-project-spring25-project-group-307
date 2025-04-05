@@ -280,6 +280,57 @@ export const getAllQuestionsInOrderAndSaveToFeed = async (
   }
 };
 
+export const getFeedHistoryByUser = async (
+  userId: ObjectId,
+  numFeedQuestionsBeforeNav: number,
+): Promise<FeedItem[]> => {
+  try {
+    const userFeed = await getFeedByUserId(userId);
+    if ('error' in userFeed) {
+      throw new Error('Feed not found');
+    }
+
+    const startIndex = userFeed.lastViewedRanking - numFeedQuestionsBeforeNav;
+    const endIndex = userFeed.lastViewedRanking || 0;
+
+    const userFeedItems = await getFeedItemsByFeedIdAndRankingRange(
+      userFeed._id,
+      startIndex,
+      endIndex,
+    );
+    if ('error' in userFeedItems) {
+      throw new Error('Feed items not found');
+    }
+
+    const questionIds = userFeedItems.map(feedItem => feedItem.question);
+
+    const questions: PopulatedDatabaseQuestion[] = await QuestionModel.find({
+      _id: { $in: questionIds },
+    }).populate<{
+      tags: DatabaseTag[];
+      answers: PopulatedDatabaseAnswer[];
+      comments: DatabaseComment[];
+    }>([
+      { path: 'tags', model: TagModel },
+      { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },
+      { path: 'comments', model: CommentModel },
+    ]);
+
+    const communityIds = userFeedItems.map(feedItem => feedItem.community);
+    const communities = await CommunityModel.find({ _id: { $in: communityIds } });
+
+    const feedItems: FeedItem[] = userFeedItems.map(feedItem => {
+      const question = questions.find(q => q._id.equals(feedItem.question));
+      const community = communities.find(c => c._id.equals(feedItem.community));
+      return { feed: userFeed, question, community, viewedRanking: feedItem.viewedRanking };
+    });
+
+    return feedItems;
+  } catch (err) {
+    return [];
+  }
+};
+
 export const getQuestionsForInfiniteScroll = async (
   userId: ObjectId,
   limit: number,

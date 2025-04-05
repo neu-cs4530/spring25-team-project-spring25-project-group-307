@@ -6,6 +6,7 @@ import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { useNavigate } from 'react-router-dom';
+import { ObjectId } from 'mongodb';
 
 import { useEffect, useState } from 'react';
 import { IconButton, Menu, MenuItem } from '@mui/material';
@@ -20,7 +21,13 @@ import {
 } from '../../../../services/userService';
 import { addReportToQuestion } from '../../../../services/questionService';
 
-const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
+const RecommendedQuestionCard = ({
+  item,
+  onNavToCommunity,
+}: {
+  item: Omit<FeedItem, '_id'>;
+  onNavToCommunity: (communityId: ObjectId) => void;
+}) => {
   const navigate = useNavigate();
   const viewQuestion = () => {
     if ('_id' in item.question) {
@@ -176,7 +183,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                 <Button
                   onClick={event => {
                     event.stopPropagation();
-                    navigate(`/community/${item.community._id}`);
+                    onNavToCommunity(item.community._id);
                   }}
                   variant='contained'
                   size='small'

@@ -1,5 +1,6 @@
 import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
-import { Box, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
+import { useLocation, useNavigate } from 'react-router-dom';
 import QuestionView from '../../questionPage/question';
 import AskCommunityQuestion from '../../askCommunityQuestion';
 
@@ -10,6 +11,13 @@ interface CommunityHomeProps {
 }
 
 const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: CommunityHomeProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const fromFeed = location.state?.fromFeed || false;
+  const scrollPosition = location.state?.scrollPosition || 0;
+  const numFeedQuestionsBeforeNav = location.state?.numFeedQuestionsBeforeNav || 0;
+
   if (!community) {
     return <Typography variant='h5'>Loading community...</Typography>;
   }
@@ -21,6 +29,18 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
 
   return (
     <div>
+      {fromFeed && (
+        <Button
+          variant='outlined'
+          onClick={() => {
+            navigate('/feed', {
+              state: { fromFeed, scrollPosition, numFeedQuestionsBeforeNav },
+            });
+          }}
+          sx={{ mb: 2 }}>
+          Back to Feed
+        </Button>
+      )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography variant='h3'>{community?.title}</Typography>
         <AskCommunityQuestion communityID={community?._id.toString() || ''} />

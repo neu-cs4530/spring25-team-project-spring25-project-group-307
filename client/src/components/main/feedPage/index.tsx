@@ -4,15 +4,43 @@ import CircularProgress from '@mui/material/CircularProgress';
 
 import { Link, Typography } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { ObjectId } from 'mongodb';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import RecommendedContentPanel from './recommendedContentPanel';
 import useFeedPage from '../../../hooks/useFeedPage';
 
 const FeedPage = () => {
   const { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed } = useFeedPage();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleNavigateToCommunity = (communityId: ObjectId) => {
+    const rightMain = document.querySelector('.right_main') as HTMLElement;
+    const scrollPosition = rightMain?.scrollTop || 0;
+    const numFeedQuestionsBeforeNav = feedItems.length;
+
+    navigate(`/community/${communityId}`, {
+      state: { fromFeed: true, scrollPosition, numFeedQuestionsBeforeNav },
+    });
+  };
+
+  useEffect(() => {
+    if (location.state?.fromFeed && !isQuestionsLoading) {
+      const savedScrollPosition = location.state.scrollPosition || 0;
+      const rightMain = document.querySelector('.right_main') as HTMLElement;
+
+      if (rightMain) {
+        rightMain.scrollTo(0, savedScrollPosition);
+      }
+
+      navigate('.', { replace: true, state: {} });
+    }
+  }, [location.state, isQuestionsLoading, navigate]);
 
   return (
     <>
-      <RecommendedContentPanel feedItems={feedItems} />
+      <RecommendedContentPanel feedItems={feedItems} onNavToCommunity={handleNavigateToCommunity} />
       <Box sx={{ width: '100%', typography: 'body1' }}>
         <Box ref={pageEndElement} sx={{ width: '100%', p: 2 }}></Box>
         {noMoreContent && (
