@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import {
+  CommunitiesResponse,
   Community,
   DatabaseCommunity,
   DatabaseTag,
@@ -10,6 +11,7 @@ import {
   Tag,
 } from '../types/types';
 import CommunityModel from '../models/communities.model';
+// eslint-disable-next-line import/no-cycle
 import { getUserByUsername } from './user.service';
 
 /**
@@ -172,6 +174,33 @@ const leaveCommunity = async (
     return community;
   } catch (error) {
     return null;
+  }
+};
+
+const removeUserFromAssociatedCommunities = async (
+  username: string,
+): Promise<CommunitiesResponse> => {
+  try {
+    const user = await getUserByUsername(username);
+    if ('error' in user) {
+      throw new Error(user.error);
+    }
+    const communities = await getCommunitiesByUser(username);
+
+    // For each community, use leaveCommunity to remove the user
+    const leaveCommunityPromises = communities.map(community =>
+      leaveCommunity(community.title, username),
+    );
+
+    const results = await Promise.all(leaveCommunityPromises);
+    // Check if any of the leaveCommunity calls failed
+    if (results.includes(null)) {
+      throw new Error('Failed to remove user from one or more communities');
+    }
+
+    return results.filter((community): community is DatabaseCommunity => community !== null);
+  } catch (error) {
+    return { error: `Error occurred when removing user from communities: ${error}` };
   }
 };
 
@@ -479,4 +508,5 @@ export {
   unpinQuestion,
   getTagsForCommunity,
   getAllCommunityTags,
+  removeUserFromAssociatedCommunities,
 };

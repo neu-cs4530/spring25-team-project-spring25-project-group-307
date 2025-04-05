@@ -3,6 +3,7 @@ import UserModel from '../models/users.model';
 import {
   DatabaseUser,
   SafeDatabaseUser,
+  UpdateResultResponse,
   User,
   UserCredentials,
   UserResponse,
@@ -11,7 +12,8 @@ import {
 import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
 import { deleteFeedItemsByFeedId } from './feedItem.service';
 import { deleteInterestsByUserId } from './interest.service';
-import { getCommunitiesByUser, leaveCommunity } from './community.service';
+// eslint-disable-next-line import/no-cycle
+import { removeUserFromAssociatedCommunities } from './community.service';
 
 /**
  * Saves a new user to the database.
@@ -133,22 +135,7 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
  */
 export const deleteUserByUsername = async (username: string): Promise<UserResponse> => {
   try {
-    // Remove user from associated communities
-    const userCommunities = await getCommunitiesByUser(username);
-
-    if ('error' in userCommunities) {
-      throw Error('Failed to find communities for user');
-    }
-
-    const leaveCommunityPromises = userCommunities.map(community =>
-      leaveCommunity(community.title, username),
-    );
-
-    const updatedCommunities = await Promise.all(leaveCommunityPromises);
-
-    if (updatedCommunities.some(updatedCommunity => !updatedCommunity)) {
-      throw Error('Failed to remove user from one or more communities');
-    }
+    await removeUserFromAssociatedCommunities(username);
 
     const deletedUser: SafeDatabaseUser | null = await UserModel.findOneAndDelete({
       username,
@@ -271,6 +258,25 @@ export const removeUserSavedQuestion = async (
     }
 
     return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+export const removeSavedQuestionFromAllUsers = async (
+  questionId: ObjectId,
+): Promise<UpdateResultResponse> => {
+  try {
+    const result = await UserModel.updateMany(
+      { savedQuestions: questionId },
+      { $pull: { savedQuestions: questionId } },
+    );
+
+    if (!result) {
+      throw Error('Error updating users');
+    }
+
+    return result;
   } catch (error) {
     return { error: `Error occurred when updating user: ${error}` };
   }

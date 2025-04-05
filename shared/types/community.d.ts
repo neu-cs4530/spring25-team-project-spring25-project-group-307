@@ -63,3 +63,5 @@ export interface PopulatedDatabaseCommunity
  * Type representing possible responses for a Community-related operation.
  */
 export type CommunityResponse = DatabaseCommunity | { error: string };
+
+export type CommunitiesResponse = DatabaseCommunity[] | { error: string };

@@ -28,6 +28,8 @@ import {
 import CommunityModel from '../models/communities.model';
 import { deleteAnswerById } from './answer.service';
 import { deleteCommentById } from './comment.service';
+import { deleteInterestByTagId } from './interest.service';
+import { removeSavedQuestionFromAllUsers } from './user.service';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -217,19 +219,29 @@ export const deleteQuestionById = async (qid: string): Promise<QuestionResponse>
     await Promise.all(deleteCommentPromises);
 
     // For each tag, check if any other question is using it. If not, append to the list of tags to be deleted
-    const tagsToDelete: string[] = [];
+    const tagsToDelete: ObjectId[] = [];
     const tagExistenceChecks = result.tags.map(tag => QuestionModel.exists({ tags: tag }));
     const tagExistenceResults = await Promise.all(tagExistenceChecks);
 
     result.tags.forEach((tag, index) => {
       if (!tagExistenceResults[index]) {
-        tagsToDelete.push(tag._id.toString());
+        tagsToDelete.push(tag);
       }
     });
-    // Delete the tags that are not used by any other question
-    if (tagsToDelete.length > 0) {
-      await deleteTagsByIds(tagsToDelete);
+
+    if (tagsToDelete.length === 0) {
+      return result;
     }
+
+    // Delete all interests related to the tags
+    const deleteInterestPromises = tagsToDelete.map(tagId => deleteInterestByTagId(tagId));
+    await Promise.all(deleteInterestPromises);
+
+    // Delete the tags that are not used by any other question
+    await deleteTagsByIds(tagsToDelete);
+
+    // Remove from savedQuestions
+    await removeSavedQuestionFromAllUsers(question._id);
 
     return result;
   } catch (error) {

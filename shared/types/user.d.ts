@@ -114,3 +114,5 @@ export interface UpdateBiographyRequest extends Request {
  * - `error`: An error message if the operation fails.
  */
 export type DeleteResultResponse = DeleteResult | { error: string };
+
+export type UpdateResultResponse = UpdateResult | { error: string };
