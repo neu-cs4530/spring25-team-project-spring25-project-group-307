@@ -1,11 +1,6 @@
 import axios from 'axios';
 import { ObjectId } from 'mongodb';
-import {
-  UserCredentials,
-  SafeDatabaseUser,
-  Question,
-  PopulatedDatabaseQuestion,
-} from '../types/types';
+import { UserCredentials, SafeDatabaseUser, PopulatedDatabaseQuestion } from '../types/types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
