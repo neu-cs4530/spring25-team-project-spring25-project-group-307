@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import './index.css';
 import { PopulatedDatabaseQuestion, SafeDatabaseUser } from '@fake-stack-overflow/shared';
-import { Box, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography, Snackbar } from '@mui/material';
+import Button from '@mui/material/Button';
 import {
   addSavedQuestion,
   getUserByUsername,
@@ -63,7 +64,11 @@ const ReportIcon = () => (
  */
 const AnswerHeader = ({ ansCount, title, question, user }: AnswerHeaderProps) => {
   const [isSaved, setIsSaved] = useState(false);
+
   const [hasReported, setHasReported] = useState(false);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [undoTimeout, setUndoTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [action, setAction] = useState<'report' | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -102,6 +107,33 @@ const AnswerHeader = ({ ansCount, title, question, user }: AnswerHeaderProps) =>
   const handleReport = async () => {
     await addReportToQuestion(question._id.toString(), user.username);
     setHasReported(true);
+  };
+
+  const handleReportAction = () => {
+    setHasReported(true);
+    setAction('report');
+    setSnackbarOpen(true);
+
+    const timeout = setTimeout(() => {
+      handleReport();
+      setSnackbarOpen(false);
+    }, 3000);
+
+    setUndoTimeout(timeout);
+  };
+
+  const handleUndo = () => {
+    setHasReported(false);
+    if (undoTimeout) {
+      clearTimeout(undoTimeout);
+      setUndoTimeout(null);
+    }
+    setSnackbarOpen(false);
+    setAction(null);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   return (
@@ -146,13 +178,28 @@ const AnswerHeader = ({ ansCount, title, question, user }: AnswerHeaderProps) =>
             <span className='tooltip'>{isSaved ? 'Unsave' : 'Save'}</span>
           </div>
           {!hasReported && (
-            <div className='report_icon tooltip-container' onClick={handleReport}>
+            <div className='report_icon tooltip-container' onClick={handleReportAction}>
               <ReportIcon />
               <span className='tooltip'>Report</span>
             </div>
           )}
         </Stack>
       </Stack>
+
+      <Snackbar
+        open={snackbarOpen}
+        onClose={handleSnackbarClose}
+        message={
+          <span>
+            {action === 'report' && 'This question has been reported.'}
+            <Button size='small' onClick={handleUndo} sx={{ ml: 1 }}>
+              Undo
+            </Button>
+          </span>
+        }
+        autoHideDuration={3000}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
     </Box>
   );
 };

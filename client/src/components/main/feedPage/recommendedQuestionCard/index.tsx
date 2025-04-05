@@ -90,15 +90,15 @@ const RecommendedQuestionCard = ({
   };
 
   const handleSave = async () => {
+    handleMenuClose();
     await addSavedQuestion(user.username, item.question._id);
     setIsSaved(true);
-    handleMenuClose();
   };
 
   const handleUnsave = async () => {
+    handleMenuClose();
     await removeSavedQuestion(user.username, item.question._id);
     setIsSaved(false);
-    handleMenuClose();
   };
 
   const handleReport = async () => {
