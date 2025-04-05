@@ -11,6 +11,9 @@ import {
 import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
 import { deleteFeedItemsByFeedId } from './feedItem.service';
 import { deleteInterestsByUserId } from './interest.service';
+import AnswerModel from '../models/answers.model';
+import CommentModel from '../models/comments.model';
+import TagModel from '../models/tags.model';
 
 /**
  * Saves a new user to the database.
@@ -258,5 +261,30 @@ export const removeUserSavedQuestion = async (
     return updatedUser;
   } catch (error) {
     return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+export const getUserWithSavedQuestions = async (username: string): Promise<UserResponse> => {
+  try {
+    const user = await UserModel.findOne({ username }).populate({
+      path: 'savedQuestions',
+      populate: [
+        { path: 'tags', model: TagModel },
+        {
+          path: 'answers',
+          model: AnswerModel,
+          populate: { path: 'comments', model: CommentModel },
+        },
+        { path: 'comments', model: CommentModel },
+      ],
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  } catch (error) {
+    return { error: `Error fetching saved questions: ${error}` };
   }
 };
