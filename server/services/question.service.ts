@@ -18,7 +18,7 @@ import QuestionModel from '../models/questions.model';
 import TagModel from '../models/tags.model';
 import CommentModel from '../models/comments.model';
 import { parseKeyword, parseTags } from '../utils/parse.util';
-import { checkTagInQuestion } from './tag.service';
+import { checkTagInQuestion, deleteTagsByIds } from './tag.service';
 import {
   sortQuestionsByActive,
   sortQuestionsByMostViews,
@@ -26,6 +26,8 @@ import {
   sortQuestionsByUnanswered,
 } from '../utils/sort.util';
 import CommunityModel from '../models/communities.model';
+import { deleteAnswerById } from './answer.service';
+import { deleteCommentById } from './comment.service';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -175,8 +177,61 @@ export const saveQuestion = async (question: Question): Promise<QuestionResponse
  */
 export const deleteQuestionById = async (qid: string): Promise<QuestionResponse> => {
   try {
+    // Populate to get the comments
+    const question: PopulatedDatabaseQuestion | null = await QuestionModel.findById(qid).populate<{
+      tags: DatabaseTag[];
+      answers: PopulatedDatabaseAnswer[];
+      comments: DatabaseComment[];
+    }>([
+      { path: 'tags', model: TagModel },
+      { path: 'answers', model: AnswerModel, populate: { path: 'comments', model: CommentModel } },
+      { path: 'comments', model: CommentModel },
+    ]);
+
+    if (!question) {
+      return { error: 'Question not found' };
+    }
+
     const result: DatabaseQuestion | null = await QuestionModel.findByIdAndDelete(qid);
-    return result || { error: 'Question not found' };
+
+    if (!result) {
+      return { error: 'Question not found' };
+    }
+
+    // Delete comments to answers
+    const deleteAnswerCommentPromises = question.answers.map(answer =>
+      answer.comments.map(comment => deleteCommentById(comment._id.toString())),
+    );
+    await Promise.all(deleteAnswerCommentPromises);
+
+    // Delete all answers related to the question, using deleteAnswerById
+    const deleteAnswerPromises = result.answers.map(answer =>
+      deleteAnswerById(answer._id.toString()),
+    );
+    await Promise.all(deleteAnswerPromises);
+
+    // Delete all comments related to the question, using deleteCommentById
+    const deleteCommentPromises = result.comments.map(comment =>
+      deleteCommentById(comment._id.toString()),
+    );
+    await Promise.all(deleteCommentPromises);
+
+    // For each tag, check if any other question is using it. If not, append to the list of tags to be deleted
+    const tagsToDelete: string[] = [];
+    const tagExistenceChecks = result.tags.map(tag => QuestionModel.exists({ tags: tag }));
+    const tagExistenceResults = await Promise.all(tagExistenceChecks);
+
+    result.tags.forEach((tag, index) => {
+      if (!tagExistenceResults[index]) {
+        tagsToDelete.push(tag._id.toString());
+      }
+    });
+    // Delete the tags that are not used by any other question
+    if (tagsToDelete.length > 0) {
+      await deleteTagsByIds(tagsToDelete);
+    }
+
+    return result;
   } catch (error) {
     return { error: 'Error when deleting a question' };
   }

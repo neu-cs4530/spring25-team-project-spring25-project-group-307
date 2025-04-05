@@ -11,6 +11,7 @@ import {
 import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
 import { deleteFeedItemsByFeedId } from './feedItem.service';
 import { deleteInterestsByUserId } from './interest.service';
+import { getCommunitiesByUser, leaveCommunity } from './community.service';
 
 /**
  * Saves a new user to the database.
@@ -132,6 +133,23 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
  */
 export const deleteUserByUsername = async (username: string): Promise<UserResponse> => {
   try {
+    // Remove user from associated communities
+    const userCommunities = await getCommunitiesByUser(username);
+
+    if ('error' in userCommunities) {
+      throw Error('Failed to find communities for user');
+    }
+
+    const leaveCommunityPromises = userCommunities.map(community =>
+      leaveCommunity(community.title, username),
+    );
+
+    const updatedCommunities = await Promise.all(leaveCommunityPromises);
+
+    if (updatedCommunities.some(updatedCommunity => !updatedCommunity)) {
+      throw Error('Failed to remove user from one or more communities');
+    }
+
     const deletedUser: SafeDatabaseUser | null = await UserModel.findOneAndDelete({
       username,
     }).select('-password');
