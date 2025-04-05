@@ -12,6 +12,7 @@ const SavedPage = () => {
   const { user } = useUserContext();
   const [savedQuestions, setSavedQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
   const [sharePopupOpen, setSharePopupOpen] = useState(false);
+  const [sharePopupId, setSharePopupId] = useState('');
 
   useEffect(() => {
     if (user?.username) {
@@ -26,7 +27,8 @@ const SavedPage = () => {
     removeSavedQuestion(user.username, questionId);
   };
 
-  const handleShare = () => {
+  const handleShare = (questionId: ObjectId) => {
+    setSharePopupId(String(questionId));
     setSharePopupOpen(true);
   };
 
@@ -54,21 +56,24 @@ const SavedPage = () => {
                     onClick={() => handleUnsave(q._id)}>
                     Unsave
                   </Button>
-                  <Button variant='outlined' color='primary' size='small' onClick={handleShare}>
+                  <Button
+                    variant='outlined'
+                    color='primary'
+                    size='small'
+                    onClick={() => handleShare(q._id)}>
                     Share
                   </Button>
                 </Stack>
               </Box>
-
-              <SharePopup
-                open={sharePopupOpen}
-                onClose={() => {
-                  setSharePopupOpen(false);
-                }}
-                questionId={String(q._id)}
-              />
             </Box>
           ))}
+          <SharePopup
+            open={sharePopupOpen}
+            onClose={() => {
+              setSharePopupOpen(false);
+            }}
+            questionId={sharePopupId}
+          />
           {savedQuestions.length === 0 && (
             <Typography variant='body1' color='text.secondary'>
               You haven’t saved any questions yet.
