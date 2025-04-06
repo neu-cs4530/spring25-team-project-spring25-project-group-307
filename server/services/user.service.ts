@@ -1,6 +1,7 @@
 import { ObjectId } from 'mongodb';
 import UserModel from '../models/users.model';
 import {
+  DatabaseCommunity,
   DatabaseUser,
   SafeDatabaseUser,
   UpdateResultResponse,
@@ -143,11 +144,11 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
     }
 
     // Retrieve the communities the user is part of (either as a member, moderator, or admin) via the community model
-    const communities = await CommunityModel.find({
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
       $or: [
-        { members: deletedUser._id },
-        { moderators: deletedUser._id },
         { admins: deletedUser._id },
+        { moderators: deletedUser._id },
+        { members: deletedUser._id },
       ],
     });
 
