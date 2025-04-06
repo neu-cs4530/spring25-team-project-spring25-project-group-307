@@ -270,7 +270,7 @@ const RecommendedQuestionCard = ({ item }: { item: Omit<FeedItem, '_id'> }) => {
                 handleMenuClose();
               }}
               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}>
+              transformOrigin={{ vertical: 'top', horizontal: 'left' }}>
               {!hasInteractedWithInterests && (
                 <MenuItem
                   onClick={event => {

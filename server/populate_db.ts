@@ -212,7 +212,7 @@ async function userCreate(
     password,
     dateJoined,
     biography: biography ?? '',
-    ranking: '',
+    ranking: 'Newcomer Newbie',
     score: 0,
     achievements: [],
     questionsAsked: 0,

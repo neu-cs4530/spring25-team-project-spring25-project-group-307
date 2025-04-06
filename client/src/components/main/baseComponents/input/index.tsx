@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { TextField } from '@mui/material';
 
 /**
  * Interface representing the props for the Input component.
@@ -41,16 +42,20 @@ const Input = ({ title, hint, id, mandatory = true, val, setState, err }: InputP
       {mandatory ? '*' : ''}
     </div>
     {hint && <div className='input_hint'>{hint}</div>}
-    <input
+    <TextField
       id={id}
       className='input_input'
-      type='text'
+      placeholder={title}
+      variant='outlined'
+      size='small'
       value={val}
-      onInput={e => {
-        setState(e.currentTarget.value);
+      onChange={e => {
+        setState(e.target.value);
       }}
+      error={!!err}
+      helperText={err}
+      sx={{ width: '100%', backgroundColor: 'white', borderRadius: '4px', mb: 3 }}
     />
-    {err && <div className='input_error'>{err}</div>}
   </>
 );
 

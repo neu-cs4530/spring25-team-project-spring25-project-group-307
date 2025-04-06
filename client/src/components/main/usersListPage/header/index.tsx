@@ -1,5 +1,6 @@
 import React from 'react';
 import './index.css';
+import { Box, TextField } from '@mui/material';
 import useUserSearch from '../../../../hooks/useUserSearch';
 
 /**
@@ -26,19 +27,24 @@ const UsersListHeader = ({ userCount, setUserFilter }: UserHeaderProps) => {
 
   return (
     <div>
-      <div className='space_between right_padding'>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
         <div className='bold_title'>Users List</div>
-        <input
-          id='user_search_bar'
-          placeholder='Search Usernames ...'
-          type='text'
-          value={val}
-          onChange={handleInputChange}
-        />
-      </div>
-      <div className='space_between right_padding'>
+        <Box sx={{ width: '300px' }}>
+          <TextField
+            id='user_search'
+            placeholder='Search for Username'
+            className='content_background'
+            sx={{ width: '100%' }}
+            variant='outlined'
+            size='small'
+            value={val}
+            onChange={handleInputChange}
+          />
+        </Box>
+      </Box>
+      <Box sx={{ my: 5 }}>
         <div id='user_count'>{userCount} users</div>
-      </div>
+      </Box>
     </div>
   );
 };

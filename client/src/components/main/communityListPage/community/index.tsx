@@ -46,10 +46,10 @@ const CommunityView = ({
     onClick={e =>
       community.isPrivate && !UserInCommunity ? null : handleViewCommunity(e, community._id)
     }
+    className='content_background'
     sx={{
       'cursor': community.isPrivate && !UserInCommunity ? 'default' : 'pointer',
       'borderRadius': '10px',
-      'backgroundColor': '#FDFBF7',
       '&:hover': {
         backgroundColor: community.isPrivate && !UserInCommunity ? 'none' : '#F7F7F7',
       },
