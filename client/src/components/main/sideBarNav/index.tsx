@@ -16,6 +16,8 @@ import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
 import PeopleIcon from '@mui/icons-material/People';
 import CasinoIcon from '@mui/icons-material/Casino';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ViewStreamIcon from '@mui/icons-material/ViewStream';
 import { Toolbar } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 import Header from '../../header';
@@ -78,8 +80,13 @@ const SideBarNav = () => {
   const links3 = [
     { id: 'menu_users', title: 'Users', path: '/users', icon: <PeopleIcon /> },
     { id: 'menu_games', title: 'Games', path: '/games', icon: <CasinoIcon /> },
-    { id: 'menu_leaderboard', title: 'Leaderboard', path: '/leaderboard', icon: <PeopleIcon /> },
-    { id: 'menu_feed', title: 'Feed', path: '/feed', icon: <PeopleIcon /> },
+    {
+      id: 'menu_leaderboard',
+      title: 'Leaderboard',
+      path: '/leaderboard',
+      icon: <TrendingUpIcon />,
+    },
+    { id: 'menu_feed', title: 'Feed', path: '/feed', icon: <ViewStreamIcon /> },
     { id: 'menu_saved', title: 'Saved', path: '/saved', icon: <BookmarkIcon /> },
   ];
 

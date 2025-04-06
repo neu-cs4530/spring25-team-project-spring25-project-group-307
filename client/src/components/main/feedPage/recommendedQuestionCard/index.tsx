@@ -17,8 +17,7 @@ import {
 } from '@mui/material';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
-// import { useNavigate } from 'react-router-dom';
-// import SendIcon from '@mui/icons-material/Send';
+import SendIcon from '@mui/icons-material/Send';
 
 import { useEffect, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -31,7 +30,7 @@ import {
   removeSavedQuestion,
 } from '../../../../services/userService';
 import { addReportToQuestion } from '../../../../services/questionService';
-// import SharePopup from '../../sharePopup';
+import SharePopup from '../../sharePopup';
 
 const RecommendedQuestionCard = ({
   item,
@@ -63,7 +62,8 @@ const RecommendedQuestionCard = ({
   const viewQuestion = () => {
     onNavToQuestion(item.question._id);
   };
-  // const [sharePopupOpen, setSharePopupOpen] = useState(false);
+
+  const [sharePopupOpen, setSharePopupOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -245,6 +245,11 @@ const RecommendedQuestionCard = ({
           alignItems: 'center',
           p: 2,
         }}>
+        <SharePopup
+          open={sharePopupOpen}
+          onClose={() => setSharePopupOpen(false)}
+          questionId={item.question._id}
+        />
         <Card
           onClick={event => {
             if (!isDialogOpen) {
@@ -370,7 +375,16 @@ const RecommendedQuestionCard = ({
                 width: '100%', // Ensure the Box spans the full width of the card
               }}>
               {/* "View Post" Button */}
-              <Button size='small'>View Post</Button>
+              <Box>
+                <Button size='small'>View Post</Button>
+                <IconButton
+                  onClick={event => {
+                    event.stopPropagation();
+                    setSharePopupOpen(true);
+                  }}>
+                  <SendIcon color='primary' />
+                </IconButton>
+              </Box>
 
               {/* 3-Dot Menu Icon */}
               <IconButton
