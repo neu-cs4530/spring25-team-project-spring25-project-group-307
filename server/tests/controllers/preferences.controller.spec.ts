@@ -1,9 +1,10 @@
 import mongoose from 'mongoose';
 import supertest from 'supertest';
-import { app } from '../../app';
-import * as preferencesService from '../../services/preferences.service';
 import { DatabasePreferences } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
+
+import { app } from '../../app';
+import * as preferencesService from '../../services/preferences.service';
 
 const addUserPreferenceToCommunitySpy = jest.spyOn(
   preferencesService,

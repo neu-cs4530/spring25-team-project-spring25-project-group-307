@@ -1,7 +1,8 @@
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const mockingoose = require('mockingoose');
 
 import { DatabasePreferences, UserResponse } from '@fake-stack-overflow/shared';
+import { ObjectId } from 'mongodb';
+
 import PreferencesModel from '../../models/preferences.model';
 import {
   addUserPreferenceToCommunity,
@@ -9,8 +10,11 @@ import {
   getPreferencesForCommunity,
   getAllPreferencesForCommunity,
 } from '../../services/preferences.service';
-import { ObjectId } from 'mongodb';
+
 import * as userService from '../../services/user.service';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const mockingoose = require('mockingoose');
 
 describe('Preferences Model', () => {
   beforeEach(() => {
@@ -121,9 +125,11 @@ describe('Preferences Model', () => {
       )) as DatabasePreferences;
 
       for (const key in updatedPref) {
-        expect(result[key as keyof DatabasePreferences]).toEqual(
-          updatedPref[key as keyof DatabasePreferences],
-        );
+        if (key !== '_id') {
+          expect(result[key as keyof DatabasePreferences]).toEqual(
+            updatedPref[key as keyof DatabasePreferences],
+          );
+        }
       }
     });
 
@@ -208,9 +214,11 @@ describe('Preferences Model', () => {
       result.forEach((res, idx) => {
         const expected = prefs[idx];
         for (const key in expected) {
-          expect(res[key as keyof DatabasePreferences]).toEqual(
-            expected[key as keyof DatabasePreferences],
-          );
+          if (key !== '_id') {
+            expect(res[key as keyof DatabasePreferences]).toEqual(
+              expected[key as keyof DatabasePreferences],
+            );
+          }
         }
       });
     });

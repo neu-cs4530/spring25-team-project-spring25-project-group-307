@@ -9,8 +9,12 @@ const clearAllNotificationsSpy = jest.spyOn(userNotificationsService, 'clearAllN
 describe('User Notifications Controller', () => {
   describe('GET /notifications/:username', () => {
     it('should return notifications for a user', async () => {
-      const mockNotifications = [{ message: 'new answer', questionId: '123' }];
-      getNotificationsSpy.mockResolvedValueOnce(mockNotifications as any);
+      const mockNotifications = {
+        _id: '1234567890abcdef12345678',
+        username: 'user',
+        notifications: [],
+      };
+      getNotificationsSpy.mockResolvedValueOnce(mockNotifications);
 
       const response = await supertest(app).get('/notifications/testUser');
 
