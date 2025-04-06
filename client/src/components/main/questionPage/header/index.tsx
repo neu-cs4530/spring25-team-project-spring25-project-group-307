@@ -46,6 +46,9 @@ const QuestionHeader = ({
         <ToggleButtonGroup
           size='small'
           color='primary'
+          sx={{
+            backgroundColor: '#f0f0f0',
+          }}
           value={questionOrder}
           exclusive
           onChange={(event, newOrder) => {

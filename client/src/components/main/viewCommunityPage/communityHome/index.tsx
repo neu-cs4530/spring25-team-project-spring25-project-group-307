@@ -29,7 +29,7 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
   );
 
   return (
-    <div>
+    <Box sx={{ padding: '0% 5%' }}>
       {fromFeed && (
         <Button
           variant='outlined'
@@ -46,7 +46,9 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
         </Button>
       )}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant='h3'>{community?.title}</Typography>
+        <Typography variant='h4' sx={{ fontWeight: 'bold' }}>
+          Welcome to {community?.title}!
+        </Typography>
         <AskCommunityQuestion communityID={community?._id.toString() || ''} />
       </Box>
 
@@ -90,7 +92,7 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
           handleTogglePinQuestion={handleTogglePinQuestion}
         />
       ))}
-    </div>
+    </Box>
   );
 };
 
