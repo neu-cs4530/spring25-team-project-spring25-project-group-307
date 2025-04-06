@@ -12,8 +12,7 @@ import {
 import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
 import { deleteFeedItemsByFeedId } from './feedItem.service';
 import { deleteInterestsByUserId } from './interest.service';
-// eslint-disable-next-line import/no-cycle
-import { removeUserFromAssociatedCommunities } from './community.service';
+import CommunityModel from '../models/communities.model';
 
 /**
  * Saves a new user to the database.
@@ -135,8 +134,6 @@ export const loginUser = async (loginCredentials: UserCredentials): Promise<User
  */
 export const deleteUserByUsername = async (username: string): Promise<UserResponse> => {
   try {
-    await removeUserFromAssociatedCommunities(username);
-
     const deletedUser: SafeDatabaseUser | null = await UserModel.findOneAndDelete({
       username,
     }).select('-password');
@@ -144,6 +141,31 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
     if (!deletedUser) {
       throw Error('Error deleting user');
     }
+
+    // Retrieve the communities the user is part of (either as a member, moderator, or admin) via the community model
+    const communities = await CommunityModel.find({
+      $or: [
+        { members: deletedUser._id },
+        { moderators: deletedUser._id },
+        { admins: deletedUser._id },
+      ],
+    });
+
+    // For each community, remove the user from the community using the community model findOneAndUpdate method
+    await Promise.all(
+      communities.map(async community => {
+        await CommunityModel.findOneAndUpdate(
+          { title: community.title },
+          {
+            $pull: {
+              members: deletedUser._id,
+              moderators: deletedUser._id,
+              admins: deletedUser._id,
+            },
+          },
+        );
+      }),
+    );
 
     const deletedFeedId = await getFeedByUserId(deletedUser._id);
 
