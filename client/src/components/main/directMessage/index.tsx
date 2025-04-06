@@ -100,6 +100,12 @@ const DirectMessage = () => {
                   size='small'
                   value={newMessage}
                   onChange={e => setNewMessage(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleSendMessage();
+                    }
+                  }}
                   placeholder='Type a message...'
                   sx={{ flexGrow: 1, mr: 1 }}
                 />
