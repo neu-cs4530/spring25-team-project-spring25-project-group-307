@@ -25,6 +25,7 @@ import FeedPage from './main/feedPage';
 import ViewCommunityPage from './main/viewCommunityPage';
 import NewCommunityQuestion from './main/newCommunityQuestion';
 import StatisticsPage from './statistics';
+import SavedPage from './main/savedPage';
 
 const ProtectedRoute = ({
   user,
@@ -102,6 +103,7 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/new/question/:cid' element={<NewCommunityQuestion />} />
             <Route path='/statistics/:username' element={<StatisticsPage />} />
             <Route path='/feed' element={<FeedPage />} />
+            <Route path='/saved' element={<SavedPage />} />
           </Route>
         }
       </Routes>
