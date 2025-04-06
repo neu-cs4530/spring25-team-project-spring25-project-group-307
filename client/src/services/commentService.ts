@@ -28,7 +28,7 @@ const addComment = async (
   id: string,
   type: 'question' | 'answer' | 'comment',
   comment: Comment,
-): Promise<DatabaseComment> => {
+): Promise<{ answer: DatabaseComment; unlockedAchievements: string[] }> => {
   const reqBody: AddCommentRequestBody = {
     id,
     type,
@@ -38,7 +38,10 @@ const addComment = async (
   if (res.status !== 200) {
     throw new Error('Error while creating a new comment for the question');
   }
-  return res.data;
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 const deleteComment = async (cid: ObjectId): Promise<DatabaseComment> => {
@@ -66,23 +69,35 @@ const getReplies = async (cid: string): Promise<PopulatedDatabaseComment> => {
 /**
  * Upvotes a comment.
  */
-const upvoteComment = async (cid: ObjectId, username: string): Promise<VoteInterface> => {
+const upvoteComment = async (
+  cid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
   const res = await api.post(`${COMMENT_API_URL}/upvoteComment`, { cid, username });
   if (res.status !== 200) {
     throw new Error('Error while upvoting the comment');
   }
-  return res.data;
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 /**
  * Downvotes a comment.
  */
-const downvoteComment = async (cid: ObjectId, username: string): Promise<VoteInterface> => {
+const downvoteComment = async (
+  cid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
   const res = await api.post(`${COMMENT_API_URL}/downvoteComment`, { cid, username });
   if (res.status !== 200) {
     throw new Error('Error while downvoting the comment');
   }
-  return res.data;
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 export { addComment, deleteComment, getReplies, upvoteComment, downvoteComment };

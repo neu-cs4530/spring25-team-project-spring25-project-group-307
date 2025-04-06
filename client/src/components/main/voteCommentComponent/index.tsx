@@ -5,6 +5,7 @@ import { downvoteComment, upvoteComment } from '../../../services/commentService
 import useUserContext from '../../../hooks/useUserContext';
 import { DatabaseComment } from '../../../types/types';
 import useCommentVoteStatus from '../../../hooks/useCommentVoteStatus';
+import { useAchievement } from '../../../contexts/AchievementContext';
 
 /**
  * Props interface for CommentVoteComponent
@@ -21,6 +22,7 @@ interface CommentVoteComponentProps {
 const CommentVoteComponent = ({ comment }: CommentVoteComponentProps) => {
   const { user } = useUserContext();
   const { count, voted } = useCommentVoteStatus({ comment });
+  const { triggerAchievement } = useAchievement();
 
   /**
    * Handles voting logic for a comment.
@@ -30,11 +32,13 @@ const CommentVoteComponent = ({ comment }: CommentVoteComponentProps) => {
   const handleVote = async (type: 'upvote' | 'downvote') => {
     try {
       if (comment._id) {
+        let response;
         if (type === 'upvote') {
-          await upvoteComment(comment._id, user.username);
+          response = await upvoteComment(comment._id, user.username);
         } else {
-          await downvoteComment(comment._id, user.username);
+          response = await downvoteComment(comment._id, user.username);
         }
+        response?.unlockedAchievements?.forEach(triggerAchievement);
       }
     } catch (err) {
       // Handle error

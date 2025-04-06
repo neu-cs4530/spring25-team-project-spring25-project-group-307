@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { validateHyperlink } from '../tool';
 import { addQuestion } from '../services/questionService';
+import { useAchievement } from '../contexts/AchievementContext';
 import useUserContext from './useUserContext';
 import { Question } from '../types/types';
 
@@ -22,7 +23,7 @@ const useNewQuestion = () => {
   const [title, setTitle] = useState<string>('');
   const [text, setText] = useState<string>('');
   const [tagNames, setTagNames] = useState<string>('');
-
+  const { triggerAchievement } = useAchievement();
   const [titleErr, setTitleErr] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
   const [tagErr, setTagErr] = useState<string>('');
@@ -107,7 +108,11 @@ const useNewQuestion = () => {
 
     const res = await addQuestion(question);
 
-    if (res && res._id) {
+    if (res.unlockedAchievements?.length > 0) {
+      res.unlockedAchievements.forEach(triggerAchievement);
+    }
+
+    if (res) {
       navigate('/home');
     }
   };

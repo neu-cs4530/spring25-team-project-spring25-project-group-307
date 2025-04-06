@@ -21,6 +21,7 @@ export interface AnswerUpdatePayload {
  */
 export interface GameUpdatePayload {
   gameInstance: GameInstance<GameState>;
+  unlockedAchievements?: string[];
 }
 
 /**
@@ -144,10 +145,12 @@ export interface CommentVoteUpdatePayload {
  * - `messageUpdate`: Server sends updated message.
  * - `userUpdate`: Server sends updated user status.
  * - `gameUpdate`: Server sends updated game state.
+ * - `gameAchievement`: Server sends notification of unlocked achievements in the game.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
  * - `answerVoteUpdate`: Server sends updated votes for an answer.
  * - `commentVoteUpdate`: Server sends updated votes for a comment.
+ *
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
@@ -160,6 +163,7 @@ export interface ServerToClientEvents {
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
+  gameAchievement: (payload: { unlockedAchievements: string[] }) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
   preferencesUpdate: (updateMessage: string) => void;

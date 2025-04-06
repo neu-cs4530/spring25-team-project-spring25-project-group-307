@@ -106,6 +106,7 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: mockComment.commentDateTime.toISOString(),
+      unlockedAchievements: [],
       upVotes: [],
       downVotes: [],
     });
@@ -165,6 +166,7 @@ describe('POST /addComment', () => {
       text: 'This is a test comment',
       commentBy: 'dummyUserId',
       commentDateTime: mockComment.commentDateTime.toISOString(),
+      unlockedAchievements: [],
       upVotes: [],
       downVotes: [],
     });

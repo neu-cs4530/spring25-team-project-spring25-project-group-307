@@ -52,7 +52,7 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
       return;
     }
 
-    const updatedReplies = [...replies, res];
+    const updatedReplies = [...replies, res.answer];
     setReplies(updatedReplies);
     setShowReplies(true);
     setReplyText('');
