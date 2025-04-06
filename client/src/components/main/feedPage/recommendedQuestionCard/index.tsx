@@ -17,8 +17,8 @@ import {
 } from '@mui/material';
 import { DatabaseTag, FeedItem } from '@fake-stack-overflow/shared';
 import { ObjectId } from 'mongodb';
-import { useNavigate } from 'react-router-dom';
-import SendIcon from '@mui/icons-material/Send';
+// import { useNavigate } from 'react-router-dom';
+// import SendIcon from '@mui/icons-material/Send';
 
 import { useEffect, useState } from 'react';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
@@ -31,7 +31,7 @@ import {
   removeSavedQuestion,
 } from '../../../../services/userService';
 import { addReportToQuestion } from '../../../../services/questionService';
-import SharePopup from '../../sharePopup';
+// import SharePopup from '../../sharePopup';
 
 const RecommendedQuestionCard = ({
   item,
@@ -63,7 +63,7 @@ const RecommendedQuestionCard = ({
   const viewQuestion = () => {
     onNavToQuestion(item.question._id);
   };
-  const [sharePopupOpen, setSharePopupOpen] = useState(false);
+  // const [sharePopupOpen, setSharePopupOpen] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
