@@ -30,7 +30,6 @@ import { deleteAnswerById } from './answer.service';
 import { deleteCommentById } from './comment.service';
 import { deleteInterestByTagId } from './interest.service';
 import UserModel from '../models/users.model';
-import { getCommunitiesByQuestion } from './community.service';
 
 /**
  * Checks if keywords exist in a question's title or text.
@@ -245,7 +244,7 @@ export const deleteQuestionById = async (qid: string): Promise<QuestionResponse>
     await UserModel.updateMany({ savedQuestions: qid }, { $pull: { savedQuestions: qid } });
 
     // Get the community of the question and remove it from that community's questions
-    const communities = await getCommunitiesByQuestion(qid);
+    const communities = await CommunityModel.find({ questions: qid });
     const communityPromises = communities.map(community =>
       CommunityModel.findByIdAndUpdate(community._id, { $pull: { questions: qid } }, { new: true }),
     );
