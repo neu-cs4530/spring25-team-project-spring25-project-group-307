@@ -1,5 +1,5 @@
 import React from 'react';
-import { FormControlLabel, Switch } from '@mui/material';
+import { Button, FormControlLabel, Switch, Typography } from '@mui/material';
 import useNewCommunity from '../../../hooks/UseNewCommunity';
 import Form from '../baseComponents/form';
 import TextArea from '../baseComponents/textarea';
@@ -42,7 +42,7 @@ const NewCommunityPage = () => {
         err={descriptionErr}
       />
       <FormControlLabel
-        sx={{ mb: 2 }}
+        sx={{ mb: 3 }}
         control={
           <Switch
             onChange={e => {
@@ -61,14 +61,17 @@ const NewCommunityPage = () => {
         err={tagErr}
       />
       <div className='btn_indicator_container'>
-        <button
-          className='form_postBtn'
+        <Button
+          variant='contained'
           onClick={() => {
             postCommunity();
-          }}>
+          }}
+          sx={{ mb: 1 }}>
           Post Community
-        </button>
-        <div className='mandatory_indicator'>* indicates mandatory fields</div>
+        </Button>
+        <Typography variant='body1' color='error'>
+          * indicates mandatory fields
+        </Typography>
       </div>
     </Form>
   );

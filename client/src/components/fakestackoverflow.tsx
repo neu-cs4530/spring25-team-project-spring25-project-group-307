@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 import Layout from './layout';
 import Login from './auth/login';
 import { FakeSOSocket, SafeDatabaseUser } from '../types/types';
@@ -83,7 +84,14 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/question/:qid' element={<AnswerPage />} />
             <Route path='/new/question' element={<NewQuestionPage />} />
             <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
-            <Route path='/users' element={<UsersListPage />} />
+            <Route
+              path='/users'
+              element={
+                <Box sx={{ mx: 10, my: 4 }}>
+                  <UsersListPage />
+                </Box>
+              }
+            />
             <Route path='/user/:username' element={<ProfileSettings />} />
             <Route path='/games' element={<AllGamesPage />} />
             <Route path='/games/:gameID' element={<GamePage />} />

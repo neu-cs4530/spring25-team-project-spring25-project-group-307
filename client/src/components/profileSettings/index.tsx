@@ -76,7 +76,6 @@ const ProfileSettings: React.FC = () => {
       sx={{
         display: 'flex',
         justifyContent: 'center',
-        mt: 4,
         px: 3,
         backgroundColor: '#F5F1E1',
       }}>
@@ -170,22 +169,24 @@ const ProfileSettings: React.FC = () => {
                         ))}
                       </Grid2>
                       {canEditProfile && (
-                        <div>
-                          <button
-                            className='login-button'
-                            style={{ marginLeft: '1rem' }}
+                        <Box sx={{ mt: 1 }}>
+                          <Button
+                            variant='contained'
+                            color='primary'
+                            size='medium'
                             onClick={() => {
                               setEditInterestsMode(true);
                             }}>
                             Edit
-                          </button>
-                          <button
-                            className='delete-button'
-                            style={{ marginLeft: '1rem' }}
-                            onClick={handleResetInterestsWeights}>
+                          </Button>
+                          <Button
+                            variant='contained'
+                            color='error'
+                            onClick={handleResetInterestsWeights}
+                            sx={{ ml: 2 }}>
                             Reset Weights
-                          </button>
-                        </div>
+                          </Button>
+                        </Box>
                       )}
                     </div>
                   )}
@@ -257,15 +258,16 @@ const ProfileSettings: React.FC = () => {
                         ))}
                       </Grid2>
                       <div style={{ marginTop: '1rem' }}>
-                        <button className='login-button' onClick={handleUpdateInterests}>
+                        <Button variant='contained' color='primary' onClick={handleUpdateInterests}>
                           Save
-                        </button>
-                        <button
-                          className='delete-button'
-                          style={{ marginLeft: '1rem' }}
+                        </Button>
+                        <Button
+                          variant='contained'
+                          color='error'
+                          sx={{ ml: 2 }}
                           onClick={() => setEditInterestsMode(false)}>
                           Cancel
-                        </button>
+                        </Button>
                       </div>
                       {showInterestHelpMessage && (
                         <div className='floating-message'>
