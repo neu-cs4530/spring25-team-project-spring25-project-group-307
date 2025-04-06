@@ -22,13 +22,13 @@ const SearchBar = ({ handleInputChange, handleKeyDown, val }: SearchBarProps) =>
   <Box sx={{ position: 'absolute', left: '50%', transform: 'translateX(-50%)' }}>
     <TextField
       id='search'
-      label='Search...'
+      placeholder='Search...'
       variant='outlined'
       value={val}
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       size='small'
-      sx={{ maxWidth: '300px', background: 'white', borderRadius: '5px' }}
+      sx={{ width: '275px', background: 'white', borderRadius: '5px' }}
     />
   </Box>
 );

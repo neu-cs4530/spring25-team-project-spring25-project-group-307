@@ -24,6 +24,7 @@ const useAuth = (authType: 'login' | 'signup') => {
   const [password, setPassword] = useState<string>('');
   const [passwordConfirmation, setPasswordConfirmation] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false);
   const [err, setErr] = useState<string>('');
   const { setUser } = useLoginContext();
   const navigate = useNavigate();
@@ -36,13 +37,20 @@ const useAuth = (authType: 'login' | 'signup') => {
   };
 
   /**
+   * Toggles the visibility of the password confirmation input field (for signup).
+   */
+  const togglePasswordConfirmationVisibility = () => {
+    setShowPasswordConfirmation(prevState => !prevState);
+  };
+
+  /**
    * Handles changes in input fields and updates the corresponding state.
    *
    * @param e - The input change event.
    * @param field - The field being updated ('username', 'password', or 'confirmPassword').
    */
   const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement>,
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
     field: 'username' | 'password' | 'confirmPassword',
   ) => {
     const fieldText = e.target.value.trim();
@@ -112,10 +120,12 @@ const useAuth = (authType: 'login' | 'signup') => {
     password,
     passwordConfirmation,
     showPassword,
+    showPasswordConfirmation,
     err,
     handleInputChange,
     handleSubmit,
     togglePasswordVisibility,
+    togglePasswordConfirmationVisibility,
   };
 };
 

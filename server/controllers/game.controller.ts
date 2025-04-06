@@ -162,8 +162,44 @@ const gameController = (socket: FakeSOSocket) => {
 
         if (winnerUsername) {
           const winnerUser = await UserModel.findOne({ username: winnerUsername });
+          const currentRank = winnerUser?.ranking;
           if (winnerUser) {
-            await grantAchievementToUser(winnerUser._id.toString(), 'Nim Beginner');
+            const totalNimWins = winnerUser.nimGameWins + 1;
+            const newScore = winnerUser.score + 7;
+            const newRank = getUpdatedRank(newScore);
+            if (currentRank !== newRank && newRank === 'Common Contributor') {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Ascension I');
+            }
+            if (currentRank !== newRank && newRank === 'Skill Solver') {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Ascension II');
+            }
+            if (currentRank !== newRank && newRank === 'Expert Explorer') {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Ascension III');
+            }
+            if (currentRank !== newRank && newRank === 'Mentor Maven') {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Ascension IV');
+            }
+            if (currentRank !== newRank && newRank === 'Master Maverick') {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Ascension V');
+            }
+
+            if (totalNimWins === 1) {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Nim Beginner');
+            } else if (totalNimWins === 5) {
+              await grantAchievementToUser(winnerUser._id.toString(), 'Nim Novice');
+            } else if (totalNimWins === 10)
+              await grantAchievementToUser(winnerUser._id.toString(), 'Nim King');
+
+            await UserModel.updateOne(
+              { username: winnerUsername },
+              {
+                $set: {
+                  score: newScore,
+                  ranking: newRank,
+                  nimGameWins: totalNimWins,
+                },
+              },
+            );
           }
         }
         GameManager.getInstance().removeGame(gameID);

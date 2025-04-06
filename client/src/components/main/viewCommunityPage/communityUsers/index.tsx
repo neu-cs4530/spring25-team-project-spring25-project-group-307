@@ -33,6 +33,7 @@ interface CommunityUsersProps {
   handleClose: () => void;
   userToAdd: string;
   handleSetUsername: (username: string) => void;
+  currentUser?: SafeDatabaseUser;
 }
 
 const CommunityUsers = ({
@@ -48,6 +49,7 @@ const CommunityUsers = ({
   handleClose,
   userToAdd,
   handleSetUsername,
+  currentUser,
 }: CommunityUsersProps) => (
   <Box sx={{ maxWidth: '800px', mx: 'auto' }}>
     <HeaderCommunityUsers
@@ -79,7 +81,10 @@ const CommunityUsers = ({
           {admins?.map(admin => (
             <TableRow
               key={admin.username}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              sx={{
+                '&:last-child td, &:last-child th': { border: 0 },
+                'backgroundColor': admin.username === currentUser?.username ? '#d9d9d9' : 'inherit',
+              }}>
               <TableCell component='th' scope='row'>
                 {admin.username}
               </TableCell>
@@ -91,7 +96,11 @@ const CommunityUsers = ({
           {moderators?.map(moderator => (
             <TableRow
               key={moderator.username}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              sx={{
+                '&:last-child td, &:last-child th': { border: 0 },
+                'backgroundColor':
+                  moderator.username === currentUser?.username ? '#d9d9d9' : 'inherit',
+              }}>
               <TableCell component='th' scope='row'>
                 {moderator.username}
               </TableCell>
@@ -117,7 +126,11 @@ const CommunityUsers = ({
           {members?.map(member => (
             <TableRow
               key={member.username}
-              sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+              sx={{
+                '&:last-child td, &:last-child th': { border: 0 },
+                'backgroundColor':
+                  member.username === currentUser?.username ? '#d9d9d9' : 'inherit',
+              }}>
               <TableCell component='th' scope='row'>
                 {member.username}
               </TableCell>

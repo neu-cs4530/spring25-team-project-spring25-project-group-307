@@ -12,6 +12,7 @@ import {
   deleteUserByUsername,
   getUserByUsername,
   getUsersList,
+  getUserWithSavedQuestions,
   loginUser,
   removeUserSavedQuestion,
   saveUser,
@@ -69,6 +70,9 @@ const userController = (socket: FakeSOSocket) => {
       responsesGiven: 0,
       lastLogin: new Date(),
       savedQuestions: [],
+      nimGameWins: 0,
+      upVotesGiven: 0,
+      downVotesGiven: 0,
     };
 
     try {
@@ -287,6 +291,31 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  /**
+   * Retrieves a user by their username.
+   * @param req The request containing the username as a route parameter.
+   * @param res The response, either returning the user or an error.
+   * @returns A promise resolving to void.
+   */
+  const getUserSavedQuestions = async (
+    req: UserByUsernameRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const user = await getUserWithSavedQuestions(username);
+
+      if ('error' in user) {
+        throw Error(user.error);
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).send(`Error when getting user with saved questions ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -297,6 +326,7 @@ const userController = (socket: FakeSOSocket) => {
   router.patch('/updateBiography', updateBiography);
   router.patch('/addSavedQuestion', addSavedQuestion);
   router.patch('/removeSavedQuestion', removeSavedQuestion);
+  router.get('/getUserSavedQuestions/:username', getUserSavedQuestions);
   return router;
 };
 

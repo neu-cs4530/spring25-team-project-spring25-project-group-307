@@ -4,7 +4,6 @@ import {
   DatabaseCommunity,
   DatabaseUser,
   SafeDatabaseUser,
-  UpdateResultResponse,
   User,
   UserCredentials,
   UserResponse,
@@ -14,6 +13,9 @@ import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
 import { deleteFeedItemsByFeedId } from './feedItem.service';
 import { deleteInterestsByUserId } from './interest.service';
 import CommunityModel from '../models/communities.model';
+import AnswerModel from '../models/answers.model';
+import CommentModel from '../models/comments.model';
+import TagModel from '../models/tags.model';
 
 /**
  * Saves a new user to the database.
@@ -51,6 +53,9 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       responsesGiven: result.responsesGiven,
       lastLogin: result.lastLogin,
       savedQuestions: result.savedQuestions,
+      upVotesGiven: result.upVotesGiven,
+      downVotesGiven: result.downVotesGiven,
+      nimGameWins: result.nimGameWins,
     };
 
     return safeUser;
@@ -286,21 +291,27 @@ export const removeUserSavedQuestion = async (
   }
 };
 
-export const removeSavedQuestionFromAllUsers = async (
-  questionId: ObjectId,
-): Promise<UpdateResultResponse> => {
+export const getUserWithSavedQuestions = async (username: string): Promise<UserResponse> => {
   try {
-    const result = await UserModel.updateMany(
-      { savedQuestions: questionId },
-      { $pull: { savedQuestions: questionId } },
-    );
+    const user = await UserModel.findOne({ username }).populate({
+      path: 'savedQuestions',
+      populate: [
+        { path: 'tags', model: TagModel },
+        {
+          path: 'answers',
+          model: AnswerModel,
+          populate: { path: 'comments', model: CommentModel },
+        },
+        { path: 'comments', model: CommentModel },
+      ],
+    });
 
-    if (!result) {
-      throw Error('Error updating users');
+    if (!user) {
+      throw new Error('User not found');
     }
 
-    return result;
+    return user;
   } catch (error) {
-    return { error: `Error occurred when updating user: ${error}` };
+    return { error: `Error fetching saved questions: ${error}` };
   }
 };

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import CommunityHome from './communityHome';
 import useViewCommunityPage from '../../../hooks/useViewCommunityPage';
 import CommunityUsers from './communityUsers';
+import useUserContext from '../../../hooks/useUserContext';
 
 const ViewCommunityPage = () => {
   const {
@@ -19,6 +20,8 @@ const ViewCommunityPage = () => {
     handleSetUsername,
   } = useViewCommunityPage();
   const [value, setValue] = useState('1');
+
+  const currentUser = useUserContext();
 
   const handleChange = (event: React.SyntheticEvent, newValue: string) => {
     setValue(newValue);
@@ -53,6 +56,7 @@ const ViewCommunityPage = () => {
             handleClose={handleClose}
             userToAdd={userToAdd}
             handleSetUsername={handleSetUsername}
+            currentUser={currentUser.user}
           />
         </TabPanel>
       </TabContext>

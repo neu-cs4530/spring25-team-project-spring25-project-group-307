@@ -51,31 +51,33 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
       </Box>
 
       {/* Community description */}
-      <Typography variant='h5' sx={{ my: '5px' }}>
+      <Typography variant='subtitle1' sx={{ my: '5px' }}>
         {community?.description}
       </Typography>
 
       {/* Pinned Questions */}
       {pinnedQuestions.length > 0 ? (
         <>
-          <Typography variant='h6' sx={{ mt: 2 }}>
+          <Typography variant='h6' sx={{ mt: 3, mb: 1 }}>
             Pinned Questions
           </Typography>
-          {pinnedQuestions.map(question => (
-            <QuestionView
-              key={question._id}
-              question={question}
-              community={community}
-              pinnedQuestion={true}
-              currentRole={currentRole}
-              handleTogglePinQuestion={handleTogglePinQuestion}
-            />
-          ))}
+          <Box>
+            {pinnedQuestions.map(question => (
+              <QuestionView
+                key={question._id}
+                question={question}
+                community={community}
+                pinnedQuestion={true}
+                currentRole={currentRole}
+                handleTogglePinQuestion={handleTogglePinQuestion}
+              />
+            ))}
+          </Box>
         </>
       ) : null}
 
       {/* Unpinned Questions */}
-      <Typography variant='h6' sx={{ mt: 2 }}>
+      <Typography variant='h6' sx={{ mt: 3, mb: 1 }}>
         Questions
       </Typography>
       {unpinnedQuestions.map(question => (

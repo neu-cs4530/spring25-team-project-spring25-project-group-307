@@ -51,6 +51,8 @@ const CommentSection = ({
       text,
       commentBy: user.username,
       commentDateTime: new Date(),
+      upVotes: [],
+      downVotes: [],
     };
 
     handleAddComment(newComment);

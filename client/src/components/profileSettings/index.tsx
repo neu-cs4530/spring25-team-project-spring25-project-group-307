@@ -73,10 +73,16 @@ const ProfileSettings: React.FC = () => {
   return (
     <Box
       className='page-container'
-      sx={{ display: 'flex', justifyContent: 'center', mt: 4, px: 3 }}>
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        mt: 4,
+        px: 3,
+        backgroundColor: '#F5F1E1',
+      }}>
       <Grid container spacing={3} maxWidth='900px'>
         <Grid item xs={12}>
-          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2 }}>
+          <Card sx={{ p: 3, boxShadow: 3, borderRadius: 2, backgroundColor: '#FDFBF7' }}>
             <CardContent>
               <Typography variant='h5' gutterBottom sx={{ fontWeight: 'bold' }}>
                 Profile Settings
