@@ -1,5 +1,6 @@
 import React from 'react';
 import '../input/index.css';
+import { TextField } from '@mui/material';
 
 /**
  * Interface representing the props for the Textarea component.
@@ -41,15 +42,30 @@ const TextArea = ({ title, mandatory = true, hint, id, val, setState, err }: Tex
       {mandatory ? '*' : ''}
     </div>
     {hint && <div className='input_hint'>{hint}</div>}
-    <textarea
+    {/* <textarea
       id={id}
       className='input_input'
       value={val}
       onChange={e => {
         setState(e.currentTarget.value);
       }}
+    /> */}
+    <TextField
+      id={id}
+      className='input_input'
+      placeholder={title}
+      variant='outlined'
+      size='small'
+      multiline
+      rows={4}
+      value={val}
+      onChange={e => {
+        setState(e.currentTarget.value);
+      }}
+      error={!!err}
+      helperText={err}
+      sx={{ width: '100%', mb: 3, backgroundColor: 'white', borderRadius: '4px' }}
     />
-    {err && <div className='input_error'>{err}</div>}
   </>
 );
 

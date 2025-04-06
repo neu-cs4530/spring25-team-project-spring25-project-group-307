@@ -46,6 +46,7 @@ const CommunityHeader = ({
       <TextField
         sx={{ width: '20%' }}
         id='search'
+        className='content_background'
         label='Search for Communities'
         variant='outlined'
         size='small'

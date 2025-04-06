@@ -28,7 +28,7 @@ const SearchBar = ({ handleInputChange, handleKeyDown, val }: SearchBarProps) =>
       onChange={handleInputChange}
       onKeyDown={handleKeyDown}
       size='small'
-      sx={{ width: '275px', background: 'white', borderRadius: '5px' }}
+      sx={{ width: '275px', backgroundColor: '#FDFBF7', borderRadius: '5px' }}
     />
   </Box>
 );

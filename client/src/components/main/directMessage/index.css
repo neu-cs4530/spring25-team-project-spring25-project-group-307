@@ -24,7 +24,7 @@
 /* Container styles */
 .direct-message-container {
   display: flex;
-  height: 100vh;
+  height: 85vh;
   gap: 16px;
   padding: 16px;
   box-sizing: border-box;
@@ -35,7 +35,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  background-color: #fff;
+  background-color: #FDFBF7;
   border: 2px solid #ddd;
   border-radius: 8px;
   padding: 16px;
@@ -56,7 +56,7 @@
   padding: 10px;
   margin-bottom: 16px;
   background-color: #fefefe;
-  max-height: 400px;
+  max-height: 450px;
 }
 
 .chat-message {
@@ -76,7 +76,7 @@
 /* Chat list styles */
 .chats-list {
   width: 30%;
-  background-color: #fff;
+  background-color: #FDFBF7;
   border: 2px solid #ddd;
   border-radius: 8px;
   padding: 16px;

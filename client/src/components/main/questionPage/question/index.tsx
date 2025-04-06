@@ -59,13 +59,13 @@ const QuestionView = ({
 
   return (
     <Card
+      className='content_background'
       sx={{
         'display': 'flex',
         'justifyContent': 'space-between',
         'marginBottom': 2,
         'borderRadius': 5,
         'boxShadow': 3,
-        'backgroundColor': '#FDFBF7',
         '&:hover': {
           backgroundColor: '#F7F7F7',
         },
