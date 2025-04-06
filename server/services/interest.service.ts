@@ -57,6 +57,20 @@ export const deleteInterest = async (interest: Interest): Promise<InterestRespon
   }
 };
 
+export const deleteInterestByTagId = async (tagId: ObjectId): Promise<InterestResponse> => {
+  try {
+    const result = await InterestModel.findOneAndDelete({ tagId });
+
+    if (!result) {
+      throw Error('Failed to delete interest');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting interest: ${error}` };
+  }
+};
+
 export const deleteInterestsByUserId = async (aUserId: ObjectId): Promise<DeleteResultResponse> => {
   try {
     const result = await InterestModel.deleteMany({ userId: aUserId });

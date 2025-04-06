@@ -77,6 +77,18 @@ const getCommunitiesByUser = async (username: string): Promise<DatabaseCommunity
   }
 };
 
+const getCommunitiesByQuestion = async (questionId: string): Promise<DatabaseCommunity[]> => {
+  try {
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
+      questions: { $in: questionId },
+    });
+
+    return communities;
+  } catch (error) {
+    return [];
+  }
+};
+
 /**
  * Adds a community to the database if it does not already exist.
  *
@@ -479,4 +491,5 @@ export {
   unpinQuestion,
   getTagsForCommunity,
   getAllCommunityTags,
+  getCommunitiesByQuestion,
 };

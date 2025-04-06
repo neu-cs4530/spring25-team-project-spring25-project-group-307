@@ -25,4 +25,12 @@ const getNext = async (userId: ObjectId, limit: number): Promise<FeedItem[]> => 
   return res.data;
 };
 
-export { refresh, getNext };
+const getHistory = async (
+  userId: ObjectId,
+  numFeedQuestionsBeforeNav: number,
+): Promise<FeedItem[]> => {
+  const res = await api.post(`${FEED_API_URL}/history`, { userId, numFeedQuestionsBeforeNav });
+  return res.data;
+};
+
+export { refresh, getNext, getHistory };

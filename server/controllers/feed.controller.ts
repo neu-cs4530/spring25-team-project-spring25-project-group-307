@@ -2,6 +2,8 @@ import express, { Router, Request, Response } from 'express';
 import { FakeSOSocket } from '../types/types';
 import {
   getAllQuestionsInOrderAndSaveToFeed,
+  getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex,
+  getFeedHistoryByUser,
   getQuestionsForInfiniteScroll,
   updateFeedLastViewedRanking,
 } from '../services/feed.service';
@@ -59,6 +61,7 @@ const feedController = (socket: FakeSOSocket) => {
     }
 
     try {
+      await getAllQuestionsInOrderAndSaveToFeedFromLastViewedIndex(userId);
       const questions = await getQuestionsForInfiniteScroll(userId, limit);
 
       res.status(200).send(questions);
@@ -67,9 +70,32 @@ const feedController = (socket: FakeSOSocket) => {
     }
   };
 
+  const getFeedHistory = async (req: Request, res: Response): Promise<void> => {
+    if (req.body === undefined) {
+      res.status(400).send('Invalid getFeedHistory body');
+      return;
+    }
+
+    const { userId, numFeedQuestionsBeforeNav } = req.body;
+
+    if (userId === undefined) {
+      res.status(400).send('Invalid user ID');
+      return;
+    }
+
+    try {
+      const questions = await getFeedHistoryByUser(userId, numFeedQuestionsBeforeNav);
+
+      res.status(200).send(questions);
+    } catch (error) {
+      res.status(500).send(`Error when getting feed history: ${error}`);
+    }
+  };
+
   // Define routes for the feed-related operations.
   router.post('/refresh', refreshFeed);
   router.post('/next', getNextFeedItems);
+  router.post('/history', getFeedHistory);
   return router;
 };
 

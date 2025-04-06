@@ -13,6 +13,7 @@ import { user, safeUser } from '../mockData.models';
 import FeedModel from '../../models/feed.model';
 import FeedItemModel from '../../models/feedItem.model';
 import InterestModel from '../../models/interest.model';
+import CommunityModel from '../../models/communities.model';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -173,11 +174,27 @@ describe('deleteUserByUsername', () => {
       deletedCount: 0,
     };
 
+    const community = {
+      _id: new mongoose.Types.ObjectId(),
+      title: 'Community 1',
+      description: 'Description 1',
+      isPrivate: false,
+      admins: [safeUser._id],
+      moderators: [safeUser._id],
+      members: [safeUser._id],
+      questions: [],
+      pinnedQuestions: [],
+      tags: [],
+    };
+    const communities = [community];
+
     mockingoose(UserModel).toReturn(safeUser, 'findOneAndDelete');
     mockingoose(FeedModel).toReturn(feed._id, 'findOne');
     mockingoose(FeedModel).toReturn(feed, 'findOneAndDelete');
     mockingoose(FeedItemModel).toReturn(deleteRes, 'deleteMany');
     mockingoose(InterestModel).toReturn(deleteRes, 'deleteMany');
+    mockingoose(CommunityModel).toReturn(communities, 'find');
+    mockingoose(CommunityModel).toReturn(community, 'findOneAndUpdate');
 
     const deletedUser = (await deleteUserByUsername(user.username)) as SafeDatabaseUser;
 

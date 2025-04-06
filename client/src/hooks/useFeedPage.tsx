@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FeedItem } from '@fake-stack-overflow/shared';
-import { getNext, refresh } from '../services/feedService';
+import { useLocation } from 'react-router-dom';
+import { getHistory, getNext, refresh } from '../services/feedService';
 import useUserContext from './useUserContext';
 
 const useFeedPage = () => {
@@ -14,6 +15,11 @@ const useFeedPage = () => {
   const noMoreContentRef = useRef(noMoreContent);
 
   const pageEndElement = useRef(null);
+
+  const location = useLocation();
+  const skipFetch = location.state?.fromFeed || false;
+  const numFeedQuestionsBeforeNav = location.state?.numFeedQuestionsBeforeNav || 0;
+
   const getMoreQuestions = useCallback(
     async (limit: number) => {
       if (isFetching) return;
@@ -43,6 +49,26 @@ const useFeedPage = () => {
   const setupFeed = async () => {
     await refresh(currentUser._id);
   };
+
+  const retrieveHistory = useCallback(async () => {
+    setIsFetching(true);
+    setIsQuestionsLoading(true);
+    const questions = await getHistory(currentUser._id, numFeedQuestionsBeforeNav);
+    setFeedItems(questions);
+    setIsFetching(false);
+    setIsQuestionsLoading(false);
+    if (questions.length === 0) {
+      setNoMoreContent(true);
+    } else {
+      setNoMoreContent(false);
+    }
+  }, [currentUser._id, numFeedQuestionsBeforeNav]);
+
+  useEffect(() => {
+    if (skipFetch) {
+      retrieveHistory();
+    }
+  }, [retrieveHistory, skipFetch]);
 
   useEffect(() => {
     isFetchingRef.current = isFetching;
@@ -78,7 +104,15 @@ const useFeedPage = () => {
     };
   }, [getMoreQuestions]);
 
-  return { feedItems, isQuestionsLoading, pageEndElement, noMoreContent, resetFeed, setupFeed };
+  return {
+    feedItems,
+    setFeedItems,
+    isQuestionsLoading,
+    pageEndElement,
+    noMoreContent,
+    resetFeed,
+    setupFeed,
+  };
 };
 
 export default useFeedPage;

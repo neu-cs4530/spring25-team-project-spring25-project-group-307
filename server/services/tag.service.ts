@@ -1,4 +1,5 @@
-import { DatabaseQuestion, DatabaseTag, Question, Tag } from '../types/types';
+import { ObjectId } from 'mongodb';
+import { DatabaseQuestion, DatabaseTag, Question, Tag, DeleteResultResponse } from '../types/types';
 import QuestionModel from '../models/questions.model';
 import TagModel from '../models/tags.model';
 
@@ -121,5 +122,19 @@ export const getTagCountMap = async (): Promise<Map<string, number> | null | { e
     return tmap;
   } catch (error) {
     return { error: 'Error when constructing tag map' };
+  }
+};
+
+export const deleteTagsByIds = async (ids: ObjectId[]): Promise<DeleteResultResponse> => {
+  try {
+    const result = await TagModel.deleteMany({ _id: { $in: ids } });
+
+    if (!result) {
+      throw Error('Failed to delete tags');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting tags: ${error}` };
   }
 };

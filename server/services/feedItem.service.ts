@@ -54,6 +54,26 @@ export const deleteFeedItemsByFeedId = async (aFeedId: ObjectId): Promise<Delete
   }
 };
 
+export const deleteFeedItemsByFeedIdFromIndex = async (
+  aFeedId: ObjectId,
+  startIndex: number,
+): Promise<DeleteResultResponse> => {
+  try {
+    const result = await FeedItemModel.deleteMany({
+      feed: aFeedId,
+      viewedRanking: { $gte: startIndex },
+    });
+
+    if (!result) {
+      throw Error('Failed to delete feed items');
+    }
+
+    return result;
+  } catch (error) {
+    return { error: `Error occurred when deleting feed items: ${error}` };
+  }
+};
+
 export const getFeedItemsByFeedIdAndRankingRange = async (
   feedId: ObjectId,
   startRanking: number,
