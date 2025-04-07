@@ -1,5 +1,5 @@
 import './index.css';
-import { DatabaseMessage, PopulatedDatabaseQuestion } from '../../../types/types';
+import { DatabaseMessage } from '../../../types/types';
 import { getMetaData } from '../../../tool';
 
 import EmbededQuestionView from './embededQuestionView';

@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Notification } from '@fake-stack-overflow/shared';
+
 import {
   getNotifications,
   clearNotification,
   clearAllNotifications,
 } from '../services/userNotificationService';
-import { Notification } from '@fake-stack-overflow/shared';
 
 import useUserContext from './useUserContext';
 
