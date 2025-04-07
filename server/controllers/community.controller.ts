@@ -135,10 +135,6 @@ const communityController = (socket: FakeSOSocket) => {
         tags: await processTags(community.tags),
       };
 
-      if (communityWithTags.tags.length === 0) {
-        throw new Error('No tags found');
-      }
-
       // Save the community
       const result = await addCommunity(communityWithTags);
       res.json(result);
