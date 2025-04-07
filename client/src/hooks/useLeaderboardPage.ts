@@ -29,7 +29,13 @@ const useLeaderboardPage = () => {
             pinnedQuestions: c.pinnedQuestions.map(pinnedQuestion => pinnedQuestion.toString()), // convert ObjectId[] to string[]
           }))
 
-          .sort((a, b) => b.members.length - a.members.length);
+          .sort(
+            (a, b) =>
+              b.members.length +
+              b.admins.length +
+              b.moderators.length -
+              (a.members.length + a.admins.length + a.moderators.length),
+          );
 
         setCommunities(sorted);
       } catch (err) {
