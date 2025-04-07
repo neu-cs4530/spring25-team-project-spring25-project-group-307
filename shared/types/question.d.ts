@@ -68,6 +68,7 @@ export interface PopulatedDatabaseQuestion
   answers: PopulatedDatabaseAnswer[];
   comments: DatabaseComment[];
   community?: DatabaseCommunity;
+  askedByRank?: string;
 }
 
 /**

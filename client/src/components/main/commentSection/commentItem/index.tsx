@@ -1,18 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ObjectId } from 'mongodb';
-import { Box, Button, Card, CardContent, IconButton, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  IconButton,
+  Typography,
+  Tooltip,
+  Chip,
+} from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { DatabaseComment, Comment } from '@fake-stack-overflow/shared';
 import { getMetaData } from '../../../../tool';
 import CommentVoteComponent from '../../voteCommentComponent';
 import { addComment, getReplies } from '../../../../services/commentService';
 import useUserContext from '../../../../hooks/useUserContext';
+import { getUserByUsername } from '../../../../services/userService';
 
 /**
  * Interface representing the props for the CommentItem component.
- * - comment - The comment object to be displayed.
- * - handleDeleteComment - A function to handle the deletion of a comment.
- * - currentRole - The role of the current user (e.g., 'ADMIN', 'MODERATOR, 'MEMBER').
  */
 interface CommentItemProps {
   comment: DatabaseComment;
@@ -23,10 +30,25 @@ interface CommentItemProps {
 
 const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: CommentItemProps) => {
   const { user } = useUserContext();
-  const [showReplies, setShowReplies] = useState<boolean>(false);
-  const [replying, setReplying] = useState<boolean>(false);
-  const [replyText, setReplyText] = useState<string>('');
+  const [showReplies, setShowReplies] = useState(false);
+  const [replying, setReplying] = useState(false);
+  const [replyText, setReplyText] = useState('');
   const [replies, setReplies] = useState<DatabaseComment[]>([]);
+  const [commentByRank, setCommentByRank] = useState(comment.commentByRank ?? null);
+
+  const fetchRepliesWithRanks = useCallback(async () => {
+    const res = await getReplies(comment._id.toString());
+    const rankedReplies = await Promise.all(
+      (res.replies || []).map(async reply => {
+        const replyUser = await getUserByUsername(reply.commentBy);
+        return {
+          ...reply,
+          commentByRank: replyUser?.ranking ?? null,
+        };
+      }),
+    );
+    setReplies(rankedReplies);
+  }, [comment._id]);
 
   const handleShowRepliesClick = () => {
     setShowReplies(!showReplies);
@@ -40,20 +62,20 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
     const newReply: Comment = {
       text: replyText,
       commentBy: user.username,
+      commentByRank: user.ranking,
       commentDateTime: new Date(),
       upVotes: [],
       downVotes: [],
     };
 
     const res = await addComment(comment._id.toString(), 'comment', newReply);
-    if (res && 'error' in res) {
-      // eslint-disable-next-line no-console
-      console.error('Error adding reply:', res.error);
-      return;
-    }
+    if ('error' in res) return;
 
-    const updatedReplies = [...replies, res.answer];
-    setReplies(updatedReplies);
+    // Refresh replies and re-fetch rank of the parent comment
+    await fetchRepliesWithRanks();
+    const updatedParentUser = await getUserByUsername(comment.commentBy);
+    setCommentByRank(updatedParentUser?.ranking ?? null);
+
     setShowReplies(true);
     setReplyText('');
     setReplying(false);
@@ -61,20 +83,20 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
 
   const handleDeleteReply = (replyId: ObjectId) => {
     handleDeleteComment(replyId);
-    setReplies(replies.filter(reply => reply._id !== replyId));
-    setShowReplies(replies.length > 0);
+    setReplies(prev => prev.filter(reply => reply._id !== replyId));
+    setShowReplies(replies.length > 1); // after removal
   };
 
   useEffect(() => {
-    const fetchReplies = async () => {
-      await getReplies(comment._id.toString()).then(res => {
-        if (res.replies) {
-          setReplies(res.replies);
-        }
-      });
+    const initialize = async () => {
+      await fetchRepliesWithRanks();
+      if (!comment.commentByRank) {
+        const userDoc = await getUserByUsername(comment.commentBy);
+        setCommentByRank(userDoc?.ranking ?? null);
+      }
     };
-    fetchReplies();
-  }, [comment._id]);
+    initialize();
+  }, [comment._id, comment.commentBy, comment.commentByRank, fetchRepliesWithRanks]);
 
   return (
     <Box>
@@ -84,29 +106,48 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
             <Typography variant='body1' sx={{ mb: 1 }}>
               {comment.text}
             </Typography>
-            <Typography variant='caption'>
-              {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
-            </Typography>
+            <Box display='flex' alignItems='center' gap={1} sx={{ flexWrap: 'wrap', mb: 0.5 }}>
+              <Typography variant='caption' fontWeight={500}>
+                {comment.commentBy}
+              </Typography>
+              {commentByRank && (
+                <Tooltip title='User Rank' arrow>
+                  <Chip
+                    label={commentByRank}
+                    size='small'
+                    variant='outlined'
+                    color='primary'
+                    sx={{ fontSize: '0.65rem', fontWeight: 500 }}
+                  />
+                </Tooltip>
+              )}
+              <Typography variant='caption' color='text.secondary'>
+                {getMetaData(new Date(comment.commentDateTime))}
+              </Typography>
+            </Box>
             <Box sx={{ mt: 1 }}>
               <CommentVoteComponent comment={comment} />
             </Box>
           </CardContent>
         </Card>
-        {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate ? (
+        {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate && (
           <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>
             <DeleteIcon />
           </IconButton>
-        ) : null}
+        )}
       </Box>
-      {replies && replies.length > 0 ? (
+
+      {replies.length > 0 && (
         <Button variant='text' onClick={handleShowRepliesClick} sx={{ mb: 1 }}>
           {showReplies ? 'Hide Replies' : `Show ${replies.length} Replies`}
         </Button>
-      ) : null}
+      )}
+
       <Button variant='text' sx={{ mb: 1 }} onClick={handleReplyClick}>
         {replying ? 'Cancel Reply' : 'Reply'}
       </Button>
-      {replying ? (
+
+      {replying && (
         <Box sx={{ pl: 2, mb: 1 }}>
           <div className='input-row'>
             <textarea
@@ -115,13 +156,14 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
               onChange={e => setReplyText(e.target.value)}
               className='comment-textarea'
             />
-            <button className='add-comment-button' onClick={handleAddReply}>
+            <Button variant='contained' onClick={handleAddReply} sx={{ mb: 1 }}>
               Add Reply
-            </button>
+            </Button>
           </div>
         </Box>
-      ) : null}
-      {showReplies && replies.length > 0 ? (
+      )}
+
+      {showReplies && replies.length > 0 && (
         <Box sx={{ pl: 2 }}>
           {replies.map(reply => (
             <CommentItem
@@ -133,7 +175,7 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
             />
           ))}
         </Box>
-      ) : null}
+      )}
     </Box>
   );
 };

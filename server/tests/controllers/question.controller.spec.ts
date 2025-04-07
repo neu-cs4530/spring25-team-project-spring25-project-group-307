@@ -222,7 +222,7 @@ describe('Test questionController', () => {
 
       // Asserting the response
       expect(response.status).toBe(200);
-      expect(response.body.populatedQuestion).toEqual(simplifyQuestion(mockPopulatedQuestion));
+      expect(response.body.question).toEqual(simplifyQuestion(mockPopulatedQuestion));
       expect(response.body.unlockedAchievements).toEqual([]);
     });
 
@@ -350,7 +350,7 @@ describe('Test questionController', () => {
 
       // Asserting the response
       expect(response.status).toBe(200);
-      expect(response.body.populatedQuestion).toEqual(simplifyQuestion(mockPopulatedQuestion));
+      expect(response.body.question).toEqual(simplifyQuestion(mockPopulatedQuestion));
       expect(response.body.unlockedAchievements).toEqual([]);
     });
   });

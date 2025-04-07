@@ -1,4 +1,5 @@
 import './index.css';
+import { Button, Typography } from '@mui/material';
 import React from 'react';
 import Form from '../baseComponents/form';
 import TextArea from '../baseComponents/textarea';
@@ -20,10 +21,17 @@ const NewAnswerPage = () => {
         err={textErr}
       />
       <div className='btn_indicator_container'>
-        <button className='form_postBtn' onClick={postAnswer}>
+        <Button
+          variant='contained'
+          onClick={() => {
+            postAnswer();
+          }}
+          sx={{ mb: 1 }}>
           Post Answer
-        </button>
-        <div className='mandatory_indicator'>* indicates mandatory fields</div>
+        </Button>
+        <Typography variant='body1' color='error'>
+          * indicates mandatory fields
+        </Typography>
       </div>
     </Form>
   );

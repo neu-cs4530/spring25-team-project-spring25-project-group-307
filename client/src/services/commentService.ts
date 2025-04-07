@@ -39,7 +39,7 @@ const addComment = async (
     throw new Error('Error while creating a new comment for the question');
   }
   return {
-    answer: res.data,
+    answer: res.data.answer,
     unlockedAchievements: res.data.unlockedAchievements ?? [],
   };
 };

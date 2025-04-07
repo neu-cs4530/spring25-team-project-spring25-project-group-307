@@ -57,7 +57,7 @@ const NewQuestionPage = () => {
             postQuestion();
           }}
           sx={{ mb: 1 }}>
-          Post Community
+          Post Question
         </Button>
         <Typography variant='body1' color='error'>
           * indicates mandatory fields

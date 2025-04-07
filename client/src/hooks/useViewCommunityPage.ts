@@ -9,6 +9,7 @@ import {
   unpinQuestion,
   updateUserRole,
 } from '../services/communityService';
+import { getUserByUsername } from '../services/userService';
 import useUserContext from './useUserContext';
 
 /**
@@ -35,6 +36,16 @@ const useViewCommunityPage = () => {
   const handleSetUsername = (newUsername: string) => setUserToAdd(newUsername);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  const enrichQuestionsWithRanks = async (questions: PopulatedDatabaseQuestion[]) =>
+    Promise.all(
+      questions.map(async question =>
+        getUserByUsername(question.askedBy).then(fetchedUser => ({
+          ...question,
+          askedByRank: fetchedUser?.ranking ?? null,
+        })),
+      ),
+    );
 
   const handleRoleChange = async (username: string, newRole: string) => {
     setError(null);
@@ -104,7 +115,14 @@ const useViewCommunityPage = () => {
     const fetchCommunity = async () => {
       try {
         const res = await getCommunityById(cid);
-        setCommunity(res || null);
+        const rankedPinnedQuestions = await enrichQuestionsWithRanks(res.pinnedQuestions || []);
+        const rankedUnpinnedQuestions = await enrichQuestionsWithRanks(res.questions || []);
+
+        setCommunity({
+          ...res,
+          pinnedQuestions: rankedPinnedQuestions,
+          questions: rankedUnpinnedQuestions,
+        });
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);

@@ -111,6 +111,7 @@ const AnswerPage = () => {
         views={question.views.length}
         text={question.text}
         askby={question.askedBy}
+        askbyRank={question.askedByRank}
         meta={getMetaData(new Date(question.askDateTime))}
       />
       <CommentSection

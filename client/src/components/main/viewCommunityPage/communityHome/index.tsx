@@ -1,5 +1,5 @@
 import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, Chip, Tooltip } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import QuestionView from '../../questionPage/question';
@@ -26,6 +26,25 @@ const CommunityHome = ({ community, currentRole, handleTogglePinQuestion }: Comm
   const pinnedQuestions = community.pinnedQuestions || [];
   const unpinnedQuestions = community.questions.filter(
     question => !pinnedQuestions.some(pinned => pinned._id === question._id),
+  );
+
+  const renderQuestionHeader = (question: PopulatedDatabaseQuestion) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+      <Typography variant='body2' fontWeight={500}>
+        Asked by: {question.askedBy}
+      </Typography>
+      {question.askedByRank && (
+        <Tooltip title='User Rank' arrow>
+          <Chip
+            label={question.askedByRank}
+            size='small'
+            variant='outlined'
+            color='primary'
+            sx={{ fontSize: '0.65rem', fontWeight: 500 }}
+          />
+        </Tooltip>
+      )}
+    </Box>
   );
 
   return (

@@ -25,7 +25,7 @@ import StarIcon from '@mui/icons-material/Star';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import QuestionAnswerIcon from '@mui/icons-material/QuestionAnswer';
 import CommentIcon from '@mui/icons-material/Comment';
-// import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import TaskAltIcon from '@mui/icons-material/TaskAlt';
 // import FavoriteIcon from '@mui/icons-material/Favorite';
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects';
@@ -59,7 +59,7 @@ const ACHIEVEMENTS_LIST = [
   { name: 'Helpful Mind', requirement: 'Post first answer' },
   { name: 'Curious Thinker', requirement: 'Ask 5 questions' },
   { name: 'Problem Solver', requirement: 'Answer 5 questions' },
-  // { name: 'Audience Pleaser', requirement: 'Get 5 upvotes on an answer' },
+  { name: 'New Commenter', requirement: 'Comment on  a question or answer' },
   { name: 'Diligent Reviewer', requirement: 'Give 5 upvotes to other users' },
   // { name: 'Community Favorite', requirement: 'Get 5 upvotes on a question' },
   { name: 'Ascension I', requirement: 'Reached Common Contributor' },
@@ -79,8 +79,8 @@ const achievementIcons: Record<string, React.ReactElement> = {
   'Curious Thinker': <EmojiObjectsIcon />,
   'Problem Solver': <CelebrationIcon />,
   'Acknowledged': <TaskAltIcon />,
-  // 'Audience Pleaser': <ThumbUpIcon />,
-  'ReDiligent Reviewer': <HowToVoteIcon />,
+  'New Commenter': <ThumbUpIcon />,
+  'Diligent Reviewer': <HowToVoteIcon />,
   // 'Community Favorite': <FavoriteIcon />,
   'Ascension I': <StarBorderIcon />,
   'Ascension II': <StarPurple500Icon />,

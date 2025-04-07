@@ -222,6 +222,7 @@ async function userCreate(
     nimGameWins: 0,
     upVotesGiven: 0,
     downVotesGiven: 0,
+    commentsMade: 0, // Initialize commentsMade to 0
   };
 
   return await UserModel.create(userDetail);

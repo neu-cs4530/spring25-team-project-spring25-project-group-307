@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ObjectId } from 'mongodb';
-import { Box, IconButton } from '@mui/material';
+import { Box, IconButton, Typography, Chip, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AnswerVoteComponent from '../../answerVoteComponent';
 import { handleHyperlink } from '../../../../tool';
@@ -45,26 +45,51 @@ const AnswerView = ({
       const updatedComments = commentList.filter(comment => comment._id !== commentId);
       setCommentList(updatedComments);
     } catch (error) {
-      // catch error
+      // handle error
     }
   };
 
   return (
-    <div className='answer'>
+    <Box className='answer' sx={{ borderTop: '1px dashed #ccc', pt: 2, mt: 2 }}>
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
         <AnswerVoteComponent answer={answer} />
-        <Box>
-          <div id='answerText' className='answerText'>
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography id='answerText' className='answerText' sx={{ mb: 1 }}>
             {handleHyperlink(text)}
-          </div>
+          </Typography>
 
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div className='answerAuthor'>
-              <div className='answer_author'>{ansBy}</div>
-              <div className='answer_question_meta'>{meta}</div>
-            </div>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: 1,
+              mt: 1,
+              mb: 1,
+            }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography fontWeight={500} color='text.primary'>
+                {ansBy}
+              </Typography>
+              {answer.ansByRank && (
+                <Tooltip title='User Rank' arrow>
+                  <Chip
+                    label={answer.ansByRank}
+                    size='small'
+                    variant='outlined'
+                    color='primary'
+                    sx={{ fontSize: '0.7rem', fontWeight: 500 }}
+                  />
+                </Tooltip>
+              )}
+              <Typography variant='body2' color='text.secondary'>
+                • {meta}
+              </Typography>
+            </Box>
+
             {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
-              <IconButton onClick={handleDeleteAnswer}>
+              <IconButton onClick={handleDeleteAnswer} size='small'>
                 <DeleteIcon />
               </IconButton>
             )}
@@ -79,7 +104,7 @@ const AnswerView = ({
           />
         </Box>
       </Box>
-    </div>
+    </Box>
   );
 };
 
