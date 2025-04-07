@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react';
 import './index.css';
 import { DatabaseMessage, PopulatedDatabaseQuestion } from '../../../types/types';
 import { getMetaData } from '../../../tool';
-import { getQuestionById } from '../../../services/questionService';
-import useUserContext from '../../../hooks/useUserContext';
+
 import EmbededQuestionView from './embededQuestionView';
+import useMessageCard from '../../../hooks/useMessageCard';
 
 /**
  * MessageCard component displays a single message with its sender and timestamp.
@@ -13,40 +12,8 @@ import EmbededQuestionView from './embededQuestionView';
  */
 
 const MessageCard = ({ message }: { message: DatabaseMessage }) => {
-  const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
-  const { user } = useUserContext();
-
-  useEffect(() => {
-    const isValidUrl = (input: string) => {
-      try {
-        const url = new URL(input);
-        return url;
-      } catch {
-        return undefined;
-      }
-    };
-
-    const baseUrl = new URL(window.location.origin);
-    const maybeUrl = isValidUrl(message.msg);
-
-    if (maybeUrl) {
-      if (
-        maybeUrl &&
-        baseUrl.hostname === maybeUrl.hostname &&
-        maybeUrl.pathname.startsWith('/question')
-      ) {
-        // remove leading and trailing slash and put the url parts in an array
-        const parts = maybeUrl.pathname.replace(/\/$/, '').split('/');
-        parts.shift();
-        if (parts.length === 2 && parts[0] === 'question') {
-          getQuestionById(parts[1], user.username)
-            .then(res => setQuestion(res || null))
-            .catch(() => setQuestion(null));
-        }
-      }
-    }
-  }, [message.msg, user.username]);
-
+  // question might be null if the message does not contain a valid question URL
+  const { question } = useMessageCard(message);
   return (
     <div className='message'>
       <div className='message-header'>
