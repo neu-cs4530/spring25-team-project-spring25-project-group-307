@@ -5,7 +5,7 @@ import { getUserWithSavedQuestions, removeSavedQuestion } from '../services/user
 import useUserContext from './useUserContext';
 
 // Custom hook to handle logic for the User's Saved Questions page
-const userSavedPage = () => {
+const useSavedPage = () => {
   const { user } = useUserContext();
 
   // State to store the list of saved questions
@@ -52,4 +52,4 @@ const userSavedPage = () => {
   };
 };
 
-export default userSavedPage;
+export default useSavedPage;
