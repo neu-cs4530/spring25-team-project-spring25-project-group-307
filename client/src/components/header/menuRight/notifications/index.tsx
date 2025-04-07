@@ -1,64 +1,18 @@
 import { Badge, Box, Divider, IconButton, Link, Menu, MenuItem, Typography } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import { useEffect, useState, useCallback } from 'react';
-import { Notification } from '@fake-stack-overflow/shared';
-import { useNavigate } from 'react-router-dom';
 
-import useUserContext from '../../../../hooks/useUserContext';
-import {
-  clearAllNotifications,
-  clearNotification,
-  getNotifications,
-} from '../../../../services/userNotificationService';
+import useNotifications from '../../../../hooks/useNotifications';
 
 const Notifications = () => {
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { socket, user } = useUserContext();
-  const navigate = useNavigate();
-  const open = Boolean(anchorEl);
-
-  const handleClickBell = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  }, []);
-
-  const handleClose = useCallback(() => {
-    setAnchorEl(null);
-  }, []);
-
-  const refreshNotifications = useCallback(() => {
-    getNotifications(user.username).then(notificationsResponse => {
-      if (notificationsResponse) setNotifications(notificationsResponse.notifications);
-    });
-  }, [user.username]);
-
-  const handleClickNotification = useCallback(
-    (notification: Notification) => {
-      navigate(`/question/${notification.questionId}`);
-      clearNotification(user.username, notification.questionId).then(() => {
-        refreshNotifications();
-        handleClose();
-      });
-    },
-    [navigate, refreshNotifications, handleClose, user.username],
-  );
-
-  const handleClear = useCallback(() => {
-    handleClose();
-    clearAllNotifications(user.username).then(() => setNotifications([]));
-  }, [handleClose, user.username]);
-
-  useEffect(() => {
-    refreshNotifications();
-
-    socket.on('preferencesUpdate', () => {
-      refreshNotifications();
-    });
-
-    return () => {
-      socket.off('preferencesUpdate');
-    };
-  }, [socket, user.username, refreshNotifications]);
+  const {
+    handleClickBell,
+    notifications,
+    anchorEl,
+    handleClose,
+    open,
+    handleClickNotification,
+    handleClear,
+  } = useNotifications();
   return (
     <>
       <IconButton onClick={handleClickBell} color='inherit'>
