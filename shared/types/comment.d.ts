@@ -17,6 +17,7 @@ export interface Comment {
   replies?: ObjectId[];
   upVotes: string[];
   downVotes: string[];
+  commentByRank?: string;
 }
 
 /**
@@ -28,6 +29,7 @@ export interface Comment {
  */
 export interface DatabaseComment extends Comment {
   _id: ObjectId;
+  commentByRank?: string;
 }
 
 /**

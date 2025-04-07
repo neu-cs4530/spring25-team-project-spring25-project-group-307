@@ -215,7 +215,7 @@ const questionController = (socket: FakeSOSocket) => {
       }
       socket.emit('questionUpdate', populatedQuestion as PopulatedDatabaseQuestion);
 
-      res.json({ populatedQuestion, unlockedAchievements: unlocked });
+      res.json({ question: populatedQuestion, unlockedAchievements: unlocked });
     } catch (err: unknown) {
       if (err instanceof Error) {
         res.status(500).send(`Error when saving question: ${err.message}`);

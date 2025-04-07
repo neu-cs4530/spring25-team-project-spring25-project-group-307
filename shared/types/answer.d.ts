@@ -34,6 +34,7 @@ export interface DatabaseAnswer extends Omit<Answer, 'comments'> {
  */
 export interface PopulatedDatabaseAnswer extends Omit<DatabaseAnswer, 'comments'> {
   comments: DatabaseComment[];
+  ansByRank?: string;
 }
 
 /**

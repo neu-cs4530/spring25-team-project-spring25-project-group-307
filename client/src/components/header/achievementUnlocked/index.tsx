@@ -4,6 +4,10 @@ import { useAchievement } from '../../../contexts/AchievementContext';
 const AchievementSnackbar = () => {
   const { achievement } = useAchievement();
 
+  if (!achievement) return null;
+
+  const isRankAchievement = achievement.includes('Ascension');
+
   return (
     <Snackbar
       open={!!achievement}
@@ -11,6 +15,12 @@ const AchievementSnackbar = () => {
       anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}>
       <Alert severity='success'>
         🎉 Achievement Unlocked: <strong>{achievement}</strong>
+        {isRankAchievement && (
+          <>
+            <br />
+            🔼 <strong>Rank Increase!</strong>
+          </>
+        )}
       </Alert>
     </Snackbar>
   );

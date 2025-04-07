@@ -73,6 +73,7 @@ const userController = (socket: FakeSOSocket) => {
       nimGameWins: 0,
       upVotesGiven: 0,
       downVotesGiven: 0,
+      commentsMade: 0,
     };
 
     try {

@@ -148,6 +148,7 @@ const commentController = (socket: FakeSOSocket) => {
         const newScore = user.score + 3;
         const newRank = getUpdatedRank(newScore);
         const currentRank = user?.ranking;
+        const newCommentsMade = user.commentsMade + 1;
         if (currentRank !== newRank && newRank === 'Common Contributor') {
           const a = await grantAchievementToUser(user._id.toString(), 'Ascension I');
           if (a) unlocked.push(a);
@@ -168,17 +169,13 @@ const commentController = (socket: FakeSOSocket) => {
           const a = await grantAchievementToUser(user._id.toString(), 'Ascension V');
           if (a) unlocked.push(a);
         }
-        if (user.questionsAsked === 0) {
-          const a = await grantAchievementToUser(user._id.toString(), 'First Step');
-          if (a) unlocked.push(a);
-        }
-        if (user.questionsAsked === 4) {
-          const a = await grantAchievementToUser(user._id.toString(), 'Curious Thinker');
+        if (user.commentsMade === 0) {
+          const a = await grantAchievementToUser(user._id.toString(), 'New Commenter');
           if (a) unlocked.push(a);
         }
         await UserModel.updateOne(
           { username: comment.commentBy },
-          { $set: { score: newScore, ranking: newRank } },
+          { $set: { score: newScore, ranking: newRank, commentsMade: newCommentsMade } },
         );
       }
 
@@ -189,7 +186,7 @@ const commentController = (socket: FakeSOSocket) => {
           | PopulatedDatabaseComment,
         type,
       });
-      res.json({ ...comFromDb, unlockedAchievements: unlocked });
+      res.json({ answer: populatedDoc, unlockedAchievements: unlocked });
     } catch (err: unknown) {
       res.status(500).send(`Error when adding comment: ${(err as Error).message}`);
     }

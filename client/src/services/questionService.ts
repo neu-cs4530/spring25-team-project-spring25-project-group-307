@@ -54,7 +54,7 @@ const getQuestionById = async (
  */
 const addQuestion = async (
   q: Question,
-): Promise<{ answer: PopulatedDatabaseQuestion; unlockedAchievements: string[] }> => {
+): Promise<{ question: PopulatedDatabaseQuestion; unlockedAchievements: string[] }> => {
   const res = await api.post(`${QUESTION_API_URL}/addQuestion`, q);
 
   if (res.status !== 200) {
@@ -62,7 +62,7 @@ const addQuestion = async (
   }
 
   return {
-    answer: res.data,
+    question: res.data.question,
     unlockedAchievements: res.data.unlockedAchievements ?? [],
   };
 };

@@ -50,6 +50,7 @@ const CommentSection = ({
     const newComment: Comment = {
       text,
       commentBy: user.username,
+      commentByRank: user.ranking,
       commentDateTime: new Date(),
       upVotes: [],
       downVotes: [],
@@ -95,9 +96,9 @@ const CommentSection = ({
                 onChange={e => setText(e.target.value)}
                 className='comment-textarea'
               />
-              <button className='add-comment-button' onClick={handleAddCommentClick}>
+              <Button variant='contained' onClick={handleAddCommentClick} sx={{ mb: 1 }}>
                 Add Comment
-              </button>
+              </Button>
             </div>
             {textErr && <small className='error'>{textErr}</small>}
           </div>

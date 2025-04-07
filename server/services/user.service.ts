@@ -56,6 +56,7 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       upVotesGiven: result.upVotesGiven,
       downVotesGiven: result.downVotesGiven,
       nimGameWins: result.nimGameWins,
+      commentsMade: result.commentsMade,
     };
 
     return safeUser;

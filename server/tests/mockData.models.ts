@@ -220,6 +220,7 @@ export const user: User = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -237,6 +238,7 @@ export const safeUser: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser2: SafeDatabaseUser = {
@@ -254,6 +256,7 @@ export const safeUser2: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser3: SafeDatabaseUser = {
@@ -271,6 +274,7 @@ export const safeUser3: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const COMMUNITIES: DatabaseCommunity[] = [

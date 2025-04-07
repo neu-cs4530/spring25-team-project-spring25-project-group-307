@@ -8,12 +8,15 @@ import {
   PopulatedDatabaseAnswer,
   DatabaseCommunity,
   PopulatedDatabaseComment,
+  DatabaseComment,
 } from '../types/types';
 import useUserContext from './useUserContext';
 import { addComment, deleteComment } from '../services/commentService';
 import { getQuestionById, getCommunityQuestion, deleteQuestion } from '../services/questionService';
 import { deleteQuestionFromCommunity } from '../services/communityService';
+import { useAchievement } from '../contexts/AchievementContext';
 import { deleteAnswer } from '../services/answerService';
+import { getUserByUsername } from '../services/userService';
 
 /**
  * Custom hook for managing the answer page's state, navigation, and real-time updates.
@@ -32,6 +35,17 @@ const useAnswerPage = () => {
   const [question, setQuestion] = useState<PopulatedDatabaseQuestion | null>(null);
   const [community, setCommunity] = useState<DatabaseCommunity | null>(null);
   const [currentRole, setCurrentRole] = useState<string>('None');
+  const { triggerAchievement } = useAchievement();
+  const fetchCommentsWithRank = async (comments: DatabaseComment[]) =>
+    Promise.all(
+      comments.map(async comment => {
+        const userInfo = await getUserByUsername(comment.commentBy);
+        return {
+          ...comment,
+          commentByRank: userInfo?.ranking ?? null,
+        };
+      }),
+    );
 
   /**
    * Function to handle navigation to the "New Answer" page.
@@ -66,7 +80,11 @@ const useAnswerPage = () => {
         throw new Error('No target ID provided.');
       }
 
-      await addComment(targetId, targetType, comment);
+      const res = await addComment(targetId, targetType, comment);
+
+      if (res.unlockedAchievements?.length > 0) {
+        res.unlockedAchievements.forEach(triggerAchievement);
+      }
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error adding comment:', error);
@@ -139,7 +157,29 @@ const useAnswerPage = () => {
     const fetchData = async () => {
       try {
         const res = await getQuestionById(questionID, user.username);
-        setQuestion(res || null);
+        if (res) {
+          const questionAuthor = await getUserByUsername(res.askedBy);
+          const askedByRank = questionAuthor?.ranking ?? null;
+
+          // Fetch ranks for all answer authors in parallel
+          const answersWithRank = await Promise.all(
+            res.answers.map(async ans => {
+              const answerAuthor = await getUserByUsername(ans.ansBy);
+              return {
+                ...ans,
+                ansByRank: answerAuthor?.ranking ?? null,
+              };
+            }),
+          );
+          const commentsWithRank = await fetchCommentsWithRank(res.comments);
+
+          setQuestion({
+            ...res,
+            askedByRank,
+            comments: commentsWithRank,
+            answers: answersWithRank,
+          });
+        }
       } catch (error) {
         // eslint-disable-next-line no-console
         console.error('Error fetching question:', error);
@@ -217,7 +257,7 @@ const useAnswerPage = () => {
      * @param result - The updated question or answer object.
      * @param type - The type of the object being updated, either 'question' or 'answer'.
      */
-    const handleCommentUpdate = ({
+    const handleCommentUpdate = async ({
       result,
       type,
     }: {
@@ -228,19 +268,40 @@ const useAnswerPage = () => {
         const questionResult = result as PopulatedDatabaseQuestion;
 
         if (String(questionResult._id) === questionID) {
-          setQuestion(questionResult);
+          const [rankedComments, questionAuthor] = await Promise.all([
+            fetchCommentsWithRank(questionResult.comments),
+            getUserByUsername(questionResult.askedBy),
+          ]);
+          const askedByRank = questionAuthor?.ranking ?? null;
+
+          setQuestion(prev =>
+            prev
+              ? {
+                  ...questionResult,
+                  comments: rankedComments,
+                  askedByRank,
+                }
+              : prev,
+          );
         }
       } else if (type === 'answer') {
-        setQuestion(prevQuestion =>
-          prevQuestion
-            ? // Updates answers with a matching object ID, and creates a new Question object
-              {
-                ...prevQuestion,
-                answers: prevQuestion.answers.map(a =>
-                  a._id === result._id ? (result as PopulatedDatabaseAnswer) : a,
+        const answerResult = result as PopulatedDatabaseAnswer;
+
+        const authorInfo = await getUserByUsername(answerResult.ansBy);
+        const ansByRank = authorInfo?.ranking ?? null;
+        const rankedComments = await fetchCommentsWithRank(answerResult.comments);
+
+        setQuestion(prev =>
+          prev
+            ? {
+                ...prev,
+                answers: prev.answers.map(a =>
+                  a._id === answerResult._id
+                    ? { ...answerResult, ansByRank, comments: rankedComments }
+                    : a,
                 ),
               }
-            : prevQuestion,
+            : prev,
         );
       }
     };
