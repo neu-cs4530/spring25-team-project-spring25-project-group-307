@@ -73,6 +73,7 @@ describe('Preferences Model', () => {
         upVotesGiven: 130,
         downVotesGiven: 12,
         username: 'vidmaster123',
+        commentsMade: 25, // Adding commentsMade field for completeness
       };
 
       mockingoose(PreferencesModel).toReturn(null, 'findOneAndUpdate');
