@@ -1,10 +1,12 @@
 import { ObjectId } from 'mongodb';
 import {
+  Community,
   DatabaseAnswer,
   DatabaseComment,
   DatabaseCommunity,
   DatabaseQuestion,
   DatabaseTag,
+  PopulatedDatabaseCommunity,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
@@ -309,3 +311,28 @@ export const COMMUNITIES: DatabaseCommunity[] = [
     tags: [],
   },
 ];
+
+export const newCommunity1: Community = {
+  title: 'New Community',
+  description: 'This is a new community',
+  isPrivate: false,
+  admins: [],
+  moderators: [],
+  members: [],
+  pinnedQuestions: [],
+  questions: [],
+  tags: [],
+};
+
+export const populatedCommunity1: PopulatedDatabaseCommunity = {
+  _id: new ObjectId('65e9b5a995b6c7045a30d823'),
+  title: 'Community 1',
+  description: 'Description 1',
+  isPrivate: false,
+  admins: [],
+  moderators: [],
+  members: [safeUser, safeUser2],
+  pinnedQuestions: [],
+  questions: [],
+  tags: [tag1, tag2],
+};
