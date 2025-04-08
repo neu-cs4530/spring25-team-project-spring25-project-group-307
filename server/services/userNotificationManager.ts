@@ -35,6 +35,15 @@ class UserNotificationManager {
   }
 
   /**
+   * Resets the UserNotificationManager to its initial state.
+   * Primarily intended for testing purposes.
+   */
+  public reset(): void {
+    this._socketIdToUser.clear();
+    this._socketIdToSocket.clear();
+  }
+
+  /**
    * Returns the singleton instance of UserNotificationManager.
    * @returns {UserNotificationManager} The single instance of the manager.
    */
