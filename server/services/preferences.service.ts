@@ -6,7 +6,6 @@ import {
 import PreferencesModel from '../models/preferences.model';
 import { getUserByUsername } from './user.service';
 
-// TODO : add tests
 /**
  * adds a userPreference to an existing Preferences for a community,
  * otherwise creates a new Preferences and adds the userPreference

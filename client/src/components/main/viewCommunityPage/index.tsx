@@ -10,7 +10,6 @@ const ViewCommunityPage = () => {
   const {
     community,
     currentRole,
-    handleTogglePinQuestion,
     handleRoleChange,
     handleAddUser,
     open,
@@ -18,6 +17,7 @@ const ViewCommunityPage = () => {
     handleClose,
     userToAdd,
     handleSetUsername,
+    handleTogglePinQuestion,
   } = useViewCommunityPage();
   const [value, setValue] = useState('1');
 

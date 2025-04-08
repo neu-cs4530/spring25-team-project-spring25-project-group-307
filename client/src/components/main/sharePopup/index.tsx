@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 import {
   Alert,
@@ -10,11 +10,8 @@ import {
   Snackbar,
 } from '@mui/material';
 
-import { SafeDatabaseUser } from '@fake-stack-overflow/shared';
-
 import UsersListPage from '../usersListPage';
-import { createChat, getChatsByUser, sendMessage } from '../../../services/chatService';
-import useUserContext from '../../../hooks/useUserContext';
+import useSharePopup from '../../../hooks/useSharePopup';
 
 interface SharePopupProps {
   open: boolean;
@@ -23,39 +20,10 @@ interface SharePopupProps {
 }
 
 const SharePopup: React.FC<SharePopupProps> = ({ open, onClose, questionId }) => {
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [sendLoading, setSendLoading] = useState(false);
-  const { user } = useUserContext();
-
-  const handleUserSelect = (selectedUser: SafeDatabaseUser) => {
-    const baseUrl = new URL(window.location.origin);
-
-    const questionURL = `${baseUrl}question/${questionId}`;
-
-    const message = { msg: questionURL, msgFrom: user.username, msgDateTime: new Date() };
-    setSendLoading(true);
-
-    getChatsByUser(user.username)
-      .then(chats => {
-        const chatWithSelectedUser = chats.find(chat =>
-          chat.participants.includes(selectedUser.username),
-        );
-
-        if (!chatWithSelectedUser) {
-          createChat([user.username, selectedUser.username]).then(createdChat =>
-            sendMessage(message, createdChat._id),
-          );
-        } else {
-          sendMessage(message, chatWithSelectedUser._id);
-        }
-      })
-      .finally(() => {
-        setSnackbarOpen(true);
-        setSendLoading(false);
-        onClose();
-      });
-  };
-
+  const { snackbarOpen, sendLoading, handleUserSelect, setSnackbarOpen } = useSharePopup(
+    onClose,
+    questionId,
+  );
   return (
     <div>
       <Dialog open={open} onClose={onClose} fullWidth maxWidth='sm'>

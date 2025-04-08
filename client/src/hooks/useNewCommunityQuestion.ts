@@ -109,9 +109,9 @@ const useNewCommunityQuestion = () => {
 
     const res = await addQuestion(question);
     if (cid) {
-      await addQuestionToCommunity(cid, res._id.toString());
+      await addQuestionToCommunity(cid, res.question._id.toString());
       navigate(`/community/${cid}`);
-    } else if (res && res._id) {
+    } else if (res && res.question._id) {
       navigate('/home');
     }
   };

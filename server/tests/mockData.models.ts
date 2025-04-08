@@ -1,5 +1,6 @@
 import { ObjectId } from 'mongodb';
 import {
+  Community,
   DatabaseAnswer,
   DatabaseComment,
   DatabaseCommunity,
@@ -8,6 +9,7 @@ import {
   DatabaseQuestion,
   DatabaseTag,
   Interest,
+  PopulatedDatabaseCommunity,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
@@ -221,6 +223,7 @@ export const user: User = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser: SafeDatabaseUser = {
@@ -238,6 +241,7 @@ export const safeUser: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser2: SafeDatabaseUser = {
@@ -255,6 +259,7 @@ export const safeUser2: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const safeUser3: SafeDatabaseUser = {
@@ -272,6 +277,7 @@ export const safeUser3: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 export const COMMUNITIES: DatabaseCommunity[] = [
@@ -450,3 +456,28 @@ export const FEED_ITEMS: DatabaseFeedItem[] = [
     viewedRanking: 3,
   },
 ];
+
+export const newCommunity1: Community = {
+  title: 'New Community',
+  description: 'This is a new community',
+  isPrivate: false,
+  admins: [],
+  moderators: [],
+  members: [],
+  pinnedQuestions: [],
+  questions: [],
+  tags: [],
+};
+
+export const populatedCommunity1: PopulatedDatabaseCommunity = {
+  _id: new ObjectId('65e9b5a995b6c7045a30d823'),
+  title: 'Community 1',
+  description: 'Description 1',
+  isPrivate: false,
+  admins: [],
+  moderators: [],
+  members: [safeUser, safeUser2],
+  pinnedQuestions: [],
+  questions: [],
+  tags: [tag1, tag2],
+};

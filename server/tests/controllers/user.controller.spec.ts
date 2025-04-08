@@ -19,6 +19,7 @@ const mockUser: User = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 const mockSafeUser: SafeDatabaseUser = {
@@ -36,6 +37,7 @@ const mockSafeUser: SafeDatabaseUser = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 const mockUserJSONResponse = {
@@ -53,6 +55,7 @@ const mockUserJSONResponse = {
   nimGameWins: 0,
   upVotesGiven: 0,
   downVotesGiven: 0,
+  commentsMade: 0,
 };
 
 const saveUserSpy = jest.spyOn(util, 'saveUser');
@@ -92,6 +95,7 @@ describe('Test userController', () => {
         nimGameWins: 0,
         upVotesGiven: 0,
         downVotesGiven: 0,
+        commentsMade: 0,
       });
       expect(saveUserSpy).toHaveBeenCalledWith({
         ...mockReqBody,
@@ -107,6 +111,7 @@ describe('Test userController', () => {
         nimGameWins: 0,
         upVotesGiven: 0,
         downVotesGiven: 0,
+        commentsMade: 0,
       });
     });
 

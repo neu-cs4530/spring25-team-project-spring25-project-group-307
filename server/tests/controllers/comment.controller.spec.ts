@@ -101,14 +101,18 @@ describe('POST /addComment', () => {
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      _id: validCid.toString(),
-      text: 'This is a test comment',
-      commentBy: 'dummyUserId',
-      commentDateTime: mockComment.commentDateTime.toISOString(),
-      upVotes: [],
-      downVotes: [],
-    });
+    expect(response.body.answer.comments).toEqual([
+      expect.objectContaining({
+        _id: validCid.toString(),
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: mockComment.commentDateTime.toISOString(),
+        upVotes: [],
+        downVotes: [],
+      }),
+    ]);
+
+    expect(response.body.unlockedAchievements).toEqual([]);
   });
 
   it('should add a new comment to the answer', async () => {
@@ -160,14 +164,18 @@ describe('POST /addComment', () => {
     const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      _id: validCid.toString(),
-      text: 'This is a test comment',
-      commentBy: 'dummyUserId',
-      commentDateTime: mockComment.commentDateTime.toISOString(),
-      upVotes: [],
-      downVotes: [],
-    });
+    expect(response.body.answer.comments).toEqual([
+      expect.objectContaining({
+        _id: validCid.toString(),
+        text: 'This is a test comment',
+        commentBy: 'dummyUserId',
+        commentDateTime: mockComment.commentDateTime.toISOString(),
+        upVotes: [],
+        downVotes: [],
+      }),
+    ]);
+
+    expect(response.body.unlockedAchievements).toEqual([]);
   });
 
   it('should return bad request error if id property missing', async () => {

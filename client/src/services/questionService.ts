@@ -52,14 +52,19 @@ const getQuestionById = async (
  * @param q - The question object to add.
  * @throws Error if there is an issue creating the new question.
  */
-const addQuestion = async (q: Question): Promise<PopulatedDatabaseQuestion> => {
+const addQuestion = async (
+  q: Question,
+): Promise<{ question: PopulatedDatabaseQuestion; unlockedAchievements: string[] }> => {
   const res = await api.post(`${QUESTION_API_URL}/addQuestion`, q);
 
   if (res.status !== 200) {
     throw new Error('Error while creating a new question');
   }
 
-  return res.data;
+  return {
+    question: res.data.question,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 /**
@@ -82,13 +87,19 @@ const deleteQuestion = async (qid: ObjectId): Promise<QuestionResponse> => {
  * @param username - The username of the person upvoting the question.
  * @throws Error if there is an issue upvoting the question.
  */
-const upvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteInterface> => {
+const upvoteQuestion = async (
+  qid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
   const data = { qid, username };
   const res = await api.post(`${QUESTION_API_URL}/upvoteQuestion`, data);
   if (res.status !== 200) {
     throw new Error('Error while upvoting the question');
   }
-  return res.data;
+  return {
+    answer: res.data.answer,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 /**
@@ -98,13 +109,19 @@ const upvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteInte
  * @param username - The username of the person downvoting the question.
  * @throws Error if there is an issue downvoting the question.
  */
-const downvoteQuestion = async (qid: ObjectId, username: string): Promise<VoteInterface> => {
+const downvoteQuestion = async (
+  qid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
   const data = { qid, username };
   const res = await api.post(`${QUESTION_API_URL}/downvoteQuestion`, data);
   if (res.status !== 200) {
     throw new Error('Error while downvoting the question');
   }
-  return res.data;
+  return {
+    answer: res.data.answer,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
 };
 
 /**

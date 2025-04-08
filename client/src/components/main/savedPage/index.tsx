@@ -1,36 +1,18 @@
-import { useEffect, useState } from 'react';
 import { Box, Stack, Typography, Button } from '@mui/material';
-import { PopulatedDatabaseQuestion } from '@fake-stack-overflow/shared';
-import { ObjectId } from 'mongodb';
 
-import useUserContext from '../../../hooks/useUserContext';
-import { getUserWithSavedQuestions, removeSavedQuestion } from '../../../services/userService';
 import QuestionView from '../questionPage/question';
 import SharePopup from '../sharePopup';
+import useSavedPage from '../../../hooks/useSavedPage';
 
 const SavedPage = () => {
-  const { user } = useUserContext();
-  const [savedQuestions, setSavedQuestions] = useState<PopulatedDatabaseQuestion[]>([]);
-  const [sharePopupOpen, setSharePopupOpen] = useState(false);
-  const [sharePopupId, setSharePopupId] = useState('');
-
-  useEffect(() => {
-    if (user?.username) {
-      getUserWithSavedQuestions(user.username).then(userResponse =>
-        setSavedQuestions(userResponse.savedQuestions),
-      );
-    }
-  }, [user?.username]);
-
-  const handleUnsave = async (questionId: ObjectId) => {
-    setSavedQuestions(prev => prev.filter(q => String(q._id) !== String(questionId)));
-    removeSavedQuestion(user.username, questionId);
-  };
-
-  const handleShare = (questionId: ObjectId) => {
-    setSharePopupId(String(questionId));
-    setSharePopupOpen(true);
-  };
+  const {
+    savedQuestions,
+    handleUnsave,
+    handleShare,
+    sharePopupOpen,
+    setSharePopupOpen,
+    sharePopupId,
+  } = useSavedPage();
 
   return (
     <>

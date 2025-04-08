@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { GameErrorPayload, GameInstance, GameState, GameUpdatePayload } from '../types/types';
 import { joinGame, leaveGame } from '../services/gamesService';
+import { useAchievement } from '../contexts/AchievementContext';
 
 /**
  * Custom hook to manage the state and logic for the game page, including joining, leaving the game, and handling game updates.
@@ -15,7 +16,7 @@ const useGamePage = () => {
   const { user, socket } = useUserContext();
   const { gameID } = useParams();
   const navigate = useNavigate();
-
+  const { triggerAchievement } = useAchievement();
   const [gameInstance, setGameInstance] = useState<GameInstance<GameState> | null>(null);
   const [joinedGameID, setJoinedGameID] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
@@ -33,10 +34,21 @@ const useGamePage = () => {
 
   useEffect(() => {
     const handleJoinGame = async (id: string) => {
-      const joinedGame = await joinGame(id, user.username);
-      setGameInstance(joinedGame);
-      setJoinedGameID(joinedGame.gameID);
-      socket.emit('joinGame', joinedGame.gameID);
+      try {
+        const joinedGame = await joinGame(id, user.username);
+
+        if (!joinedGame || joinedGame.state.status === 'OVER') {
+          setError('This game has already ended.');
+          navigate('/games');
+          return;
+        }
+
+        setGameInstance(joinedGame);
+        setJoinedGameID(joinedGame.gameID);
+        socket.emit('joinGame', joinedGame.gameID);
+      } catch (err) {
+        // catch error
+      }
     };
 
     if (gameID) {
@@ -56,6 +68,12 @@ const useGamePage = () => {
       }
     };
 
+    const handleGameAchievement = (payload: { unlockedAchievements: string[] }) => {
+      payload.unlockedAchievements.forEach(triggerAchievement);
+    };
+
+    socket.on('gameAchievement', handleGameAchievement);
+
     socket.on('gameUpdate', handleGameUpdate);
     socket.on('gameError', handleGameError);
 
@@ -63,8 +81,7 @@ const useGamePage = () => {
       socket.off('gameUpdate', handleGameUpdate);
       socket.off('gameError', handleGameError);
     };
-  }, [gameID, socket, user.username]);
-
+  }, [gameID, navigate, socket, triggerAchievement, user.username]);
   return {
     gameInstance,
     error,

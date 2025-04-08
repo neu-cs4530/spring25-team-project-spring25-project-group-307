@@ -1,4 +1,3 @@
-import React from 'react';
 import { ObjectId } from 'mongodb';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import { Box, Card, CardActions, CardContent, Chip, IconButton, Typography } from '@mui/material';
@@ -115,9 +114,26 @@ const QuestionView = ({
             flexDirection: 'column',
             justifyContent: 'flex-end',
           }}>
-          <Typography component='span' variant='body2' color='primary.main'>
-            {question.askedBy}{' '}
-          </Typography>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <Typography variant='body2' color='primary.main' sx={{ fontWeight: 600 }}>
+              {question.askedBy}
+            </Typography>
+            {question.askedByRank && (
+              <Chip
+                label={question.askedByRank}
+                size='small'
+                variant='outlined'
+                sx={{
+                  mt: 0.5,
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  borderColor: 'primary.light',
+                  color: 'primary.dark',
+                  backgroundColor: '#e3f2fd',
+                }}
+              />
+            )}
+          </Box>
           <Typography component='span' variant='body2' color='text.secondary'>
             asked {getMetaData(new Date(question.askDateTime))}
           </Typography>

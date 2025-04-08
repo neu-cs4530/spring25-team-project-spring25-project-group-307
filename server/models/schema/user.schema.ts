@@ -81,6 +81,10 @@ const userSchema: Schema = new Schema(
       type: Number,
       default: 0,
     },
+    commentsMade: {
+      type: Number,
+      default: 0,
+    },
   },
   { collection: 'User' },
 );

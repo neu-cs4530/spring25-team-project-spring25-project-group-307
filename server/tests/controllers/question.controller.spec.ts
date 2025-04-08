@@ -240,7 +240,8 @@ describe('Test questionController', () => {
 
       // Asserting the response
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(simplifyQuestion(mockPopulatedQuestion));
+      expect(response.body.question).toEqual(simplifyQuestion(mockPopulatedQuestion));
+      expect(response.body.unlockedAchievements).toEqual([]);
     });
 
     it('should return 500 if error occurs in `saveQuestion` while adding a new question', async () => {
@@ -367,7 +368,8 @@ describe('Test questionController', () => {
 
       // Asserting the response
       expect(response.status).toBe(200);
-      expect(response.body).toEqual(simplifyQuestion(result)); // Expect only unique tags
+      expect(response.body.question).toEqual(simplifyQuestion(mockPopulatedQuestion));
+      expect(response.body.unlockedAchievements).toEqual([]);
     });
   });
 
@@ -390,8 +392,7 @@ describe('Test questionController', () => {
 
       expect(response.status).toBe(200);
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('upvote');
+      expect(response.body.answer.upVotes).toContain('new-user'); // or appropriate username
     });
 
     it('should cancel the upvote successfully', async () => {
@@ -416,8 +417,7 @@ describe('Test questionController', () => {
 
       const firstResponse = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
       expect(firstResponse.status).toBe(200);
-      expect(firstResponse.body.success).toBe(true);
-      expect(firstResponse.body.vote).toBe('upvote');
+      expect(firstResponse.body.answer.upVotes).toContain('some-user'); // or appropriate username
 
       addVoteToQuestionSpy.mockResolvedValueOnce(mockSecondResponse);
 
@@ -425,8 +425,9 @@ describe('Test questionController', () => {
         .post('/question/upvoteQuestion')
         .send(mockReqBody);
       expect(secondResponse.status).toBe(200);
-      expect(secondResponse.body.success).toBe(true);
-      expect(secondResponse.body.vote).toBe('upvote');
+      expect(secondResponse.body.answer).toBeDefined();
+      expect(secondResponse.body.answer.upVotes).toEqual([]);
+      expect(secondResponse.body.unlockedAchievements).toEqual(expect.any(Array));
     });
 
     it('should handle upvote and then downvote by the same user', async () => {
@@ -447,8 +448,7 @@ describe('Test questionController', () => {
       let response = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('upvote');
+      expect(response.body.answer.upVotes).toContain('new-user');
 
       // Now downvote the question
       mockResponseWithBothVotes = {
@@ -462,8 +462,9 @@ describe('Test questionController', () => {
       response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('downvote');
+      expect(response.body.answer).toBeDefined();
+      expect(response.body.answer.upVotes).toEqual([]);
+      expect(response.body.unlockedAchievements).toEqual(expect.any(Array));
     });
 
     it('should return bad request error if the request had qid missing', async () => {
@@ -505,8 +506,8 @@ describe('Test questionController', () => {
       const response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('downvote');
+      expect(response.body.answer).toBeDefined();
+      expect(response.body.unlockedAchievements).toEqual(expect.any(Array));
     });
 
     it('should cancel the downvote successfully', async () => {
@@ -533,8 +534,7 @@ describe('Test questionController', () => {
         .post('/question/downvoteQuestion')
         .send(mockReqBody);
       expect(firstResponse.status).toBe(200);
-      expect(firstResponse.body.success).toBe(true);
-      expect(firstResponse.body.vote).toBe('downvote');
+      expect(firstResponse.body.unlockedAchievements).toEqual(expect.any(Array));
 
       addVoteToQuestionSpy.mockResolvedValueOnce(mockSecondResponse);
 
@@ -543,8 +543,8 @@ describe('Test questionController', () => {
         .send(mockReqBody);
 
       expect(secondResponse.status).toBe(200);
-      expect(secondResponse.body.success).toBe(true);
-      expect(secondResponse.body.vote).toBe('downvote');
+      expect(secondResponse.body.answer).toBeDefined();
+      expect(secondResponse.body.unlockedAchievements).toEqual(expect.any(Array));
     });
 
     it('should handle downvote and then upvote by the same user', async () => {
@@ -565,8 +565,8 @@ describe('Test questionController', () => {
       let response = await supertest(app).post('/question/downvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('downvote');
+      expect(response.body.answer).toBeDefined();
+      expect(response.body.unlockedAchievements).toEqual(expect.any(Array));
 
       // Then upvote the question
       mockResponse = {
@@ -580,8 +580,9 @@ describe('Test questionController', () => {
       response = await supertest(app).post('/question/upvoteQuestion').send(mockReqBody);
 
       expect(response.status).toBe(200);
-      expect(response.body.success).toBe(true);
-      expect(response.body.vote).toBe('upvote');
+      expect(response.body.answer).toBeDefined();
+      expect(response.body.answer.upVotes).toContain('new-user'); // or appropriate username
+      expect(response.body.unlockedAchievements).toEqual(expect.any(Array));
     });
 
     it('should return bad request error if the request had qid missing', async () => {

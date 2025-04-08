@@ -41,6 +41,7 @@ export interface User extends UserCredentials {
   nimGameWins: number;
   upVotesGiven: number;
   downVotesGiven: number;
+  commentsMade: number;
 }
 
 /**

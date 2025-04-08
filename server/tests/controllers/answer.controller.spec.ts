@@ -128,6 +128,7 @@ describe('POST /addAnswer', () => {
       comments: [],
       upVotes: [],
       downVotes: [],
+      unlockedAchievements: [],
     });
   });
 
