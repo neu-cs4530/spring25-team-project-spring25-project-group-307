@@ -1,4 +1,3 @@
-import React from 'react';
 import { ObjectId } from 'mongodb';
 import PushPinIcon from '@mui/icons-material/PushPin';
 import { Box, Card, CardActions, CardContent, Chip, IconButton, Typography } from '@mui/material';

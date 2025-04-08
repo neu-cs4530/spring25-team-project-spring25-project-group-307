@@ -25,9 +25,10 @@ const useViewCommunityPage = () => {
   const { user } = useUserContext();
   const navigate = useNavigate();
 
+  const [pinnedStates, setPinnedStates] = useState<Record<string, boolean>>({});
+  const [pinToggled, setPinToggled] = useState<boolean>(false);
   const [community, setCommunity] = useState<PopulatedDatabaseCommunity | null>(null);
   const [currentRole, setCurrentRole] = useState<string>('None');
-  const [pinned, setPinned] = useState<boolean>(false);
   const [users, setUsers] = useState<ObjectId[]>([]);
   const [open, setOpen] = useState(false);
   const [userToAdd, setUserToAdd] = useState('');
@@ -70,17 +71,29 @@ const useViewCommunityPage = () => {
    * Function to pin the question to the community.
    */
   const handleTogglePinQuestion = async (question: PopulatedDatabaseQuestion) => {
-    if (community && !pinned) {
-      // pin question
-      const res = await pinQuestion(community._id, question._id);
-      if (res) {
-        setPinned(true);
-      }
-    } else if (community && pinned) {
-      // unpin question
-      const res = await unpinQuestion(community._id, question._id);
-      if (res) {
-        setPinned(false);
+    if (community) {
+      const isPinned = pinnedStates[question._id.toString()] || false;
+
+      if (!isPinned) {
+        // Pin the question
+        const res = await pinQuestion(community._id, question._id);
+        if (res) {
+          setPinnedStates(prev => ({
+            ...prev,
+            [question._id.toString()]: true,
+          }));
+          setPinToggled(!pinToggled);
+        }
+      } else {
+        // Unpin the question
+        const res = await unpinQuestion(community._id, question._id);
+        if (res) {
+          setPinnedStates(prev => ({
+            ...prev,
+            [question._id.toString()]: false,
+          }));
+          setPinToggled(!pinToggled);
+        }
       }
     }
   };
@@ -123,6 +136,20 @@ const useViewCommunityPage = () => {
           pinnedQuestions: rankedPinnedQuestions,
           questions: rankedUnpinnedQuestions,
         });
+
+        // Initialize pinnedStates
+        const initialPinnedStates: Record<string, boolean> = {};
+        rankedPinnedQuestions.forEach(question => {
+          initialPinnedStates[question._id.toString()] = true;
+        });
+
+        rankedUnpinnedQuestions.forEach(question => {
+          if (!(question._id.toString() in initialPinnedStates)) {
+            initialPinnedStates[question._id.toString()] = false;
+          }
+        });
+
+        setPinnedStates(initialPinnedStates);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(err);
@@ -130,7 +157,7 @@ const useViewCommunityPage = () => {
     };
 
     fetchCommunity();
-  }, [cid, navigate, pinned, users]);
+  }, [cid, navigate, pinToggled, users]);
 
   useEffect(() => {
     const setCurrentUserRole = () => {
