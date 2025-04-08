@@ -1,4 +1,5 @@
-import mongoose from 'mongoose';
+import mongoose, { Query } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import QuestionModel from '../../models/questions.model';
 import {
   filterQuestionsBySearch,
@@ -9,8 +10,14 @@ import {
   addVoteToQuestion,
   addReportToQuestion,
   removeReportFromQuestion,
+  getPopulatedQuestionById,
+  getQuestionById,
+  deleteQuestionById,
 } from '../../services/question.service';
-import { DatabaseQuestion, PopulatedDatabaseQuestion } from '../../types/types';
+import * as commentUtil from '../../services/comment.service';
+import * as answerUtil from '../../services/answer.service';
+import * as tagUtil from '../../services/tag.service';
+import { DatabaseComment, DatabaseQuestion, PopulatedDatabaseQuestion } from '../../types/types';
 import {
   QUESTIONS,
   tag1,
@@ -19,9 +26,13 @@ import {
   ans2,
   ans3,
   ans4,
+  com1,
   POPULATED_QUESTIONS,
+  COMMUNITIES,
   safeUser,
 } from '../mockData.models';
+import UserModel from '../../models/users.model';
+import CommunityModel from '../../models/communities.model';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -316,6 +327,25 @@ describe('Question model', () => {
       expect(result.askDateTime).toEqual(mockQn.askDateTime);
       expect(result.views).toEqual([]);
       expect(result.answers.length).toEqual(0);
+    });
+
+    test('saveQuestion should return an error if the question is not saved', async () => {
+      jest.spyOn(QuestionModel, 'create').mockRejectedValueOnce(new Error('error'));
+      const mockQn = {
+        title: 'New Question Title',
+        text: 'New Question Text',
+        tags: [tag1, tag2],
+        askedBy: 'question3_user',
+        askDateTime: new Date('2024-06-06'),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        reportedBy: [],
+      };
+      const result = await saveQuestion(mockQn);
+      expect(result).toEqual({ error: 'Error when saving a question' });
     });
   });
 
@@ -638,6 +668,279 @@ describe('Question model', () => {
       const result = await removeReportFromQuestion('someQuestionId', 'testUser');
 
       expect(result).toEqual({ error: 'Error when removing report from question' });
+    });
+  });
+
+  describe('deleteQuestionById', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.resetAllMocks();
+    });
+
+    const mockQuestion: PopulatedDatabaseQuestion = {
+      _id: new mongoose.Types.ObjectId(),
+      title: 'Question Title',
+      text: 'Question Text',
+      tags: [],
+      askedBy: safeUser.username,
+      askDateTime: new Date(),
+      answers: [],
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      comments: [],
+      reportedBy: [],
+    };
+
+    const mockComment: DatabaseComment = {
+      _id: new mongoose.Types.ObjectId(),
+      text: 'Comment Text',
+      commentBy: safeUser.username,
+      commentDateTime: new Date(),
+      upVotes: [],
+      downVotes: [],
+    };
+
+    const mockAnswer = {
+      _id: new mongoose.Types.ObjectId(),
+      text: 'Answer Text',
+      ansBy: safeUser.username,
+      ansDateTime: new Date(),
+      comments: [],
+      upVotes: [],
+      downVotes: [],
+    };
+
+    const mockPopulatedDatabaseQuestion: PopulatedDatabaseQuestion = {
+      _id: new ObjectId('65e9b716ff0e892116b2de09'),
+      title: 'new question',
+      text: 'Does something like that exist?',
+      tags: [tag1],
+      answers: [{ ...ans1, comments: [] }],
+      askedBy: 'q_by4',
+      askDateTime: new Date('2023-11-20T09:24:00'),
+      views: [],
+      upVotes: [],
+      downVotes: [],
+      comments: [com1],
+      reportedBy: [],
+    };
+
+    test('deleteQuestionById should delete the question', async () => {
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(mockQuestion),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+      jest.spyOn(QuestionModel, 'findByIdAndDelete').mockResolvedValue(mockQuestion);
+      jest.spyOn(commentUtil, 'deleteCommentById').mockResolvedValue(mockComment);
+      jest.spyOn(answerUtil, 'deleteAnswerById').mockResolvedValue(mockAnswer);
+      jest.spyOn(tagUtil, 'deleteTagsByIds').mockResolvedValue(1);
+      jest.spyOn(UserModel, 'updateMany').mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null,
+      });
+      jest.spyOn(CommunityModel, 'find').mockResolvedValue([]);
+      jest.spyOn(CommunityModel, 'findByIdAndUpdate').mockResolvedValue(null);
+
+      const result = await deleteQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual(mockQuestion);
+    });
+
+    test('deleteQuestionById should return an error if the question is not found', async () => {
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(null),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+      jest.spyOn(QuestionModel, 'findByIdAndDelete').mockResolvedValue(mockQuestion);
+      jest.spyOn(commentUtil, 'deleteCommentById').mockResolvedValue(mockComment);
+      jest.spyOn(answerUtil, 'deleteAnswerById').mockResolvedValue(mockAnswer);
+      jest.spyOn(tagUtil, 'deleteTagsByIds').mockResolvedValue(1);
+      jest.spyOn(UserModel, 'updateMany').mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null,
+      });
+      jest.spyOn(CommunityModel, 'find').mockResolvedValue([]);
+      jest.spyOn(CommunityModel, 'findByIdAndUpdate').mockResolvedValue(null);
+
+      const result = await deleteQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual({ error: 'Question not found' });
+    });
+
+    test('deleteQuestionById should return an error if findByIdAndDelete fails', async () => {
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(mockQuestion),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+      jest.spyOn(QuestionModel, 'findByIdAndDelete').mockResolvedValue(null);
+
+      const result = await deleteQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual({ error: 'Question not found' });
+    });
+
+    test('deleteQuestionById should delete question from all areas', async () => {
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(mockPopulatedDatabaseQuestion),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+      jest
+        .spyOn(QuestionModel, 'findByIdAndDelete')
+        .mockResolvedValue(mockPopulatedDatabaseQuestion);
+      jest.spyOn(QuestionModel, 'exists').mockResolvedValue(null);
+      jest.spyOn(commentUtil, 'deleteCommentById').mockResolvedValue(com1);
+      jest.spyOn(answerUtil, 'deleteAnswerById').mockResolvedValue(ans1);
+      jest.spyOn(tagUtil, 'deleteTagsByIds').mockResolvedValue(1);
+      jest.spyOn(UserModel, 'updateMany').mockResolvedValue({
+        acknowledged: true,
+        modifiedCount: 1,
+        matchedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null,
+      });
+      jest.spyOn(CommunityModel, 'find').mockResolvedValue([COMMUNITIES[0]]);
+      jest.spyOn(CommunityModel, 'findByIdAndUpdate').mockResolvedValue(COMMUNITIES[0]);
+
+      const result = await deleteQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual(mockPopulatedDatabaseQuestion);
+    });
+
+    test('deleteQuestionById should return an error if there is a database error', async () => {
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(mockQuestion),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+      jest.spyOn(QuestionModel, 'findByIdAndDelete').mockRejectedValue(new Error('Database error'));
+
+      const result = await deleteQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual({ error: 'Error when deleting a question' });
+    });
+  });
+
+  describe('getQuestionById', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.resetAllMocks();
+    });
+
+    test('getQuestionById should return the question', async () => {
+      const mockQuestion: DatabaseQuestion = {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Question Title',
+        text: 'Question Text',
+        tags: [],
+        askedBy: safeUser.username,
+        askDateTime: new Date(),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        reportedBy: [],
+      };
+
+      jest.spyOn(QuestionModel, 'findById').mockResolvedValue(mockQuestion);
+      const result = await getQuestionById(mockQuestion._id.toString());
+      expect(result).toEqual(mockQuestion);
+    });
+
+    test('getQuestionById should return an error if the question is not found', async () => {
+      jest.spyOn(QuestionModel, 'findById').mockResolvedValue(null);
+
+      const result = await getQuestionById('nonExistentId');
+
+      expect(result).toEqual({ error: 'Question not found' });
+    });
+
+    test('getQuestionById should return an error if there is a database error', async () => {
+      jest.spyOn(QuestionModel, 'findById').mockRejectedValue(new Error('Database error'));
+
+      const result = await getQuestionById('someQuestionId');
+
+      expect(result).toEqual({ error: 'Error when retrieving the question' });
+    });
+  });
+
+  describe('getPopulatedQuestionById', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.resetAllMocks();
+    });
+
+    test('getPopulatedQuestionById should return the populated question', async () => {
+      const mockQuestion: PopulatedDatabaseQuestion = {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Question Title',
+        text: 'Question Text',
+        tags: [],
+        askedBy: safeUser.username,
+        askDateTime: new Date(),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        reportedBy: [],
+      };
+
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(mockQuestion),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+
+      const result = await getPopulatedQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual(mockQuestion);
+    });
+
+    test('getPopulatedQuestionById should return an error if the question is not found', async () => {
+      jest.spyOn(QuestionModel, 'findById').mockResolvedValue(null);
+
+      const result = await getPopulatedQuestionById('nonExistentId');
+
+      expect(result).toEqual({ error: 'Error when retrieving the question' });
+    });
+
+    test('getPopulatedQuestionById should return an error if the database query returns null', async () => {
+      const mockQuestion: PopulatedDatabaseQuestion = {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Question Title',
+        text: 'Question Text',
+        tags: [],
+        askedBy: safeUser.username,
+        askDateTime: new Date(),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        reportedBy: [],
+      };
+
+      const mockQuestionWithPopulate = {
+        populate: jest.fn().mockResolvedValue(null),
+      } as unknown as Query<PopulatedDatabaseQuestion | null, PopulatedDatabaseQuestion>;
+
+      jest.spyOn(QuestionModel, 'findById').mockReturnValue(mockQuestionWithPopulate);
+
+      const result = await getPopulatedQuestionById(mockQuestion._id.toString());
+
+      expect(result).toEqual({ error: 'Error when retrieving the question' });
     });
   });
 });
