@@ -3,8 +3,11 @@ import {
   DatabaseAnswer,
   DatabaseComment,
   DatabaseCommunity,
+  DatabaseFeed,
+  DatabaseFeedItem,
   DatabaseQuestion,
   DatabaseTag,
+  Interest,
   PopulatedDatabaseQuestion,
   SafeDatabaseUser,
   User,
@@ -307,5 +310,143 @@ export const COMMUNITIES: DatabaseCommunity[] = [
     pinnedQuestions: [],
     questions: [],
     tags: [],
+  },
+  {
+    _id: new ObjectId('65e9b58910afe6e94fc6e6de'),
+    title: 'Community 4',
+    description: 'Description 4',
+    isPrivate: false,
+    admins: [],
+    moderators: [],
+    members: [],
+    pinnedQuestions: [QUESTIONS[1]._id],
+    questions: [QUESTIONS[0]._id],
+    tags: [tag1._id, tag2._id, tag3._id],
+  },
+];
+
+export const INTERESTS: Interest[] = [
+  {
+    userId: safeUser2._id,
+    tagId: tag1._id,
+    weight: 1,
+    priority: 'moderate',
+  },
+  {
+    userId: safeUser3._id,
+    tagId: tag1._id,
+    weight: 2,
+    priority: 'high',
+  },
+  {
+    userId: safeUser3._id,
+    tagId: tag2._id,
+    weight: 0.5,
+    priority: 'moderate',
+  },
+  {
+    userId: safeUser3._id,
+    tagId: tag3._id,
+    weight: 3,
+    priority: 'high',
+  },
+];
+
+export const FEEDS: DatabaseFeed[] = [
+  {
+    _id: new ObjectId(),
+    userId: safeUser._id,
+    lastViewedRanking: 0,
+  },
+  {
+    _id: new ObjectId(),
+    userId: safeUser2._id,
+    lastViewedRanking: 0,
+  },
+  {
+    _id: new ObjectId(),
+    userId: safeUser3._id,
+    lastViewedRanking: 0,
+  },
+];
+
+export const FEED_ITEMS: DatabaseFeedItem[] = [
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[0]._id,
+    question: QUESTIONS[0]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 0,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[0]._id,
+    question: QUESTIONS[1]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 1,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[0]._id,
+    question: QUESTIONS[2]._id,
+    viewedRanking: 2,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[0]._id,
+    question: QUESTIONS[3]._id,
+    viewedRanking: 3,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[1]._id,
+    question: QUESTIONS[1]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 0,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[1]._id,
+    question: QUESTIONS[0]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 1,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[1]._id,
+    question: QUESTIONS[2]._id,
+    viewedRanking: 2,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[1]._id,
+    question: QUESTIONS[3]._id,
+    viewedRanking: 3,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[2]._id,
+    question: QUESTIONS[0]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 0,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[2]._id,
+    question: QUESTIONS[1]._id,
+    community: COMMUNITIES[3]._id,
+    viewedRanking: 1,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[2]._id,
+    question: QUESTIONS[2]._id,
+    viewedRanking: 2,
+  },
+  {
+    _id: new ObjectId(),
+    feed: FEEDS[2]._id,
+    question: QUESTIONS[3]._id,
+    viewedRanking: 3,
   },
 ];

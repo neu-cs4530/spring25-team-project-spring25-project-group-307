@@ -22,7 +22,7 @@ export interface FeedItem {
  * - `community`: The community object to which the question belongs.
  * - `viewedRanking`: The ranking of the item that the user has viewed.
  */
-export interface DatabaseFeedItem extends Omit<FeedItem, 'question' | 'feed'> {
+export interface DatabaseFeedItem extends Omit<FeedItem, 'question' | 'feed' | 'community'> {
   _id: ObjectId;
   feed: ObjectId;
   question: ObjectId;

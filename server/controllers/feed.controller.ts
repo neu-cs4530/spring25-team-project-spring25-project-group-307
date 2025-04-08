@@ -18,11 +18,6 @@ const feedController = (socket: FakeSOSocket) => {
    * @returns A promise resolving to void.
    */
   const refreshFeed = async (req: Request, res: Response): Promise<void> => {
-    if (req.body === undefined) {
-      res.status(400).send('Invalid refreshFeed body');
-      return;
-    }
-
     const { userId } = req.body;
 
     if (userId === undefined) {
@@ -48,11 +43,6 @@ const feedController = (socket: FakeSOSocket) => {
    * @returns A promise resolving to void.
    */
   const getNextFeedItems = async (req: Request, res: Response): Promise<void> => {
-    if (req.body === undefined) {
-      res.status(400).send('Invalid getNextFeedItems body');
-      return;
-    }
-
     const { userId, limit } = req.body;
 
     if (userId === undefined || limit === undefined) {
@@ -71,11 +61,6 @@ const feedController = (socket: FakeSOSocket) => {
   };
 
   const getFeedHistory = async (req: Request, res: Response): Promise<void> => {
-    if (req.body === undefined) {
-      res.status(400).send('Invalid getFeedHistory body');
-      return;
-    }
-
     const { userId, numFeedQuestionsBeforeNav } = req.body;
 
     if (userId === undefined) {
