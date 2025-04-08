@@ -337,7 +337,7 @@ const ProfileSettings: React.FC = () => {
                         onChange={e => setConfirmNewPassword(e.target.value)}
                       />
                       <Button variant='outlined' sx={{ mr: 1 }} onClick={togglePasswordVisibility}>
-                        {showPassword ? 'Hide Passwords' : 'Show Passwords'}
+                        {showPassword ? 'Hide Password' : 'Show Password'}
                       </Button>
                       <Button variant='contained' color='primary' onClick={handleResetPassword}>
                         Reset

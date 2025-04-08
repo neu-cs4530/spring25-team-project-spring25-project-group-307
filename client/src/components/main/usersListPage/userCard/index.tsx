@@ -1,6 +1,6 @@
 import React from 'react';
 import './index.css';
-import { Card, CardContent, Typography } from '@mui/material';
+import { Card, CardContent, Typography, Box } from '@mui/material';
 import { SafeDatabaseUser } from '../../../../types/types';
 
 /**
@@ -32,10 +32,13 @@ const UserCardView = (props: UserProps) => {
         'flexDirection': 'column',
         'justifyContent': 'space-between',
         'px': 2,
-        'marginBottom': 1,
+        'mb': 1.5,
         'cursor': 'pointer',
-        'boxShadow': 3,
+        'boxShadow': 4,
         'borderRadius': 5,
+        'maxWidth': 900,
+        'width': '100%',
+        'mx': 'auto',
         '&:hover': {
           boxShadow: 6,
           backgroundColor: '#F7F7F7',
@@ -45,14 +48,25 @@ const UserCardView = (props: UserProps) => {
       <CardContent
         sx={{
           display: 'flex',
-          justifyContent: 'space-between',
           alignItems: 'center',
-          padding: 3,
+          justifyContent: 'space-between',
+          paddingY: 2.5,
+          paddingX: 3,
+          gap: 2, // small spacing between items
         }}>
-        <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
-          {user.username}
-        </Typography>
-        <Typography variant='body2' color='text.disabled'>
+        <Box sx={{ flex: 1 }}>
+          <Typography variant='h6' sx={{ fontWeight: 600 }}>
+            {user.username}
+          </Typography>
+          <Typography variant='body1' sx={{ color: 'text.secondary', mt: 0.5 }}>
+            {user.ranking ?? 'Unranked'}
+          </Typography>
+        </Box>
+
+        <Typography
+          variant='body2'
+          color='text.disabled'
+          sx={{ flex: 1, textAlign: 'right', fontSize: '0.85rem' }}>
           Joined: {new Date(user.dateJoined).toUTCString()}
         </Typography>
       </CardContent>
