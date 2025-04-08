@@ -3,6 +3,7 @@ import supertest from 'supertest';
 import { app } from '../../app';
 import * as questionUtil from '../../services/question.service';
 import * as tagUtil from '../../services/tag.service';
+import * as userUtil from '../../services/user.service';
 import * as databaseUtil from '../../utils/database.util';
 import {
   Answer,
@@ -11,6 +12,7 @@ import {
   PopulatedDatabaseAnswer,
   PopulatedDatabaseQuestion,
   Question,
+  SafeDatabaseUser,
   Tag,
   VoteResponse,
 } from '../../types/types';
@@ -20,6 +22,12 @@ const getQuestionsByOrderSpy: jest.SpyInstance = jest.spyOn(questionUtil, 'getQu
 const filterQuestionsBySearchSpy: jest.SpyInstance = jest.spyOn(
   questionUtil,
   'filterQuestionsBySearch',
+);
+const getUserByUsernameSpy: jest.SpyInstance = jest.spyOn(userUtil, 'getUserByUsername');
+const addReportToQuestionSpy: jest.SpyInstance = jest.spyOn(questionUtil, 'addReportToQuestion');
+const removeReportFromQuestionSpy: jest.SpyInstance = jest.spyOn(
+  questionUtil,
+  'removeReportFromQuestion',
 );
 
 const tag1: Tag = {
@@ -205,6 +213,16 @@ const simplifyQuestion = (question: PopulatedDatabaseQuestion) => ({
     _id: answer._id.toString(),
     ansDateTime: (answer as Answer).ansDateTime.toISOString(),
   })), // Converting answer ObjectId
+  askDateTime: question.askDateTime.toISOString(),
+});
+
+const simplifyDatabaseQuestion = (question: DatabaseQuestion) => ({
+  ...question,
+  _id: question._id.toString(), // Converting ObjectId to string
+  tags: question.tags.map(tag => tag.toString()), // Converting tag ObjectId
+  answers: question.answers.map(answer => answer.toString()), // Converting answer ObjectId
+  comments: question.comments.map(comment => comment.toString()), // Converting comment ObjectId
+  reportedBy: question.reportedBy.map(user => user.toString()), // Converting user ObjectId
   askDateTime: question.askDateTime.toISOString(),
 });
 
@@ -787,6 +805,272 @@ describe('Test questionController', () => {
 
       // Asserting the response
       expect(response.status).toBe(500);
+    });
+  });
+
+  describe('POST /addReportToQuestion', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    it('should add a report to a question successfully', async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const mockUser: SafeDatabaseUser = {
+        _id: userId,
+        username: 'guest',
+        dateJoined: new Date(),
+        ranking: '',
+        score: 0,
+        achievements: [],
+        questionsAsked: 0,
+        responsesGiven: 0,
+        savedQuestions: [],
+        nimGameWins: 0,
+        upVotesGiven: 0,
+        downVotesGiven: 0,
+      };
+
+      const question = mockDatabaseQuestion;
+
+      const mockResponse = {
+        ...question,
+        askDateTime: question.askDateTime,
+        reportedBy: [userId],
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUser);
+      addReportToQuestionSpy.mockResolvedValueOnce(mockResponse);
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${question._id.toString()}`)
+        .send({ username: mockUser.username });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(simplifyDatabaseQuestion(mockResponse));
+    });
+
+    it('should return bad request error if the request had qid missing', async () => {
+      const mockReqBody = {
+        username: 'some-user',
+      };
+
+      const response = await supertest(app).post(`/question/addReportToQuestion`).send(mockReqBody);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return bad request error if the request had username missing', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {};
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(400);
+    });
+    it('should return error if getUserByUsername throws an error', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'some-user',
+      };
+
+      getUserByUsernameSpy.mockRejectedValueOnce(new Error('Error fetching user'));
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+    });
+    it('should return error if addReportToQuestion throws an error', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'guest',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({});
+      addReportToQuestionSpy.mockRejectedValueOnce(new Error('Error adding report'));
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+    });
+    it('should return error if the question is not found', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'guest',
+      };
+
+      const mockUser: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'guest',
+        dateJoined: new Date(),
+        ranking: '',
+        score: 0,
+        achievements: [],
+        questionsAsked: 0,
+        responsesGiven: 0,
+        savedQuestions: [],
+        nimGameWins: 0,
+        upVotesGiven: 0,
+        downVotesGiven: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUser);
+      addReportToQuestionSpy.mockResolvedValueOnce({ error: 'Question not found' });
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when reporting question: Question not found');
+    });
+    it('should return error if the user is not found', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'some-user',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
+
+      const response = await supertest(app)
+        .post(`/question/addReportToQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when reporting question: User not found');
+    });
+  });
+  describe('POST /removeReportFromQuestion', () => {
+    beforeEach(() => {
+      jest.resetAllMocks();
+    });
+    it('should remove a report from a question successfully', async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const mockUser: SafeDatabaseUser = {
+        _id: userId,
+        username: 'guest',
+        dateJoined: new Date(),
+        ranking: '',
+        score: 0,
+        achievements: [],
+        questionsAsked: 0,
+        responsesGiven: 0,
+        savedQuestions: [],
+        nimGameWins: 0,
+        upVotesGiven: 0,
+        downVotesGiven: 0,
+      };
+
+      const question = mockDatabaseQuestion;
+
+      const mockResponse = {
+        ...question,
+        askDateTime: question.askDateTime,
+        reportedBy: [],
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUser);
+      removeReportFromQuestionSpy.mockResolvedValueOnce(mockResponse);
+
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${question._id.toString()}`)
+        .send({ username: mockUser.username });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(simplifyDatabaseQuestion(mockResponse));
+    });
+    it('should return bad request error if the request had qid missing', async () => {
+      const mockReqBody = {
+        username: 'some-user',
+      };
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion`)
+        .send(mockReqBody);
+      expect(response.status).toBe(404);
+    });
+    it('should return bad request error if the request had username missing', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {};
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+      expect(response.status).toBe(400);
+    });
+    it('should return error if getUserByUsername throws an error', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'some-user',
+      };
+
+      getUserByUsernameSpy.mockRejectedValueOnce(new Error('Error fetching user'));
+
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+    });
+    it('should return error if removeReportFromQuestion throws an error', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'guest',
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce({});
+      removeReportFromQuestionSpy.mockRejectedValueOnce(new Error('Error removing report'));
+
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+    });
+    it('should return error if the question is not found', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'guest',
+      };
+
+      const mockUser: SafeDatabaseUser = {
+        _id: new mongoose.Types.ObjectId(),
+        username: 'guest',
+        dateJoined: new Date(),
+        ranking: '',
+        score: 0,
+        achievements: [],
+        questionsAsked: 0,
+        responsesGiven: 0,
+        savedQuestions: [],
+        nimGameWins: 0,
+        upVotesGiven: 0,
+        downVotesGiven: 0,
+      };
+
+      getUserByUsernameSpy.mockResolvedValueOnce(mockUser);
+      removeReportFromQuestionSpy.mockResolvedValueOnce({ error: 'Question not found' });
+
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when removing report from question: Question not found');
+    });
+    it('should return error if the user is not found', async () => {
+      const qid = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: 'some-user',
+      };
+      getUserByUsernameSpy.mockResolvedValueOnce({ error: 'User not found' });
+      const response = await supertest(app)
+        .post(`/question/removeReportFromQuestion/${qid.toString()}`)
+        .send(mockReqBody);
+      expect(response.status).toBe(500);
+      expect(response.text).toBe('Error when removing report from question: User not found');
     });
   });
 });

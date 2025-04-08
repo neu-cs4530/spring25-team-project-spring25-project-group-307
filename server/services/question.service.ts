@@ -418,6 +418,9 @@ export const addReportToQuestion = async (
   qid: string,
   userId: string,
 ): Promise<QuestionResponse> => {
+  if (!qid || !userId) {
+    return { error: 'Question ID and user ID are required!' };
+  }
   try {
     const question = await QuestionModel.findOne({ _id: new ObjectId(qid) });
 
@@ -425,7 +428,7 @@ export const addReportToQuestion = async (
       return { error: 'Question not found!' };
     }
 
-    if (question.reportedBy.includes(new ObjectId(userId))) {
+    if (question.reportedBy.map(id => id.toString()).includes(userId)) {
       return { error: 'Question already reported!' };
     }
 
@@ -456,7 +459,7 @@ export const removeReportFromQuestion = async (
       return { error: 'Question not found!' };
     }
 
-    if (!question.reportedBy.includes(new ObjectId(userId))) {
+    if (!question.reportedBy.map(id => id.toString()).includes(userId)) {
       return { error: 'Question not reported!' };
     }
 
