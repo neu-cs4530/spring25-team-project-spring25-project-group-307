@@ -174,8 +174,8 @@ export const addVoteToAnswer = async (
 
     return {
       msg,
-      upVotes: result.upVotes || [],
-      downVotes: result.downVotes || [],
+      upVotes: result.upVotes,
+      downVotes: result.downVotes,
     };
   } catch (err) {
     return {
