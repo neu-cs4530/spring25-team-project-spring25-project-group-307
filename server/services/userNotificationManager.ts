@@ -11,12 +11,12 @@ class UserNotificationManager {
   /**
    * Maps socket IDs to usernames (or null if not logged in).
    */
-  private _socketIdToUser: Map<string, string | null>;
+  public _socketIdToUser: Map<string, string | null>;
 
   /**
    * Maps socket IDs to their corresponding Socket instances.
    */
-  private _socketIdToSocket: Map<
+  public _socketIdToSocket: Map<
     string,
     Socket<ClientToServerEvents, ServerToClientEvents, DefaultEventsMap>
   >;

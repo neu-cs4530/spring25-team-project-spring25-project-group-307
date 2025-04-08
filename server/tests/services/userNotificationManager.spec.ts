@@ -26,8 +26,8 @@ describe('UserNotificationManager', () => {
     it('should store socket in manager with null user initially', () => {
       manager.addInitialConnection(mockSocket as Socket);
 
-      expect(manager['_socketIdToUser'].get('socket1')).toBe(null);
-      expect(manager['_socketIdToSocket'].get('socket1')).toBe(mockSocket);
+      expect(manager._socketIdToUser.get('socket1')).toBe(null);
+      expect(manager._socketIdToSocket.get('socket1')).toBe(mockSocket);
     });
   });
 
@@ -37,7 +37,7 @@ describe('UserNotificationManager', () => {
 
       manager.updateConnectionUserLogin('user1', 'socket1');
 
-      expect(manager['_socketIdToUser'].get('socket1')).toBe('user1');
+      expect(manager._socketIdToUser.get('socket1')).toBe('user1');
     });
   });
 
@@ -47,8 +47,8 @@ describe('UserNotificationManager', () => {
 
       manager.removeConnection('socket1');
 
-      expect(manager['_socketIdToUser'].has('socket1')).toBe(false);
-      expect(manager['_socketIdToSocket'].has('socket1')).toBe(false);
+      expect(manager._socketIdToUser.has('socket1')).toBe(false);
+      expect(manager._socketIdToUser.has('socket1')).toBe(false);
     });
   });
 
@@ -88,11 +88,11 @@ describe('UserNotificationManager', () => {
       (getAllPreferencesForCommunity as jest.Mock).mockResolvedValue(preferencesMock);
       (addNotification as jest.Mock).mockResolvedValue(undefined);
 
-      const socketUser1 = { id: 'socket1', emit: jest.fn() } as any;
-      const socketUser2 = { id: 'socket2', emit: jest.fn() } as any;
+      const socketUser1: Partial<Socket> = { id: 'socket1', emit: jest.fn() };
+      const socketUser2: Partial<Socket> = { id: 'socket2', emit: jest.fn() };
 
-      manager.addInitialConnection(socketUser1);
-      manager.addInitialConnection(socketUser2);
+      manager.addInitialConnection(socketUser1 as Socket);
+      manager.addInitialConnection(socketUser2 as Socket);
       manager.updateConnectionUserLogin('user1', 'socket1');
       manager.updateConnectionUserLogin('user2', 'socket2');
 
@@ -125,11 +125,11 @@ describe('UserNotificationManager', () => {
       (getAllPreferencesForCommunity as jest.Mock).mockResolvedValue(preferencesMock);
       (addNotification as jest.Mock).mockResolvedValue(undefined);
 
-      const socketUser1 = { id: 'socket1', emit: jest.fn() } as any;
-      const socketUser2 = { id: 'socket2', emit: jest.fn() } as any;
+      const socketUser1: Partial<Socket> = { id: 'socket1', emit: jest.fn() };
+      const socketUser2: Partial<Socket> = { id: 'socket2', emit: jest.fn() };
 
-      manager.addInitialConnection(socketUser1);
-      manager.addInitialConnection(socketUser2);
+      manager.addInitialConnection(socketUser1 as Socket);
+      manager.addInitialConnection(socketUser2 as Socket);
       manager.updateConnectionUserLogin('user1', 'socket1');
       manager.updateConnectionUserLogin('user2', 'socket2');
 
