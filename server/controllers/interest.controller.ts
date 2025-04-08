@@ -162,8 +162,12 @@ const interestController = (socket: FakeSOSocket) => {
   };
 
   const resetInterestsWeightsByUser = async (req: Request, res: Response): Promise<void> => {
+    if (req.body === undefined || req.body.userId === undefined) {
+      res.status(400).send('Invalid resetInterestsWeightsByUser body');
+      return;
+    }
+    const { userId } = req.body;
     try {
-      const { userId } = req.body;
       const interests = await resetInterestsWeightsByUserId(userId);
 
       res.status(200).json(interests);

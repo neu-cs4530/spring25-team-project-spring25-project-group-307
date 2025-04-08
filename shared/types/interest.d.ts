@@ -15,6 +15,10 @@ export interface Interest {
   priority: string;
 }
 
+export interface DatabaseInterest extends Interest {
+  _id: ObjectId;
+}
+
 /**
  * Express request for querying an interest by its user ID.
  * - `userId`: The user ID provided as a route parameter.
@@ -30,7 +34,7 @@ export interface InterestByUserIdRequest extends Request {
  * - `Interest`: An interest object if the operation is successful.
  * - `error`: An error message if the operation fails.
  */
-export type InterestResponse = Interest | { error: string };
+export type InterestResponse = DatabaseInterest | { error: string };
 
 /**
  * Express request for updating a user's interests.

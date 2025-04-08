@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import QuestionModel from '../../models/questions.model';
 import {
   filterQuestionsBySearch,
@@ -6,6 +7,8 @@ import {
   fetchAndIncrementQuestionViewsById,
   saveQuestion,
   addVoteToQuestion,
+  addReportToQuestion,
+  removeReportFromQuestion,
 } from '../../services/question.service';
 import { DatabaseQuestion, PopulatedDatabaseQuestion } from '../../types/types';
 import {
@@ -17,6 +20,7 @@ import {
   ans3,
   ans4,
   POPULATED_QUESTIONS,
+  safeUser,
 } from '../mockData.models';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -472,6 +476,168 @@ describe('Question model', () => {
       const result = await addVoteToQuestion('someQuestionId', 'testUser', 'downvote');
 
       expect(result).toEqual({ error: 'Error when adding downvote to question' });
+    });
+  });
+
+  describe('addReportToQuestion', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.resetAllMocks();
+    });
+    it('should add a report to the question', async () => {
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [];
+
+      const user = safeUser;
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue({
+        ...mockQuestion,
+        reportedBy: [user._id],
+      });
+
+      const result = await addReportToQuestion(mockQuestion._id.toString(), user._id.toString());
+
+      expect(result).toEqual({ ...mockQuestion, reportedBy: [user._id] });
+    });
+    it('should return an error if the question is not found', async () => {
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [];
+
+      jest
+        .spyOn(QuestionModel, 'findOne')
+        .mockResolvedValue(null as unknown as ReturnType<typeof QuestionModel.findOne>);
+
+      const result = await addReportToQuestion(mockQuestion._id.toString(), 'testUser');
+
+      expect(result).toEqual({ error: 'Question not found!' });
+    });
+    it('should return an error if there is an issue with adding a report', async () => {
+      mockingoose(QuestionModel).toReturn(new Error('Database error'), 'findOneAndUpdate');
+
+      const result = await addReportToQuestion('someQuestionId', 'testUser');
+
+      expect(result).toEqual({ error: 'Error when adding report to question' });
+    });
+    it('should return an error if the user has already reported the question', async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const mockQuestion = {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Question Title',
+        text: 'Question Text',
+        tags: [tag1, tag2],
+        askedBy: userId,
+        askDateTime: new Date(),
+        answers: [],
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        comments: [],
+        reportedBy: [userId],
+      };
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+
+      const result = await addReportToQuestion(mockQuestion._id.toString(), userId.toString());
+
+      expect(result).toEqual({ error: 'Question already reported!' });
+    });
+    it('should return an error if the user is not provided', async () => {
+      const result = await addReportToQuestion('someQuestionId', '');
+
+      expect(result).toEqual({ error: 'Question ID and user ID are required!' });
+    });
+    it('should return an error if the question ID is not provided', async () => {
+      const result = await addReportToQuestion('', 'testUser');
+
+      expect(result).toEqual({ error: 'Question ID and user ID are required!' });
+    });
+    it('should return an error if the result of findOneAndUpdate is null', async () => {
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue(null);
+
+      const result = await addReportToQuestion('someQuestionId', 'testUser');
+
+      expect(result).toEqual({ error: 'Error when adding report to question' });
+    });
+    it('should return an error if the result of findOne is null', async () => {
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [];
+
+      const user = safeUser;
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+      jest
+        .spyOn(QuestionModel, 'findOneAndUpdate')
+        .mockResolvedValue(null as unknown as ReturnType<typeof QuestionModel.findOneAndUpdate>);
+
+      const result = await addReportToQuestion(mockQuestion._id.toString(), user._id.toString());
+
+      expect(result).toEqual({ error: 'Question not found!' });
+    });
+  });
+
+  describe('removeReportFromQuestion', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+      jest.resetAllMocks();
+    });
+    it('should remove a report from the question', async () => {
+      const userId = safeUser._id;
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [safeUser._id];
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+      jest.spyOn(QuestionModel, 'findOneAndUpdate').mockResolvedValue({
+        ...mockQuestion,
+        reportedBy: [],
+      });
+
+      const result = await removeReportFromQuestion(mockQuestion._id.toString(), userId.toString());
+
+      expect(result).toEqual({ ...mockQuestion, reportedBy: [] });
+    });
+    it('should return an error if the question is not found', async () => {
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [];
+
+      jest
+        .spyOn(QuestionModel, 'findOne')
+        .mockResolvedValue(null as unknown as ReturnType<typeof QuestionModel.findOne>);
+
+      const result = await removeReportFromQuestion(mockQuestion._id.toString(), 'testUser');
+
+      expect(result).toEqual({ error: 'Question not found!' });
+    });
+    it('should return an error if the user has not reported the question', async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [];
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+
+      const result = await removeReportFromQuestion(mockQuestion._id.toString(), userId.toString());
+      expect(result).toEqual({ error: 'Question not reported!' });
+    });
+    it('should return an error if the result of findOne is null', async () => {
+      const userId = safeUser._id;
+      const mockQuestion = QUESTIONS[0];
+      mockQuestion.reportedBy = [safeUser._id];
+
+      jest.spyOn(QuestionModel, 'findOne').mockResolvedValue(mockQuestion);
+      jest
+        .spyOn(QuestionModel, 'findOneAndUpdate')
+        .mockResolvedValue(null as unknown as ReturnType<typeof QuestionModel.findOneAndUpdate>);
+
+      const result = await removeReportFromQuestion(mockQuestion._id.toString(), userId.toString());
+
+      expect(result).toEqual({ error: 'Question not found!' });
+    });
+    it('should return an error if there is an issue with removing a report', async () => {
+      mockingoose(QuestionModel).toReturn(new Error('Database error'), 'findOneAndUpdate');
+
+      const result = await removeReportFromQuestion('someQuestionId', 'testUser');
+
+      expect(result).toEqual({ error: 'Error when removing report from question' });
     });
   });
 });

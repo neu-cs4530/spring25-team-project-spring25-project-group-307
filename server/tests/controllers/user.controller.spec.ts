@@ -64,6 +64,9 @@ const updatedUserSpy = jest.spyOn(util, 'updateUser');
 const getUserByUsernameSpy = jest.spyOn(util, 'getUserByUsername');
 const getUsersListSpy = jest.spyOn(util, 'getUsersList');
 const deleteUserByUsernameSpy = jest.spyOn(util, 'deleteUserByUsername');
+const addUserSavedQuestionSpy = jest.spyOn(util, 'addUserSavedQuestion');
+const removeUserSavedQuestionSpy = jest.spyOn(util, 'removeUserSavedQuestion');
+const getUserWithSavedQuestionSpy = jest.spyOn(util, 'getUserWithSavedQuestions');
 
 describe('Test userController', () => {
   describe('POST /signup', () => {
@@ -467,6 +470,164 @@ describe('Test userController', () => {
       expect(response.text).toContain(
         'Error when updating user biography: Error: Error updating user',
       );
+    });
+  });
+
+  describe('PATCH /addSavedQuestion', () => {
+    it('should successfully add a saved question given correct arguments', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      addUserSavedQuestionSpy.mockResolvedValueOnce(mockSafeUser);
+
+      const response = await supertest(app).patch('/user/addSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserJSONResponse);
+      expect(addUserSavedQuestionSpy).toHaveBeenCalledWith(
+        mockUser.username,
+        mockReqBody.questionId.toString(),
+      );
+    });
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      const response = await supertest(app).patch('/user/addSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 400 for request with empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      const response = await supertest(app).patch('/user/addSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 400 for request missing questionId field', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+      };
+
+      const response = await supertest(app).patch('/user/addSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 500 if updateUser returns an error', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      addUserSavedQuestionSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app).patch('/user/addSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error when adding saved question: Error: Error updating user',
+      );
+    });
+  });
+
+  describe('PATCH /removeSavedQuestion', () => {
+    it('should successfully remove a saved question given correct arguments', async () => {
+      const qId = new mongoose.Types.ObjectId();
+      const mockReqBody = {
+        username: mockUser.username,
+        questionId: qId,
+      };
+
+      removeUserSavedQuestionSpy.mockResolvedValueOnce({ ...mockSafeUser, savedQuestions: [] });
+
+      const response = await supertest(app).patch('/user/removeSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserJSONResponse);
+      expect(removeUserSavedQuestionSpy).toHaveBeenCalledWith(
+        mockUser.username,
+        mockReqBody.questionId.toString(),
+      );
+    });
+    it('should return 400 for request missing username', async () => {
+      const mockReqBody = {
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      const response = await supertest(app).patch('/user/removeSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 400 for request with empty username', async () => {
+      const mockReqBody = {
+        username: '',
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      const response = await supertest(app).patch('/user/removeSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 400 for request missing questionId field', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+      };
+
+      const response = await supertest(app).patch('/user/removeSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(400);
+      expect(response.text).toEqual('Invalid request body');
+    });
+    it('should return 500 if updateUser returns an error', async () => {
+      const mockReqBody = {
+        username: mockUser.username,
+        questionId: new mongoose.Types.ObjectId(),
+      };
+
+      removeUserSavedQuestionSpy.mockResolvedValueOnce({ error: 'Error updating user' });
+
+      const response = await supertest(app).patch('/user/removeSavedQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(500);
+      expect(response.text).toContain(
+        'Error when removing saved question: Error: Error updating user',
+      );
+    });
+  });
+
+  describe('GET /getUserWithSavedQuestions', () => {
+    it('should return the user with saved questions given correct arguments', async () => {
+      getUserWithSavedQuestionSpy.mockResolvedValueOnce(mockSafeUser);
+
+      const response = await supertest(app).get(`/user/getUserSavedQuestions/${mockUser.username}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual(mockUserJSONResponse);
+      expect(getUserWithSavedQuestionSpy).toHaveBeenCalledWith(mockUser.username);
+    });
+    it('should return 500 if database error while searching username', async () => {
+      getUserWithSavedQuestionSpy.mockResolvedValueOnce({ error: 'Error finding user' });
+
+      const response = await supertest(app).get(`/user/getUserSavedQuestions/${mockUser.username}`);
+
+      expect(response.status).toBe(500);
+    });
+    it('should return 404 if username not provided', async () => {
+      // Express automatically returns 404 for missing parameters when
+      // defined as required in the route
+      const response = await supertest(app).get('/user/getUserSavedQuestions/');
+      expect(response.status).toBe(404);
     });
   });
 });

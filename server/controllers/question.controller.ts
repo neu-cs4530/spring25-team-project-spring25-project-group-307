@@ -490,6 +490,11 @@ const questionController = (socket: FakeSOSocket) => {
     req: FindQuestionByIdRequest,
     res: Response,
   ): Promise<void> => {
+    if (!req.body || !req.body.username || !req.params.qid) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
     const { qid } = req.params;
     const { username } = req.body;
 
@@ -516,6 +521,11 @@ const questionController = (socket: FakeSOSocket) => {
     req: FindQuestionByIdRequest,
     res: Response,
   ): Promise<void> => {
+    if (!req.body || !req.body.username || !req.params.qid) {
+      res.status(400).send('Invalid request');
+      return;
+    }
+
     const { qid } = req.params;
     const { username } = req.body;
 

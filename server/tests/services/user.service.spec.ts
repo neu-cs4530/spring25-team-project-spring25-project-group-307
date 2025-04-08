@@ -1,15 +1,18 @@
-import mongoose from 'mongoose';
+import mongoose, { Query } from 'mongoose';
 import UserModel from '../../models/users.model';
 import {
+  addUserSavedQuestion,
   deleteUserByUsername,
   getUserByUsername,
   getUsersList,
+  getUserWithSavedQuestions,
   loginUser,
+  removeUserSavedQuestion,
   saveUser,
   updateUser,
 } from '../../services/user.service';
 import { SafeDatabaseUser, User, UserCredentials } from '../../types/types';
-import { user, safeUser } from '../mockData.models';
+import { user, safeUser, QUESTIONS } from '../mockData.models';
 import FeedModel from '../../models/feed.model';
 import FeedItemModel from '../../models/feedItem.model';
 import InterestModel from '../../models/interest.model';
@@ -305,5 +308,135 @@ describe('updateUser', () => {
     const updatedError = await updateUser(user.username, biographyUpdates);
 
     expect('error' in updatedError).toBe(true);
+  });
+});
+
+describe('addUserSavedQuestion', () => {
+  it('should return the updated user when updated succesfully', async () => {
+    const newQuestionId = new mongoose.Types.ObjectId();
+    const updatedUser: SafeDatabaseUser = {
+      ...user,
+      _id: new mongoose.Types.ObjectId(),
+      savedQuestions: [newQuestionId],
+    };
+
+    mockingoose(UserModel).toReturn(updatedUser, 'findOneAndUpdate');
+
+    const result = (await addUserSavedQuestion(user.username, newQuestionId)) as SafeDatabaseUser;
+
+    expect(result.savedQuestions).toEqual(updatedUser.savedQuestions);
+  });
+  it('should throw an error if the username is not found', async () => {
+    const newQuestionId = new mongoose.Types.ObjectId();
+    mockingoose(UserModel).toReturn(null, 'findOneAndUpdate');
+
+    const updatedError = await addUserSavedQuestion(user.username, newQuestionId);
+
+    expect('error' in updatedError).toBe(true);
+  });
+  it('should throw an error if a database error while deleting', async () => {
+    const newQuestionId = new mongoose.Types.ObjectId();
+    mockingoose(UserModel).toReturn(new Error('Error updating object'), 'findOneAndUpdate');
+
+    const updatedError = await addUserSavedQuestion(user.username, newQuestionId);
+
+    expect('error' in updatedError).toBe(true);
+  });
+});
+
+describe('removeUserSavedQuestion', () => {
+  it('should return the updated user when updated succesfully', async () => {
+    const originalUser: SafeDatabaseUser = {
+      ...user,
+      _id: new mongoose.Types.ObjectId(),
+      savedQuestions: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+    };
+    const questionToRemove = originalUser.savedQuestions[0];
+    const updatedUser: SafeDatabaseUser = {
+      ...originalUser,
+      savedQuestions: originalUser.savedQuestions.filter(question => question !== questionToRemove),
+    };
+
+    mockingoose(UserModel).toReturn(updatedUser, 'findOneAndUpdate');
+
+    const result = (await removeUserSavedQuestion(
+      originalUser.username,
+      questionToRemove,
+    )) as SafeDatabaseUser;
+
+    expect(result.savedQuestions).toEqual(updatedUser.savedQuestions);
+  });
+  it('should throw an error if the username is not found', async () => {
+    const questionToRemove = new mongoose.Types.ObjectId();
+    mockingoose(UserModel).toReturn(null, 'findOneAndUpdate');
+
+    const updatedError = await removeUserSavedQuestion(user.username, questionToRemove);
+
+    expect('error' in updatedError).toBe(true);
+  });
+  it('should throw an error if a database error while deleting', async () => {
+    const questionToRemove = new mongoose.Types.ObjectId();
+    mockingoose(UserModel).toReturn(new Error('Error updating object'), 'findOneAndUpdate');
+
+    const updatedError = await removeUserSavedQuestion(user.username, questionToRemove);
+
+    expect('error' in updatedError).toBe(true);
+  });
+});
+
+describe('getUserWithSavedQuestions', () => {
+  beforeEach(() => {
+    mockingoose.resetAll();
+    jest.clearAllMocks();
+    jest.resetAllMocks();
+  });
+
+  it('should return the user with saved questions', async () => {
+    const populatedUser = {
+      _id: new mongoose.Types.ObjectId(),
+      username: 'testuser',
+      savedQuestions: [QUESTIONS[0], QUESTIONS[1]],
+    };
+
+    const mockQuery = {
+      populate: jest.fn().mockResolvedValue(populatedUser),
+    } as unknown as Query<SafeDatabaseUser, SafeDatabaseUser>;
+
+    jest.spyOn(UserModel, 'findOne').mockReturnValue(mockQuery);
+
+    const result = await getUserWithSavedQuestions(populatedUser.username);
+
+    expect(result).toEqual(populatedUser);
+    expect(UserModel.findOne).toHaveBeenCalledWith({ username: populatedUser.username });
+  });
+  it('should return the user with saved questions', async () => {
+    const populatedUser = {
+      _id: new mongoose.Types.ObjectId(),
+      username: 'testuser',
+      savedQuestions: [QUESTIONS[0], QUESTIONS[1]],
+    };
+
+    jest.spyOn(UserModel, 'findOne').mockReturnValueOnce({
+      populate: jest.fn().mockResolvedValueOnce(null), // Simulates no user found
+    } as unknown as Query<SafeDatabaseUser, SafeDatabaseUser>);
+
+    const result = await getUserWithSavedQuestions(populatedUser.username);
+
+    expect('error' in result).toBe(true);
+    expect(UserModel.findOne).toHaveBeenCalledWith({ username: populatedUser.username });
+  });
+  it('should throw an error if there is an error while searching the database', async () => {
+    mockingoose(UserModel).toReturn(new Error('Error finding document'), 'findOne');
+
+    const getUserError = await getUserWithSavedQuestions(user.username);
+
+    expect('error' in getUserError).toBe(true);
+  });
+  it('should throw an error if there is an error while populating the saved questions', async () => {
+    mockingoose(UserModel).toReturn(new Error('Error populating document'), 'findOne');
+
+    const getUserError = await getUserWithSavedQuestions(user.username);
+
+    expect('error' in getUserError).toBe(true);
   });
 });

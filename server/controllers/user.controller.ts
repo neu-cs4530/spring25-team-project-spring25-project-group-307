@@ -251,9 +251,12 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   const addSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || !req.body.username || !req.body.questionId) {
+      res.status(400).send('Invalid request body');
+      return;
+    }
+    const { username, questionId } = req.body;
     try {
-      const { username, questionId } = req.body;
-
       const updatedUser = await addUserSavedQuestion(username, questionId);
 
       if ('error' in updatedUser) {
@@ -272,9 +275,12 @@ const userController = (socket: FakeSOSocket) => {
   };
 
   const removeSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || !req.body.username || !req.body.questionId) {
+      res.status(400).send('Invalid request body');
+      return;
+    }
+    const { username, questionId } = req.body;
     try {
-      const { username, questionId } = req.body;
-
       const updatedUser = await removeUserSavedQuestion(username, questionId);
 
       if ('error' in updatedUser) {
