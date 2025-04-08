@@ -79,6 +79,14 @@ describe('Answer model', () => {
 
       expect(result).toEqual({ error: 'Error when deleting an answer' });
     });
+
+    test('deleteAnswerById should return an object with error if findByIdAndDelete returns null', async () => {
+      jest.spyOn(AnswerModel, 'findByIdAndDelete').mockResolvedValueOnce(null);
+
+      const result = await deleteAnswerById(mockDBAnswer._id.toString());
+
+      expect(result).toEqual({ error: 'Answer not found' });
+    });
   });
 
   describe('addAnswerToQuestion', () => {
