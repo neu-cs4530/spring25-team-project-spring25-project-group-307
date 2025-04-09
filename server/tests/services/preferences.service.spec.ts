@@ -106,6 +106,21 @@ describe('Preferences Model', () => {
 
       expect(result).toHaveProperty('error');
     });
+
+    test('should return error if error in getUserByUsername', async () => {
+      mockingoose(PreferencesModel).toReturn(null, 'findOneAndUpdate');
+      jest
+        .spyOn(userService, 'getUserByUsername')
+        .mockResolvedValueOnce({ error: 'User not found' });
+
+      const result = await addUserPreferenceToCommunity(
+        'Comments on my Questions',
+        'user',
+        'community',
+      );
+
+      expect(result).toHaveProperty('error');
+    });
   });
 
   describe('removeUserPreferenceFromCommunity', () => {
