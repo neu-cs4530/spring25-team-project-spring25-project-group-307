@@ -44,7 +44,7 @@ const answerController = (socket: FakeSOSocket) => {
    * @returns `true` if the request is valid, otherwise `false`.
    */
   function isDeleteRequestValid(req: DeleteAnswerRequest): boolean {
-    return !!req.params.aid;
+    return typeof req.params.aid === 'string' && req.params.aid.trim() !== '';
   }
 
   /**
@@ -256,7 +256,7 @@ const answerController = (socket: FakeSOSocket) => {
         });
 
         if (upvotedAnswersCount === 10) {
-          const a = await grantAchievementToUser(voter._id.toString(), 'Ambitious Reviewer');
+          const a = await grantAchievementToUser(voter._id.toString(), 'Diligent Reviewer');
           if (a) unlocked.push(a);
         }
         if (wasUpvoted) {

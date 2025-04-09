@@ -1,5 +1,6 @@
 import express, { Response } from 'express';
 import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 import {
   Comment,
   AddCommentRequest,
@@ -51,14 +52,16 @@ const commentController = (socket: FakeSOSocket) => {
    *
    * @returns `true` if the request is valid, otherwise `false`.
    */
-  const isDeleteRequestValid = (req: DeleteCommentRequest): boolean => !!req.params.cid;
+  const isDeleteRequestValid = (req: DeleteCommentRequest): boolean =>
+    !!req.params.cid && mongoose.Types.ObjectId.isValid(req.params.cid);
 
   /**
    * Checks if the provided get comment request contains the required fields.
    * @param req The request object containing the comment ID.
    * @returns `true` if the request is valid, otherwise `false`.
    */
-  const isGetRequestValid = (req: GetCommentRequest): boolean => !!req.params.cid;
+  const isGetRequestValid = (req: GetCommentRequest): boolean =>
+    mongoose.Types.ObjectId.isValid(req.params.cid);
 
   /**
    * Validates the comment object to ensure it is not empty.
@@ -122,10 +125,6 @@ const commentController = (socket: FakeSOSocket) => {
       // Populates the fields of the question or answer that this comment
       // was added to, and emits the updated object
       const populatedDoc = await populateDocument(id, type);
-
-      if (populatedDoc && 'error' in populatedDoc) {
-        throw new Error(populatedDoc.error);
-      }
 
       // notify users
       if (type === 'question') {
