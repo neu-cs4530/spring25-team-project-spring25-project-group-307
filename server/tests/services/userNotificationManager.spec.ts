@@ -75,6 +75,34 @@ describe('UserNotificationManager', () => {
     it('should return null if no socket found for username', () => {
       expect(manager.getUserSocketByUsername('nonexistent')).toBeNull();
     });
+
+    it('should return the socket when user matches username in the map', () => {
+      const socketId = 'socket1';
+      const username = 'user1';
+      const mockSocket2 = { id: socketId } as unknown as Socket;
+
+      manager._socketIdToUser.set(socketId, username);
+      manager._socketIdToSocket.set(socketId, mockSocket2);
+
+      const result = manager.getUserSocketByUsername(username);
+      expect(result).toBe(mockSocket2);
+    });
+
+    it('should return null if the socketId exists but no socket is found in _socketIdToSocket', () => {
+      const socketId = 'socket1';
+      const username = 'user1';
+
+      manager._socketIdToUser.set(socketId, username);
+      // Do not set anything in _socketIdToSocket to simulate a missing socket
+
+      const result = manager.getUserSocketByUsername(username);
+      expect(result).toBeNull();
+    });
+
+    it('should return null if _socketIdToUser is empty', () => {
+      const result = manager.getUserSocketByUsername('user1');
+      expect(result).toBeNull();
+    });
   });
 
   describe('notifyOnlineUsersInCommunity', () => {

@@ -44,6 +44,17 @@ describe('User model', () => {
       expect(savedUser.dateJoined).toEqual(user.dateJoined);
     });
 
+    it('should throw an error if result of create is null', async () => {
+      jest
+        .spyOn(UserModel, 'create')
+        .mockResolvedValueOnce(null as unknown as ReturnType<typeof UserModel.create>);
+      const saveError = await saveUser(user);
+      expect('error' in saveError).toBe(true);
+      expect(saveError).toEqual({
+        error: 'Error occurred when saving user: Error: Failed to create user',
+      });
+    });
+
     it('should throw an error if error when saving to database', async () => {
       jest
         .spyOn(UserModel, 'create')

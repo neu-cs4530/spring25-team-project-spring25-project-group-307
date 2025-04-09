@@ -4,6 +4,7 @@ import AnswerModel from '../../models/answers.model';
 import ChatModel from '../../models/chat.model';
 import UserModel from '../../models/users.model';
 import getUpdatedRank from '../../utils/userstat.util';
+import CommentModel from '../../models/comments.model';
 
 jest.mock('../../models/questions.model');
 jest.mock('../../models/answers.model');
@@ -16,6 +17,13 @@ jest.mock('../../models/comments.model');
 describe('populateDocument', () => {
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('should return an error if no ID is provided', async () => {
+    const result = await populateDocument('', 'question');
+    expect(result).toEqual({
+      error: 'Error when fetching and populating a document: Provided ID is undefined.',
+    });
   });
 
   it('should fetch and populate a question document', async () => {
@@ -159,6 +167,52 @@ describe('populateDocument', () => {
     });
   });
 
+  it('should return null for a messageDoc if it is null and handle userDoc as null', async () => {
+    const mockChat = {
+      _id: 'chatId',
+      messages: [
+        null, // Simulate a null messageDoc
+        {
+          _id: 'messageId1',
+          msg: 'Hello!',
+          msgFrom: 'nonexistentUser', // Simulate a user that does not exist
+          msgDateTime: new Date(),
+          type: 'text',
+        },
+      ],
+      toObject: jest.fn().mockReturnValue({
+        _id: 'chatId',
+        messages: [],
+      }),
+    };
+
+    // Mock ChatModel.findOne to return the mockChat
+    (ChatModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockChat),
+    });
+
+    // Mock UserModel.findOne to return null for the nonexistent user
+    (UserModel.findOne as jest.Mock).mockResolvedValue(null);
+
+    const result = await populateDocument('chatId', 'chat');
+
+    // Assertions
+    expect(ChatModel.findOne).toHaveBeenCalledWith({ _id: 'chatId' });
+    expect(result).toEqual({
+      ...mockChat.toObject(),
+      messages: [
+        {
+          _id: 'messageId1',
+          msg: 'Hello!',
+          msgFrom: 'nonexistentUser',
+          msgDateTime: mockChat.messages[1]?.msgDateTime,
+          type: 'text',
+          user: null, // The userDoc is null since the user does not exist
+        },
+      ],
+    });
+  });
+
   it('should return an error message if chat document is not found', async () => {
     (ChatModel.findOne as jest.Mock).mockReturnValue({
       populate: jest.fn().mockResolvedValue(null),
@@ -188,6 +242,47 @@ describe('populateDocument', () => {
     const result = await populateDocument('someId', invalidType);
     expect(result).toEqual({
       error: 'Error when fetching and populating a document: Invalid type provided.',
+    });
+  });
+  it('should fetch and populate a comment document', async () => {
+    const mockAnswer = {
+      _id: 'answerId',
+      comments: ['commentId'],
+    };
+    (AnswerModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockAnswer),
+    });
+
+    const result = await populateDocument('answerId', 'answer');
+
+    expect(AnswerModel.findOne).toHaveBeenCalledWith({ _id: 'answerId' });
+    expect(result).toEqual(mockAnswer);
+  });
+
+  it('should return an error message if comment document is not found', async () => {
+    (CommentModel.findOne as jest.Mock).mockReturnValue({
+      populate: jest.fn().mockResolvedValue(null),
+    });
+
+    const commentId = 'invalidCommentId';
+    const result = await populateDocument(commentId, 'comment');
+
+    expect(result).toEqual({
+      error: `Error when fetching and populating a document: Failed to fetch and populate comment with ID: ${
+        commentId
+      }`,
+    });
+  });
+
+  it('should return an error message if fetching a comment document throws an error', async () => {
+    (CommentModel.findOne as jest.Mock).mockImplementation(() => {
+      throw new Error('Database error');
+    });
+
+    const result = await populateDocument('commentId', 'comment');
+
+    expect(result).toEqual({
+      error: 'Error when fetching and populating a document: Database error',
     });
   });
 });
