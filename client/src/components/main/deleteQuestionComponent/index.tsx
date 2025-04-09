@@ -21,8 +21,8 @@ const DeleteQuestionComponent = ({
 }: DeleteQuestionComponentProps) => {
   const { anchorEl, open, handleClick, handleClose } = useDeleteQuestionComponent();
   return (
-    <Box sx={{ mr: 2 }}>
-      <IconButton onClick={handleClick}>
+    <Box sx={{ mr: 1 }}>
+      <IconButton size='small' onClick={handleClick}>
         <DeleteIcon />
       </IconButton>
       <Menu anchorEl={anchorEl} open={open} onClose={handleClose} onClick={handleClose}>
