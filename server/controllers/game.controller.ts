@@ -172,6 +172,7 @@ const gameController = (socket: FakeSOSocket) => {
             const totalNimWins = winnerUser.nimGameWins + 1;
             const newScore = winnerUser.score + 7;
             const newRank = getUpdatedRank(newScore);
+
             if (currentRank !== newRank && newRank === 'Common Contributor') {
               const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension I');
               if (a) unlocked.push(a);
