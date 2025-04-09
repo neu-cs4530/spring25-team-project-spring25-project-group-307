@@ -5,7 +5,6 @@ import * as questionUtil from '../../services/question.service';
 import * as tagUtil from '../../services/tag.service';
 import * as userUtil from '../../services/user.service';
 import * as databaseUtil from '../../utils/database.util';
-import * as userService from '../../services/user.service';
 
 import {
   Answer,
