@@ -8,6 +8,7 @@ import {
   DatabaseFeedItem,
   DatabaseQuestion,
   DatabaseTag,
+  DatabaseUser,
   Interest,
   PopulatedDatabaseCommunity,
   PopulatedDatabaseQuestion,
@@ -278,6 +279,53 @@ export const safeUser3: SafeDatabaseUser = {
   upVotesGiven: 0,
   downVotesGiven: 0,
   commentsMade: 0,
+};
+
+export const newbieUser: DatabaseUser = {
+  _id: new ObjectId(),
+  username: 'player1',
+  password: 'password',
+  dateJoined: new Date('2024-12-03'),
+  biography: 'I am a user',
+  ranking: 'Newcomer Newbie',
+  score: 45,
+  achievements: [],
+  questionsAsked: 0,
+  responsesGiven: 0,
+  lastLogin: new Date('2024-12-03'),
+  savedQuestions: [],
+  nimGameWins: 0,
+  upVotesGiven: 0,
+  downVotesGiven: 0,
+  commentsMade: 0,
+};
+
+export const commonUser: DatabaseUser = {
+  ...newbieUser,
+  score: 143,
+  ranking: 'Common Contributor',
+  nimGameWins: 4,
+};
+
+export const skilledUser: DatabaseUser = {
+  ...newbieUser,
+  score: 293,
+  ranking: 'Skilled Solver',
+  nimGameWins: 9,
+};
+
+export const expertUser: DatabaseUser = {
+  ...newbieUser,
+  score: 493,
+  ranking: 'Expert Explorer',
+  nimGameWins: 14,
+};
+
+export const mentorUser: DatabaseUser = {
+  ...newbieUser,
+  score: 743,
+  ranking: 'Mentor Maven',
+  nimGameWins: 19,
 };
 
 export const COMMUNITIES: DatabaseCommunity[] = [

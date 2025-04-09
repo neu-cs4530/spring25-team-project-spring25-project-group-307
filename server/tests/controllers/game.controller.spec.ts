@@ -5,13 +5,19 @@ import { io as Client, type Socket as ClientSocket } from 'socket.io-client';
 import { AddressInfo } from 'net';
 import { app } from '../../app';
 import GameManager from '../../services/games/gameManager';
-import { FakeSOSocket, GameInstance, NimGameState } from '../../types/types';
+import { DatabaseUser, FakeSOSocket, GameInstance, NimGameState } from '../../types/types';
 import * as util from '../../services/game.service';
+import * as userStatUtil from '../../utils/userstat.util';
+import * as achievementUtil from '../../services/achievement.service';
 import gameController from '../../controllers/game.controller';
 import NimGame from '../../services/games/nim';
 import { MAX_NIM_OBJECTS } from '../../types/constants';
+import UserModel from '../../models/users.model';
+import UserNotificationManager from '../../services/userNotificationManager';
+import { newbieUser, commonUser, skilledUser, expertUser, mentorUser } from '../mockData.models';
 
 const mockGameManager = GameManager.getInstance();
+const mockNotificationManager = UserNotificationManager.getInstance();
 
 describe('POST /create', () => {
   const addGameSpy = jest.spyOn(mockGameManager, 'addGame');
@@ -537,5 +543,471 @@ describe('playMove & socket handlers', () => {
     expect(toModelSpy).not.toHaveBeenCalled();
     expect(saveGameStateSpy).not.toHaveBeenCalled();
     expect(removeGameSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('playMove score and achievement updates', () => {
+  let httpServer: HTTPServer;
+  let io: FakeSOSocket;
+  let clientSocket: ClientSocket;
+  let serverSocket: ServerSocket;
+
+  let mockNimGame: NimGame;
+  let getGameSpy: jest.SpyInstance;
+  let getUserSocketByUsernameSpy: jest.SpyInstance;
+  let applyMoveSpy: jest.SpyInstance;
+  let toModelSpy: jest.SpyInstance;
+  let saveGameStateSpy: jest.SpyInstance;
+  let removeGameSpy: jest.SpyInstance;
+
+  beforeAll(done => {
+    httpServer = createServer();
+    io = new Server(httpServer);
+    gameController(io);
+
+    httpServer.listen(() => {
+      const { port } = httpServer.address() as AddressInfo;
+      clientSocket = Client(`http://localhost:${port}`);
+      io.on('connection', socket => {
+        serverSocket = socket;
+      });
+
+      clientSocket.on('connect', done);
+    });
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockNimGame = new NimGame();
+    mockNimGame.join('player1');
+    mockNimGame.join('player2');
+
+    getGameSpy = jest.spyOn(mockGameManager, 'getGame');
+    getUserSocketByUsernameSpy = jest.spyOn(mockNotificationManager, 'getUserSocketByUsername');
+    applyMoveSpy = jest.spyOn(mockNimGame, 'applyMove');
+    toModelSpy = jest.spyOn(mockNimGame, 'toModel').mockReturnValue({
+      state: {
+        moves: [],
+        remainingObjects: 0,
+        status: 'IN_PROGRESS',
+      },
+      gameID: '',
+      players: [],
+      gameType: 'Nim',
+    });
+
+    saveGameStateSpy = jest.spyOn(mockNimGame, 'saveGameState').mockResolvedValue(undefined);
+    removeGameSpy = jest.spyOn(mockGameManager, 'removeGame');
+  });
+
+  afterAll(done => {
+    clientSocket.removeAllListeners();
+    clientSocket.disconnect();
+    if (serverSocket) {
+      serverSocket.removeAllListeners();
+      serverSocket.disconnect();
+    }
+    io.close();
+    httpServer.close(() => done());
+  });
+
+  const gameMovePayload = {
+    gameID: 'game123',
+    move: {
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    },
+  };
+
+  it('should add a score to the winning user and update the users rank to Common Contributor', async () => {
+    getGameSpy.mockReturnValueOnce(mockNimGame);
+    getUserSocketByUsernameSpy.mockReturnValueOnce(serverSocket);
+    applyMoveSpy.mockImplementation(() => {
+      mockNimGame.state.status = 'OVER';
+      mockNimGame.state.winners = ['player1'];
+    });
+
+    const joinGameEvent = new Promise(resolve => {
+      serverSocket.once('joinGame', arg => {
+        resolve(arg);
+      });
+    });
+
+    const makeMoveEvent = new Promise(resolve => {
+      serverSocket.once('makeMove', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameUpdateEvent = new Promise(resolve => {
+      clientSocket.once('gameUpdate', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameAchievementEvent = new Promise(resolve => {
+      clientSocket.once('gameAchievement', arg => {
+        resolve(arg);
+      });
+    });
+
+    clientSocket.emit('joinGame', 'game123');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Mock the findOne method to return a user with a specific ranking
+    const mockUser: DatabaseUser = newbieUser;
+
+    jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+    jest.spyOn(userStatUtil, 'default').mockReturnValue('Common Contributor');
+    jest.spyOn(achievementUtil, 'default').mockResolvedValue('Ascension I');
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
+    });
+
+    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
+      joinGameEvent,
+      makeMoveEvent,
+      gameUpdateEvent,
+      gameAchievementEvent,
+    ]);
+
+    expect(joinMoveArg).toBe('game123');
+    expect(makeMoveArg).toStrictEqual(gameMovePayload);
+    expect(gameUpdateArg).toHaveProperty('gameInstance');
+    expect(mockNimGame.state.winners).toStrictEqual(['player1']);
+    expect(getGameSpy).toHaveBeenCalledWith('game123');
+    expect(applyMoveSpy).toHaveBeenCalledWith({
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    });
+    // Verify the rank update
+    expect(UserModel.updateOne).toHaveBeenCalledWith(
+      { username: mockUser.username },
+      {
+        $set: { ranking: 'Common Contributor', score: 52, nimGameWins: 1 },
+      },
+    );
+    expect(toModelSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).toHaveBeenCalledWith('game123');
+  });
+
+  it('should add a score to the winning user and update the users rank to Skilled Solver', async () => {
+    getGameSpy.mockReturnValueOnce(mockNimGame);
+    getUserSocketByUsernameSpy.mockReturnValueOnce(serverSocket);
+    applyMoveSpy.mockImplementation(() => {
+      mockNimGame.state.status = 'OVER';
+      mockNimGame.state.winners = ['player1'];
+    });
+
+    const joinGameEvent = new Promise(resolve => {
+      serverSocket.once('joinGame', arg => {
+        resolve(arg);
+      });
+    });
+
+    const makeMoveEvent = new Promise(resolve => {
+      serverSocket.once('makeMove', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameUpdateEvent = new Promise(resolve => {
+      clientSocket.once('gameUpdate', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameAchievementEvent = new Promise(resolve => {
+      clientSocket.once('gameAchievement', arg => {
+        resolve(arg);
+      });
+    });
+
+    clientSocket.emit('joinGame', 'game123');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Mock the findOne method to return a user with a specific ranking
+    const mockUser: DatabaseUser = commonUser;
+
+    jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+    jest.spyOn(userStatUtil, 'default').mockReturnValue('Skilled Solver');
+    jest.spyOn(achievementUtil, 'default').mockResolvedValue('Ascension II');
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
+    });
+
+    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
+      joinGameEvent,
+      makeMoveEvent,
+      gameUpdateEvent,
+      gameAchievementEvent,
+    ]);
+
+    expect(joinMoveArg).toBe('game123');
+    expect(makeMoveArg).toStrictEqual(gameMovePayload);
+    expect(gameUpdateArg).toHaveProperty('gameInstance');
+    expect(mockNimGame.state.winners).toStrictEqual(['player1']);
+    expect(getGameSpy).toHaveBeenCalledWith('game123');
+    expect(applyMoveSpy).toHaveBeenCalledWith({
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    });
+    // Verify the rank update
+    expect(UserModel.updateOne).toHaveBeenCalledWith(
+      { username: mockUser.username },
+      {
+        $set: { ranking: 'Skilled Solver', score: 150, nimGameWins: 5 },
+      },
+    );
+    expect(toModelSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).toHaveBeenCalledWith('game123');
+  });
+
+  it('should add a score to the winning user and update the users rank to Expert Explorer', async () => {
+    getGameSpy.mockReturnValueOnce(mockNimGame);
+    getUserSocketByUsernameSpy.mockReturnValueOnce(serverSocket);
+    applyMoveSpy.mockImplementation(() => {
+      mockNimGame.state.status = 'OVER';
+      mockNimGame.state.winners = ['player1'];
+    });
+
+    const joinGameEvent = new Promise(resolve => {
+      serverSocket.once('joinGame', arg => {
+        resolve(arg);
+      });
+    });
+
+    const makeMoveEvent = new Promise(resolve => {
+      serverSocket.once('makeMove', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameUpdateEvent = new Promise(resolve => {
+      clientSocket.once('gameUpdate', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameAchievementEvent = new Promise(resolve => {
+      clientSocket.once('gameAchievement', arg => {
+        resolve(arg);
+      });
+    });
+
+    clientSocket.emit('joinGame', 'game123');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Mock the findOne method to return a user with a specific ranking
+    const mockUser: DatabaseUser = skilledUser;
+
+    jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+    jest.spyOn(userStatUtil, 'default').mockReturnValue('Expert Explorer');
+    jest.spyOn(achievementUtil, 'default').mockResolvedValue('Ascension II');
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
+    });
+
+    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
+      joinGameEvent,
+      makeMoveEvent,
+      gameUpdateEvent,
+      gameAchievementEvent,
+    ]);
+
+    expect(joinMoveArg).toBe('game123');
+    expect(makeMoveArg).toStrictEqual(gameMovePayload);
+    expect(gameUpdateArg).toHaveProperty('gameInstance');
+    expect(mockNimGame.state.winners).toStrictEqual(['player1']);
+    expect(getGameSpy).toHaveBeenCalledWith('game123');
+    expect(applyMoveSpy).toHaveBeenCalledWith({
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    });
+    // Verify the rank update
+    expect(UserModel.updateOne).toHaveBeenCalledWith(
+      { username: mockUser.username },
+      {
+        $set: { ranking: 'Expert Explorer', score: 300, nimGameWins: 10 },
+      },
+    );
+    expect(toModelSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).toHaveBeenCalledWith('game123');
+  });
+
+  it('should add a score to the winning user and update the users rank to Mentor Maven', async () => {
+    getGameSpy.mockReturnValueOnce(mockNimGame);
+    getUserSocketByUsernameSpy.mockReturnValueOnce(serverSocket);
+    applyMoveSpy.mockImplementation(() => {
+      mockNimGame.state.status = 'OVER';
+      mockNimGame.state.winners = ['player1'];
+    });
+
+    const joinGameEvent = new Promise(resolve => {
+      serverSocket.once('joinGame', arg => {
+        resolve(arg);
+      });
+    });
+
+    const makeMoveEvent = new Promise(resolve => {
+      serverSocket.once('makeMove', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameUpdateEvent = new Promise(resolve => {
+      clientSocket.once('gameUpdate', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameAchievementEvent = new Promise(resolve => {
+      clientSocket.once('gameAchievement', arg => {
+        resolve(arg);
+      });
+    });
+
+    clientSocket.emit('joinGame', 'game123');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Mock the findOne method to return a user with a specific ranking
+    const mockUser: DatabaseUser = expertUser;
+
+    jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+    jest.spyOn(userStatUtil, 'default').mockReturnValue('Mentor Maven');
+    jest.spyOn(achievementUtil, 'default').mockResolvedValue('Ascension IV');
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
+    });
+
+    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
+      joinGameEvent,
+      makeMoveEvent,
+      gameUpdateEvent,
+      gameAchievementEvent,
+    ]);
+
+    expect(joinMoveArg).toBe('game123');
+    expect(makeMoveArg).toStrictEqual(gameMovePayload);
+    expect(gameUpdateArg).toHaveProperty('gameInstance');
+    expect(mockNimGame.state.winners).toStrictEqual(['player1']);
+    expect(getGameSpy).toHaveBeenCalledWith('game123');
+    expect(applyMoveSpy).toHaveBeenCalledWith({
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    });
+    // Verify the rank update
+    expect(UserModel.updateOne).toHaveBeenCalledWith(
+      { username: mockUser.username },
+      {
+        $set: { ranking: 'Mentor Maven', score: 500, nimGameWins: 15 },
+      },
+    );
+    expect(toModelSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).toHaveBeenCalledWith('game123');
+  });
+
+  it('should add a score to the winning user and update the users rank to Master Maverick', async () => {
+    getGameSpy.mockReturnValueOnce(mockNimGame);
+    getUserSocketByUsernameSpy.mockReturnValueOnce(serverSocket);
+    applyMoveSpy.mockImplementation(() => {
+      mockNimGame.state.status = 'OVER';
+      mockNimGame.state.winners = ['player1'];
+    });
+
+    const joinGameEvent = new Promise(resolve => {
+      serverSocket.once('joinGame', arg => {
+        resolve(arg);
+      });
+    });
+
+    const makeMoveEvent = new Promise(resolve => {
+      serverSocket.once('makeMove', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameUpdateEvent = new Promise(resolve => {
+      clientSocket.once('gameUpdate', arg => {
+        resolve(arg);
+      });
+    });
+
+    const gameAchievementEvent = new Promise(resolve => {
+      clientSocket.once('gameAchievement', arg => {
+        resolve(arg);
+      });
+    });
+
+    clientSocket.emit('joinGame', 'game123');
+    clientSocket.emit('makeMove', gameMovePayload);
+
+    // Mock the findOne method to return a user with a specific ranking
+    const mockUser: DatabaseUser = mentorUser;
+
+    jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce(mockUser);
+    jest.spyOn(userStatUtil, 'default').mockReturnValue('Master Maverick');
+    jest.spyOn(achievementUtil, 'default').mockResolvedValue('Ascension V');
+    jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+      acknowledged: true,
+      matchedCount: 1,
+      modifiedCount: 1,
+      upsertedCount: 0,
+      upsertedId: null,
+    });
+
+    const [joinMoveArg, makeMoveArg, gameUpdateArg] = await Promise.all([
+      joinGameEvent,
+      makeMoveEvent,
+      gameUpdateEvent,
+      gameAchievementEvent,
+    ]);
+
+    expect(joinMoveArg).toBe('game123');
+    expect(makeMoveArg).toStrictEqual(gameMovePayload);
+    expect(gameUpdateArg).toHaveProperty('gameInstance');
+    expect(mockNimGame.state.winners).toStrictEqual(['player1']);
+    expect(getGameSpy).toHaveBeenCalledWith('game123');
+    expect(applyMoveSpy).toHaveBeenCalledWith({
+      playerID: 'player1',
+      gameID: 'game123',
+      move: { numObjects: 2 },
+    });
+    // Verify the rank update
+    expect(UserModel.updateOne).toHaveBeenCalledWith(
+      { username: mockUser.username },
+      {
+        $set: { ranking: 'Master Maverick', score: 750, nimGameWins: 20 },
+      },
+    );
+    expect(toModelSpy).toHaveBeenCalled();
+    expect(saveGameStateSpy).toHaveBeenCalled();
+    expect(removeGameSpy).toHaveBeenCalledWith('game123');
   });
 });
