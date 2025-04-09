@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ObjectId } from 'mongodb';
-import { Button, Typography } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import { Comment, DatabaseComment } from '../../../types/types';
 import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
@@ -62,7 +62,7 @@ const CommentSection = ({
   };
 
   return (
-    <div className='comment-section'>
+    <Box className='comment-section' sx={{ p: 1 }}>
       <Button size='small' onClick={() => setShowComments(!showComments)}>
         <Typography color='text-secondary'>
           {showComments ? 'Hide Comments' : 'Show Comments'}
@@ -104,7 +104,7 @@ const CommentSection = ({
           </div>
         </div>
       )}
-    </div>
+    </Box>
   );
 };
 

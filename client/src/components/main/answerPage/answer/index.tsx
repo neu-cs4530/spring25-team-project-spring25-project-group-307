@@ -88,8 +88,8 @@ const AnswerView = ({
               </Typography>
             </Box>
 
-            {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && (
-              <IconButton onClick={handleDeleteAnswer} size='small'>
+            {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate && (
+              <IconButton onClick={handleDeleteAnswer} size='small' sx={{ mr: 1 }}>
                 <DeleteIcon />
               </IconButton>
             )}

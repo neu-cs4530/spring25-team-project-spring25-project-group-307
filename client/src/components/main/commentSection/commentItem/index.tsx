@@ -100,7 +100,7 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Card sx={{ mb: 1, width: '100%' }}>
           <CardContent>
             <Typography variant='body1' sx={{ mb: 1 }}>
@@ -131,7 +131,10 @@ const CommentItem = ({ comment, handleDeleteComment, currentRole, moderate }: Co
           </CardContent>
         </Card>
         {(currentRole === 'ADMIN' || currentRole === 'MODERATOR') && moderate && (
-          <IconButton sx={{ ml: 2 }} onClick={() => handleDeleteComment(comment._id)}>
+          <IconButton
+            size='small'
+            sx={{ ml: 1, height: 'fit-content' }}
+            onClick={() => handleDeleteComment(comment._id)}>
             <DeleteIcon />
           </IconButton>
         )}
