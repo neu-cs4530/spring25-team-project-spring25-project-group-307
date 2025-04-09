@@ -1,6 +1,6 @@
 import TagModel from '../../models/tags.model';
 import QuestionModel from '../../models/questions.model';
-import { addTag, processTags, getTagCountMap } from '../../services/tag.service';
+import { addTag, processTags, getTagCountMap, deleteTagsByIds } from '../../services/tag.service';
 import { POPULATED_QUESTIONS, tag1, tag2, tag3 } from '../mockData.models';
 import { DatabaseTag } from '../../types/types';
 
@@ -156,6 +156,45 @@ describe('Tag model', () => {
       const result = await getTagCountMap();
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('deleteTagsByIds', () => {
+    beforeEach(() => {
+      mockingoose.resetAll();
+    });
+
+    test('deleteTagsByIds should return the result of deleteMany', async () => {
+      const ids = [tag1._id, tag2._id];
+      const mockResult = { deletedCount: 2 };
+
+      mockingoose(TagModel).toReturn(mockResult, 'deleteMany');
+
+      const result = await deleteTagsByIds(ids);
+
+      expect(result).toEqual(mockResult);
+    });
+
+    test('deleteTagsByIds should return an error if deleteMany fails', async () => {
+      const ids = [tag1._id, tag2._id];
+
+      mockingoose(TagModel).toReturn(new Error('error'), 'deleteMany');
+
+      const result = await deleteTagsByIds(ids);
+
+      expect(result).toEqual({ error: 'Error occurred when deleting tags: Error: error' });
+    });
+
+    test('deleteTagsByIds should return an error if deleteMany returns null', async () => {
+      const ids = [tag1._id, tag2._id];
+
+      mockingoose(TagModel).toReturn(null, 'deleteMany');
+
+      const result = await deleteTagsByIds(ids);
+
+      expect(result).toEqual({
+        error: 'Error occurred when deleting tags: Error: Failed to delete tags',
+      });
     });
   });
 });
