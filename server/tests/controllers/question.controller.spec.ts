@@ -1099,11 +1099,36 @@ describe('Test questionController', () => {
 });
 
 const ASCENSION_CASES = [
-  { currentRank: 'Newcomer Newbie', newRank: 'Common Contributor', achievement: 'Ascension I' },
-  { currentRank: 'Common Contributor', newRank: 'Skilled Solver', achievement: 'Ascension II' },
-  { currentRank: 'Skilled Solver', newRank: 'Expert Explorer', achievement: 'Ascension III' },
-  { currentRank: 'Expert Explorer', newRank: 'Mentor Maven', achievement: 'Ascension IV' },
-  { currentRank: 'Mentor Maven', newRank: 'Master Maverick', achievement: 'Ascension V' },
+  {
+    currentRank: 'Newcomer Newbie',
+    newRank: 'Common Contributor',
+    achievement: 'Ascension I',
+    score: 100,
+  },
+  {
+    currentRank: 'Common Contributor',
+    newRank: 'Skilled Solver',
+    achievement: 'Ascension II',
+    score: 200,
+  },
+  {
+    currentRank: 'Skilled Solver',
+    newRank: 'Expert Explorer',
+    achievement: 'Ascension III',
+    score: 300,
+  },
+  {
+    currentRank: 'Expert Explorer',
+    newRank: 'Mentor Maven',
+    achievement: 'Ascension IV',
+    score: 400,
+  },
+  {
+    currentRank: 'Mentor Maven',
+    newRank: 'Master Maverick',
+    achievement: 'Ascension V',
+    score: 500,
+  },
 ];
 
 it('should unlock Curious Thinker when user asks their 5th question', async () => {
@@ -1745,3 +1770,69 @@ describe('GET /question/getCommunityQuestion/:qid', () => {
     expect(res.text).toMatch(/Error when getting community question/);
   });
 });
+
+describe.each(ASCENSION_CASES)(
+  'Rank transition from $currentRank to $newRank',
+  ({ currentRank, newRank, achievement, score }) => {
+    it(`should unlock ${achievement} when score increases to reach ${newRank}`, async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const qid = new mongoose.Types.ObjectId();
+      const username = 'rank-user';
+
+      const mockReqBody = {
+        title: 'Test Title',
+        text: 'Test Text',
+        tags: [{ name: 'test', description: 'test tag' }],
+        askedBy: username,
+        askDateTime: new Date('2024-06-06'),
+        views: [],
+        upVotes: [],
+        downVotes: [],
+        answers: [],
+        comments: [],
+        reportedBy: [],
+      };
+
+      const dbTag = { _id: new mongoose.Types.ObjectId(), name: 'test', description: 'test tag' };
+
+      jest.spyOn(tagUtil, 'processTags').mockResolvedValueOnce([dbTag]);
+      jest.spyOn(questionUtil, 'saveQuestion').mockResolvedValueOnce({
+        ...mockReqBody,
+        _id: qid,
+        tags: [dbTag._id],
+      });
+
+      jest.spyOn(databaseUtil, 'populateDocument').mockResolvedValueOnce({
+        ...mockReqBody,
+        _id: qid,
+        tags: [dbTag],
+        answers: [],
+        comments: [],
+      });
+
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({
+        _id: userId,
+        username,
+        score,
+        ranking: currentRank,
+        questionsAsked: 1,
+      });
+
+      jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+        acknowledged: true,
+        matchedCount: 1,
+        modifiedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null,
+      });
+
+      (getUpdatedRank as jest.Mock).mockReturnValueOnce(newRank);
+
+      const response = await supertest(app).post('/question/addQuestion').send(mockReqBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body.unlockedAchievements).toContain(achievement);
+      expect(grantAchievementToUser).toHaveBeenCalledWith(userId.toString(), achievement);
+    });
+  },
+);

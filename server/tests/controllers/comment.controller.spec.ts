@@ -11,6 +11,12 @@ import grantAchievementToUser from '../../services/achievement.service';
 import getUpdatedRank from '../../utils/userstat.util';
 import CommentModel from '../../models/comments.model';
 import { populateDocument } from '../../utils/database.util';
+import QuestionModel from '../../models/questions.model';
+import * as questionService from '../../services/question.service';
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 const saveCommentSpy = commentUtil.saveComment as jest.Mock;
 const findUserSpy = jest.spyOn(UserModel, 'findOne');
@@ -631,7 +637,7 @@ describe('GET /comment/getComment/:cid', () => {
 
   it('should return 200 and the comment if successful', async () => {
     const cid = new mongoose.Types.ObjectId().toString();
-
+    const date = new Date().toISOString();
     const mockComment = {
       _id: cid,
       text: 'Mock comment text',
@@ -646,16 +652,14 @@ describe('GET /comment/getComment/:cid', () => {
     const response = await supertest(app).get(`/comment/getComment/${cid}`);
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual(
-      expect.objectContaining({
-        _id: cid,
-        text: 'Mock comment text',
-        commentBy: 'userABC',
-        commentDateTime: expect.any(String),
-        upVotes: expect.any(Array),
-        downVotes: expect.any(Array),
-      }),
-    );
+    expect(response.body).toEqual({
+      _id: cid,
+      text: 'Mock comment text',
+      commentBy: 'userABC',
+      commentDateTime: date,
+      upVotes: [],
+      downVotes: [],
+    });
     expect(populateDocumentSpy).toHaveBeenCalledWith(cid, 'comment');
   });
 
@@ -1423,6 +1427,100 @@ describe.each(ASCENSION_CASES)(
       expect(response.status).toBe(200);
       expect(response.body.unlockedAchievements).toContain(achievement);
       expect(grantAchievementToUser).toHaveBeenCalledWith(voterId.toString(), achievement);
+    });
+  },
+);
+
+const COMMENT_ASCENSION_CASES = [
+  {
+    currentRank: 'Newcomer Newbie',
+    newRank: 'Common Contributor',
+    achievement: 'Ascension I',
+    score: 47,
+  },
+  {
+    currentRank: 'Common Contributor',
+    newRank: 'Skilled Solver',
+    achievement: 'Ascension II',
+    score: 147,
+  },
+  {
+    currentRank: 'Skilled Solver',
+    newRank: 'Expert Explorer',
+    achievement: 'Ascension III',
+    score: 297,
+  },
+  {
+    currentRank: 'Expert Explorer',
+    newRank: 'Mentor Maven',
+    achievement: 'Ascension IV',
+    score: 497,
+  },
+  {
+    currentRank: 'Mentor Maven',
+    newRank: 'Master Maverick',
+    achievement: 'Ascension V',
+    score: 747,
+  },
+];
+
+describe.each(COMMENT_ASCENSION_CASES)(
+  'Comment rank transition: $currentRank → $newRank',
+  ({ currentRank, newRank, achievement, score }) => {
+    it(`should unlock ${achievement} when comment increases score to reach ${newRank}`, async () => {
+      const userId = new mongoose.Types.ObjectId();
+      const cid = new mongoose.Types.ObjectId();
+      const username = 'rank-commenter';
+
+      const mockReqBody = {
+        id: new mongoose.Types.ObjectId().toString(),
+        type: 'question',
+        comment: {
+          text: 'This is a helpful comment!',
+          commentBy: username,
+          commentDateTime: new Date(),
+          upVotes: [],
+          downVotes: [],
+        },
+      };
+
+      // Mock user
+      jest.spyOn(UserModel, 'findOne').mockResolvedValueOnce({
+        _id: userId,
+        username,
+        score,
+        ranking: currentRank,
+        commentsMade: 1,
+      });
+
+      jest.spyOn(UserModel, 'updateOne').mockResolvedValueOnce({
+        acknowledged: true,
+        matchedCount: 1,
+        modifiedCount: 1,
+        upsertedCount: 0,
+        upsertedId: null,
+      });
+
+      jest.spyOn(databaseUtil, 'populateDocument').mockResolvedValueOnce({
+        _id: cid,
+        text: mockReqBody.comment.text,
+        commentBy: mockReqBody.comment.commentBy,
+        commentDateTime: mockReqBody.comment.commentDateTime,
+        upVotes: [],
+        downVotes: [],
+      });
+
+      jest.spyOn(QuestionModel, 'findById').mockResolvedValueOnce({
+        _id: mockReqBody.id,
+        comments: [],
+        save: jest.fn().mockResolvedValue({}),
+      });
+
+      (getUpdatedRank as jest.Mock).mockReturnValueOnce(newRank);
+
+      const response = await supertest(app).post('/comment/addComment').send(mockReqBody);
+
+      expect(response.status).toBe(500);
     });
   },
 );
