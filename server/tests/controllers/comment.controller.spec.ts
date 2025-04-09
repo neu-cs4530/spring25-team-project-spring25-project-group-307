@@ -12,7 +12,6 @@ import getUpdatedRank from '../../utils/userstat.util';
 import CommentModel from '../../models/comments.model';
 import { populateDocument } from '../../utils/database.util';
 import QuestionModel from '../../models/questions.model';
-import * as questionService from '../../services/question.service';
 
 beforeEach(() => {
   jest.clearAllMocks();
