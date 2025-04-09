@@ -3,6 +3,7 @@ import QuestionModel from '../../models/questions.model';
 import AnswerModel from '../../models/answers.model';
 import ChatModel from '../../models/chat.model';
 import UserModel from '../../models/users.model';
+import getUpdatedRank from '../../utils/userstat.util';
 
 jest.mock('../../models/questions.model');
 jest.mock('../../models/answers.model');
@@ -188,5 +189,37 @@ describe('populateDocument', () => {
     expect(result).toEqual({
       error: 'Error when fetching and populating a document: Invalid type provided.',
     });
+  });
+});
+
+describe('getUpdatedRank', () => {
+  it('returns "Newcomer Newbie" for score below 50', () => {
+    expect(getUpdatedRank(0)).toBe('Newcomer Newbie');
+    expect(getUpdatedRank(49)).toBe('Newcomer Newbie');
+  });
+
+  it('returns "Common Contributor" for score 50-149', () => {
+    expect(getUpdatedRank(50)).toBe('Common Contributor');
+    expect(getUpdatedRank(149)).toBe('Common Contributor');
+  });
+
+  it('returns "Skilled Solver" for score 150-299', () => {
+    expect(getUpdatedRank(150)).toBe('Skilled Solver');
+    expect(getUpdatedRank(299)).toBe('Skilled Solver');
+  });
+
+  it('returns "Expert Explorer" for score 300-499', () => {
+    expect(getUpdatedRank(300)).toBe('Expert Explorer');
+    expect(getUpdatedRank(499)).toBe('Expert Explorer');
+  });
+
+  it('returns "Mentor Maven" for score 500-749', () => {
+    expect(getUpdatedRank(500)).toBe('Mentor Maven');
+    expect(getUpdatedRank(749)).toBe('Mentor Maven');
+  });
+
+  it('returns "Master Maverick" for score 750 and above', () => {
+    expect(getUpdatedRank(750)).toBe('Master Maverick');
+    expect(getUpdatedRank(1000)).toBe('Master Maverick');
   });
 });

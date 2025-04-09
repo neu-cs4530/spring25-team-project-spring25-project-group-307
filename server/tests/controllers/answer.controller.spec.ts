@@ -11,7 +11,6 @@ import * as achievementService from '../../services/achievement.service';
 
 import userNotificationManager from '../../services/userNotificationManager';
 import * as questionService from '../../services/question.service';
-import * as commentUtil from '../../services/comment.service';
 import getUpdatedRank from '../../utils/userstat.util';
 import AnswerModel from '../../models/answers.model';
 
