@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Box } from '@mui/material';
 import Layout from './layout';
 import Login from './auth/login';
 import { FakeSOSocket, SafeDatabaseUser } from '../types/types';
@@ -17,6 +18,14 @@ import UsersListPage from './main/usersListPage';
 import ProfileSettings from './profileSettings';
 import AllGamesPage from './main/games/allGamesPage';
 import GamePage from './main/games/gamePage';
+import LeaderboardPage from './main/leaderboardPage';
+import CommunityPage from './main/communityListPage';
+import NewCommunityPage from './main/newCommunity';
+import FeedPage from './main/feedPage';
+import ViewCommunityPage from './main/viewCommunityPage';
+import NewCommunityQuestion from './main/newCommunityQuestion';
+import StatisticsPage from './statistics';
+import SavedPage from './main/savedPage';
 
 const ProtectedRoute = ({
   user,
@@ -39,7 +48,21 @@ const ProtectedRoute = ({
  * It manages the state for search terms and the main title.
  */
 const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
-  const [user, setUser] = useState<SafeDatabaseUser | null>(null);
+  const [user, setSafeDatabaseUser] = useState<SafeDatabaseUser | null>(null);
+  const setUser = (safeDatabaseUser: SafeDatabaseUser | null) => {
+    if (socket && safeDatabaseUser) {
+      setSafeDatabaseUser(safeDatabaseUser);
+      socket.emit('loginUser', safeDatabaseUser.username);
+    }
+  };
+  // in case of disconnect
+  useEffect(() => {
+    if (user && socket) {
+      socket.on('connect', () => {
+        socket.emit('loginUser', user.username);
+      });
+    }
+  }, [socket, user]);
 
   return (
     <LoginContext.Provider value={{ setUser }}>
@@ -62,10 +85,25 @@ const FakeStackOverflow = ({ socket }: { socket: FakeSOSocket | null }) => {
             <Route path='/question/:qid' element={<AnswerPage />} />
             <Route path='/new/question' element={<NewQuestionPage />} />
             <Route path='/new/answer/:qid' element={<NewAnswerPage />} />
-            <Route path='/users' element={<UsersListPage />} />
+            <Route
+              path='/users'
+              element={
+                <Box sx={{ mx: 10, my: 4 }}>
+                  <UsersListPage />
+                </Box>
+              }
+            />
             <Route path='/user/:username' element={<ProfileSettings />} />
             <Route path='/games' element={<AllGamesPage />} />
             <Route path='/games/:gameID' element={<GamePage />} />
+            <Route path='/leaderboard' element={<LeaderboardPage />} />
+            <Route path='/communities' element={<CommunityPage />} />
+            <Route path='/community/:cid' element={<ViewCommunityPage />} />
+            <Route path='/new/community' element={<NewCommunityPage />} />
+            <Route path='/new/question/:cid' element={<NewCommunityQuestion />} />
+            <Route path='/statistics/:username' element={<StatisticsPage />} />
+            <Route path='/feed' element={<FeedPage />} />
+            <Route path='/saved' element={<SavedPage />} />
           </Route>
         }
       </Routes>

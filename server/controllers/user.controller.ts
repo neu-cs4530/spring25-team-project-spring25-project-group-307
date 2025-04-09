@@ -8,10 +8,13 @@ import {
   UpdateBiographyRequest,
 } from '../types/types';
 import {
+  addUserSavedQuestion,
   deleteUserByUsername,
   getUserByUsername,
   getUsersList,
+  getUserWithSavedQuestions,
   loginUser,
+  removeUserSavedQuestion,
   saveUser,
   updateUser,
 } from '../services/user.service';
@@ -60,6 +63,17 @@ const userController = (socket: FakeSOSocket) => {
       ...requestUser,
       dateJoined: new Date(),
       biography: requestUser.biography ?? '',
+      ranking: 'Newcomer Newbie',
+      score: 0,
+      achievements: [],
+      questionsAsked: 0,
+      responsesGiven: 0,
+      lastLogin: new Date(),
+      savedQuestions: [],
+      nimGameWins: 0,
+      upVotesGiven: 0,
+      downVotesGiven: 0,
+      commentsMade: 0,
     };
 
     try {
@@ -236,6 +250,79 @@ const userController = (socket: FakeSOSocket) => {
     }
   };
 
+  const addSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || !req.body.username || !req.body.questionId) {
+      res.status(400).send('Invalid request body');
+      return;
+    }
+    const { username, questionId } = req.body;
+    try {
+      const updatedUser = await addUserSavedQuestion(username, questionId);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when adding saved question: ${error}`);
+    }
+  };
+
+  const removeSavedQuestion = async (req: Request, res: Response): Promise<void> => {
+    if (!req.body || !req.body.username || !req.body.questionId) {
+      res.status(400).send('Invalid request body');
+      return;
+    }
+    const { username, questionId } = req.body;
+    try {
+      const updatedUser = await removeUserSavedQuestion(username, questionId);
+
+      if ('error' in updatedUser) {
+        throw new Error(updatedUser.error);
+      }
+
+      socket.emit('userUpdate', {
+        user: updatedUser,
+        type: 'updated',
+      });
+
+      res.status(200).json(updatedUser);
+    } catch (error) {
+      res.status(500).send(`Error when removing saved question: ${error}`);
+    }
+  };
+
+  /**
+   * Retrieves a user by their username.
+   * @param req The request containing the username as a route parameter.
+   * @param res The response, either returning the user or an error.
+   * @returns A promise resolving to void.
+   */
+  const getUserSavedQuestions = async (
+    req: UserByUsernameRequest,
+    res: Response,
+  ): Promise<void> => {
+    try {
+      const { username } = req.params;
+
+      const user = await getUserWithSavedQuestions(username);
+
+      if ('error' in user) {
+        throw Error(user.error);
+      }
+
+      res.status(200).json(user);
+    } catch (error) {
+      res.status(500).send(`Error when getting user with saved questions ${error}`);
+    }
+  };
+
   // Define routes for the user-related operations.
   router.post('/signup', createUser);
   router.post('/login', userLogin);
@@ -244,6 +331,9 @@ const userController = (socket: FakeSOSocket) => {
   router.get('/getUsers', getUsers);
   router.delete('/deleteUser/:username', deleteUser);
   router.patch('/updateBiography', updateBiography);
+  router.patch('/addSavedQuestion', addSavedQuestion);
+  router.patch('/removeSavedQuestion', removeSavedQuestion);
+  router.get('/getUserSavedQuestions/:username', getUserSavedQuestions);
   return router;
 };
 

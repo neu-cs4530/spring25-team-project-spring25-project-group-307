@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { getMetaData } from '../../../tool';
+import { ObjectId } from 'mongodb';
+import { Box, Button, Typography } from '@mui/material';
 import { Comment, DatabaseComment } from '../../../types/types';
 import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
+import CommentItem from './commentItem';
 
 /**
  * Interface representing the props for the Comment Section component.
@@ -13,6 +15,9 @@ import useUserContext from '../../../hooks/useUserContext';
 interface CommentSectionProps {
   comments: DatabaseComment[];
   handleAddComment: (comment: Comment) => void;
+  handleDeleteComment: (commentId: ObjectId) => void;
+  currentRole: string;
+  moderate?: boolean;
 }
 
 /**
@@ -21,7 +26,13 @@ interface CommentSectionProps {
  * @param comments: an array of Comment objects
  * @param handleAddComment: function to handle the addition of a new comment
  */
-const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => {
+const CommentSection = ({
+  comments,
+  handleAddComment,
+  handleDeleteComment,
+  currentRole,
+  moderate,
+}: CommentSectionProps) => {
   const { user } = useUserContext();
   const [text, setText] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
@@ -39,7 +50,10 @@ const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => 
     const newComment: Comment = {
       text,
       commentBy: user.username,
+      commentByRank: user.ranking,
       commentDateTime: new Date(),
+      upVotes: [],
+      downVotes: [],
     };
 
     handleAddComment(newComment);
@@ -48,21 +62,25 @@ const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => 
   };
 
   return (
-    <div className='comment-section'>
-      <button className='toggle-button' onClick={() => setShowComments(!showComments)}>
-        {showComments ? 'Hide Comments' : 'Show Comments'}
-      </button>
+    <Box className='comment-section' sx={{ p: 1 }}>
+      <Button size='small' onClick={() => setShowComments(!showComments)}>
+        <Typography color='text-secondary'>
+          {showComments ? 'Hide Comments' : 'Show Comments'}
+        </Typography>
+      </Button>
 
       {showComments && (
         <div className='comments-container'>
           <ul className='comments-list'>
             {comments.length > 0 ? (
               comments.map(comment => (
-                <li key={String(comment._id)} className='comment-item'>
-                  <p className='comment-text'>{comment.text}</p>
-                  <small className='comment-meta'>
-                    {comment.commentBy}, {getMetaData(new Date(comment.commentDateTime))}
-                  </small>
+                <li key={comment._id.toString()}>
+                  <CommentItem
+                    comment={comment}
+                    handleDeleteComment={handleDeleteComment}
+                    currentRole={currentRole}
+                    moderate={moderate}
+                  />
                 </li>
               ))
             ) : (
@@ -78,15 +96,15 @@ const CommentSection = ({ comments, handleAddComment }: CommentSectionProps) => 
                 onChange={e => setText(e.target.value)}
                 className='comment-textarea'
               />
-              <button className='add-comment-button' onClick={handleAddCommentClick}>
+              <Button variant='contained' onClick={handleAddCommentClick} sx={{ mb: 1 }}>
                 Add Comment
-              </button>
+              </Button>
             </div>
             {textErr && <small className='error'>{textErr}</small>}
           </div>
         </div>
       )}
-    </div>
+    </Box>
   );
 };
 

@@ -1,5 +1,6 @@
+import { ObjectId } from 'mongodb';
 import api from './config';
-import { Comment, DatabaseComment } from '../types/types';
+import { Comment, DatabaseComment, PopulatedDatabaseComment, VoteInterface } from '../types/types';
 
 const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
 
@@ -11,7 +12,7 @@ const COMMENT_API_URL = `${process.env.REACT_APP_SERVER_URL}/comment`;
  */
 interface AddCommentRequestBody {
   id?: string;
-  type: 'question' | 'answer';
+  type: 'question' | 'answer' | 'comment';
   comment: Comment;
 }
 
@@ -25,9 +26,9 @@ interface AddCommentRequestBody {
  */
 const addComment = async (
   id: string,
-  type: 'question' | 'answer',
+  type: 'question' | 'answer' | 'comment',
   comment: Comment,
-): Promise<DatabaseComment> => {
+): Promise<{ answer: DatabaseComment; unlockedAchievements: string[] }> => {
   const reqBody: AddCommentRequestBody = {
     id,
     type,
@@ -37,7 +38,66 @@ const addComment = async (
   if (res.status !== 200) {
     throw new Error('Error while creating a new comment for the question');
   }
+  return {
+    answer: res.data.answer,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+const deleteComment = async (cid: ObjectId): Promise<DatabaseComment> => {
+  const res = await api.delete(`${COMMENT_API_URL}/deleteComment/${cid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while deleting a comment');
+  }
   return res.data;
 };
 
-export default addComment;
+/**
+ * Gets the populated replies for a specific comment.
+ * @param cid - The ID of the comment for which to fetch replies.
+ * @returns The populated replies for the specified comment.
+ * @throws Error if the request fails or the response status is not 200.
+ */
+const getReplies = async (cid: string): Promise<PopulatedDatabaseComment> => {
+  const res = await api.get(`${COMMENT_API_URL}/getComment/${cid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while fetching replies for the comment');
+  }
+  return res.data;
+};
+
+/**
+ * Upvotes a comment.
+ */
+const upvoteComment = async (
+  cid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
+  const res = await api.post(`${COMMENT_API_URL}/upvoteComment`, { cid, username });
+  if (res.status !== 200) {
+    throw new Error('Error while upvoting the comment');
+  }
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+/**
+ * Downvotes a comment.
+ */
+const downvoteComment = async (
+  cid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
+  const res = await api.post(`${COMMENT_API_URL}/downvoteComment`, { cid, username });
+  if (res.status !== 200) {
+    throw new Error('Error while downvoting the comment');
+  }
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+export { addComment, deleteComment, getReplies, upvoteComment, downvoteComment };

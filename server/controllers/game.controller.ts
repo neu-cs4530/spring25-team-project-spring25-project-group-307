@@ -4,11 +4,16 @@ import {
   CreateGameRequest,
   GameMovePayload,
   GameRequest,
+  NimGameState,
   GetGamesRequest,
 } from '../types/types';
 import findGames from '../services/game.service';
+import UserModel from '../models/users.model';
+import grantAchievementToUser from '../services/achievement.service';
+import getUpdatedRank from '../utils/userstat.util';
 import GameManager from '../services/games/gameManager';
 import { GAME_TYPES } from '../types/constants';
+import UserNotificationManager from '../services/userNotificationManager';
 
 /**
  * Express controller for handling game-related requests,
@@ -77,8 +82,10 @@ const gameController = (socket: FakeSOSocket) => {
 
       const game = await GameManager.getInstance().joinGame(gameID, playerID);
 
-      if ('error' in game) {
-        throw new Error(game.error);
+      if (!game || typeof game === 'string' || 'error' in game) {
+        const errMessage =
+          typeof game === 'string' ? game : (game?.error ?? 'Unknown error joining game');
+        throw new Error(errMessage);
       }
 
       socket.to(gameID).emit('gameUpdate', { gameInstance: game });
@@ -151,9 +158,75 @@ const gameController = (socket: FakeSOSocket) => {
       socket.to(gameID).emit('gameUpdate', { gameInstance: game.toModel() });
 
       await game.saveGameState();
+      const unlocked: string[] = [];
+      const { winners } = game.state as NimGameState;
+      let winnerUsername = Array.isArray(winners) && winners.length === 1 ? winners[0] : null;
 
       if (game.state.status === 'OVER') {
+        winnerUsername = Array.isArray(winners) && winners.length === 1 ? winners[0] : null;
+
+        if (winnerUsername) {
+          const winnerUser = await UserModel.findOne({ username: winnerUsername });
+          const currentRank = winnerUser?.ranking;
+          if (winnerUser) {
+            const totalNimWins = winnerUser.nimGameWins + 1;
+            const newScore = winnerUser.score + 7;
+            const newRank = getUpdatedRank(newScore);
+
+            if (currentRank !== newRank && newRank === 'Common Contributor') {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension I');
+              if (a) unlocked.push(a);
+            }
+            if (currentRank !== newRank && newRank === 'Skilled Solver') {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension II');
+              if (a) unlocked.push(a);
+            }
+            if (currentRank !== newRank && newRank === 'Expert Explorer') {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension III');
+              if (a) unlocked.push(a);
+            }
+            if (currentRank !== newRank && newRank === 'Mentor Maven') {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension IV');
+              if (a) unlocked.push(a);
+            }
+            if (currentRank !== newRank && newRank === 'Master Maverick') {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Ascension V');
+              if (a) unlocked.push(a);
+            }
+
+            if (totalNimWins === 1) {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Nim Beginner');
+              if (a) unlocked.push(a);
+            } else if (totalNimWins === 5) {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Nim Novice');
+              if (a) unlocked.push(a);
+            } else if (totalNimWins === 10) {
+              const a = await grantAchievementToUser(winnerUser._id.toString(), 'Nim King');
+              if (a) unlocked.push(a);
+            }
+
+            await UserModel.updateOne(
+              { username: winnerUsername },
+              {
+                $set: {
+                  score: newScore,
+                  ranking: newRank,
+                  nimGameWins: totalNimWins,
+                },
+              },
+            );
+          }
+        }
         GameManager.getInstance().removeGame(gameID);
+      }
+      if (winnerUsername) {
+        if (winnerUsername && unlocked.length > 0) {
+          const winnerSocket =
+            UserNotificationManager.getInstance().getUserSocketByUsername(winnerUsername);
+          if (winnerSocket) {
+            winnerSocket.emit('gameAchievement', { unlockedAchievements: unlocked });
+          }
+        }
       }
     } catch (error) {
       socket.to(gameID).emit('gameError', {

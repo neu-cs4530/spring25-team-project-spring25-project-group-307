@@ -21,6 +21,7 @@ export interface AnswerUpdatePayload {
  */
 export interface GameUpdatePayload {
   gameInstance: GameInstance<GameState>;
+  unlockedAchievements?: string[];
 }
 
 /**
@@ -46,6 +47,18 @@ export interface VoteUpdatePayload {
 }
 
 /**
+ * Payload for an answer vote update event.
+ * - `aid`: The unique identifier of the answer.
+ * - `upVotes`: An array of usernames who upvoted the answer.
+ * - `downVotes`: An array of usernames who downvoted the answer.
+ */
+export interface AnswerVoteUpdatePayload {
+  aid: string;
+  upVotes: string[];
+  downVotes: string[];
+}
+
+/**
  * Payload for a chat update event.
  * - `chat`: The updated chat object.
  * - `type`: The type of update (`'created'`, `'newMessage'`, or `'newParticipant'`).
@@ -61,8 +74,8 @@ export interface ChatUpdatePayload {
  * - `type`: The type of the updated item (`'question'` or `'answer'`).
  */
 export interface CommentUpdatePayload {
-  result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer;
-  type: 'question' | 'answer';
+  result: PopulatedDatabaseQuestion | PopulatedDatabaseAnswer | PopulatedDatabaseComment;
+  type: 'question' | 'answer' | 'comment';
 }
 
 /**
@@ -107,6 +120,19 @@ export interface ClientToServerEvents {
   leaveGame: (gameID: string) => void;
   joinChat: (chatID: string) => void;
   leaveChat: (chatID: string | undefined) => void;
+  loginUser: (username: string) => void;
+}
+
+/**
+ * Payload for a comment vote update event.
+ * - `cid`: The unique identifier of the comment.
+ * - `upVotes`: An array of usernames who upvoted the comment.
+ * - `downVotes`: An array of usernames who downvoted the comment.
+ */
+export interface CommentVoteUpdatePayload {
+  cid: string;
+  upVotes: string[];
+  downVotes: string[];
 }
 
 /**
@@ -119,18 +145,26 @@ export interface ClientToServerEvents {
  * - `messageUpdate`: Server sends updated message.
  * - `userUpdate`: Server sends updated user status.
  * - `gameUpdate`: Server sends updated game state.
+ * - `gameAchievement`: Server sends notification of unlocked achievements in the game.
  * - `gameError`: Server sends error message related to game operation.
  * - `chatUpdate`: Server sends updated chat.
+ * - `answerVoteUpdate`: Server sends updated votes for an answer.
+ * - `commentVoteUpdate`: Server sends updated votes for a comment.
+ *
  */
 export interface ServerToClientEvents {
   questionUpdate: (question: PopulatedDatabaseQuestion) => void;
   answerUpdate: (result: AnswerUpdatePayload) => void;
   viewsUpdate: (question: PopulatedDatabaseQuestion) => void;
   voteUpdate: (vote: VoteUpdatePayload) => void;
+  answerVoteUpdate: (vote: AnswerVoteUpdatePayload) => void;
+  commentVoteUpdate: (vote: CommentVoteUpdatePayload) => void;
   commentUpdate: (comment: CommentUpdatePayload) => void;
   messageUpdate: (message: MessageUpdatePayload) => void;
   userUpdate: (user: UserUpdatePayload) => void;
   gameUpdate: (game: GameUpdatePayload) => void;
+  gameAchievement: (payload: { unlockedAchievements: string[] }) => void;
   gameError: (error: GameErrorPayload) => void;
   chatUpdate: (chat: ChatUpdatePayload) => void;
+  preferencesUpdate: (updateMessage: string) => void;
 }

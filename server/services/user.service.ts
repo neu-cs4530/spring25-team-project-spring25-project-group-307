@@ -1,5 +1,7 @@
+import { ObjectId } from 'mongodb';
 import UserModel from '../models/users.model';
 import {
+  DatabaseCommunity,
   DatabaseUser,
   SafeDatabaseUser,
   User,
@@ -7,6 +9,13 @@ import {
   UserResponse,
   UsersResponse,
 } from '../types/types';
+import { deleteFeedByUserId, getFeedByUserId, saveFeed } from './feed.service';
+import { deleteFeedItemsByFeedId } from './feedItem.service';
+import { deleteInterestsByUserId } from './interest.service';
+import CommunityModel from '../models/communities.model';
+import AnswerModel from '../models/answers.model';
+import CommentModel from '../models/comments.model';
+import TagModel from '../models/tags.model';
 
 /**
  * Saves a new user to the database.
@@ -16,10 +25,18 @@ import {
  */
 export const saveUser = async (user: User): Promise<UserResponse> => {
   try {
-    const result: DatabaseUser = await UserModel.create(user);
+    const result: DatabaseUser = await UserModel.create({
+      ...user,
+    });
 
     if (!result) {
       throw Error('Failed to create user');
+    }
+
+    const feed = await saveFeed({ userId: result._id, lastViewedRanking: 0 });
+
+    if ('error' in feed) {
+      throw Error('Failed to create feed for new user');
     }
 
     // Remove password field from returned object
@@ -28,6 +45,18 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
       username: result.username,
       dateJoined: result.dateJoined,
       biography: result.biography,
+      ranking: result.ranking,
+      score: result.score,
+      achievements: result.achievements,
+      // adding in the addtional parameters
+      questionsAsked: result.questionsAsked,
+      responsesGiven: result.responsesGiven,
+      lastLogin: result.lastLogin,
+      savedQuestions: result.savedQuestions,
+      upVotesGiven: result.upVotesGiven,
+      downVotesGiven: result.downVotesGiven,
+      nimGameWins: result.nimGameWins,
+      commentsMade: result.commentsMade,
     };
 
     return safeUser;
@@ -44,7 +73,11 @@ export const saveUser = async (user: User): Promise<UserResponse> => {
  */
 export const getUserByUsername = async (username: string): Promise<UserResponse> => {
   try {
-    const user: SafeDatabaseUser | null = await UserModel.findOne({ username }).select('-password');
+    const user: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      // when user logs in, update the last login time to the current time
+      { lastLogin: new Date() },
+    ).select('-password');
 
     if (!user) {
       throw Error('User not found');
@@ -116,6 +149,55 @@ export const deleteUserByUsername = async (username: string): Promise<UserRespon
       throw Error('Error deleting user');
     }
 
+    // Retrieve the communities the user is part of (either as a member, moderator, or admin) via the community model
+    const communities: DatabaseCommunity[] = await CommunityModel.find({
+      $or: [
+        { admins: deletedUser._id },
+        { moderators: deletedUser._id },
+        { members: deletedUser._id },
+      ],
+    });
+
+    // For each community, remove the user from the community using the community model findOneAndUpdate method
+    await Promise.all(
+      communities.map(async community => {
+        await CommunityModel.findOneAndUpdate(
+          { title: community.title },
+          {
+            $pull: {
+              members: deletedUser._id,
+              moderators: deletedUser._id,
+              admins: deletedUser._id,
+            },
+          },
+        );
+      }),
+    );
+
+    const deletedFeedId = await getFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeedId) {
+      throw Error('Failed to find feed for user');
+    }
+
+    const deletedFeedItems = await deleteFeedItemsByFeedId(deletedFeedId._id);
+
+    if ('error' in deletedFeedItems) {
+      throw Error('Failed to delete feed items for user');
+    }
+
+    const deletedFeed = await deleteFeedByUserId(deletedUser._id);
+
+    if ('error' in deletedFeed) {
+      throw Error('Failed to delete feed for user');
+    }
+
+    const deletedInterests = await deleteInterestsByUserId(deletedUser._id);
+
+    if ('error' in deletedInterests) {
+      throw Error('Failed to delete interests for user');
+    }
+
     return deletedUser;
   } catch (error) {
     return { error: `Error occurred when finding user: ${error}` };
@@ -147,5 +229,90 @@ export const updateUser = async (
     return updatedUser;
   } catch (error) {
     return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+/**
+ * Retrieves a user by their ID.
+ * @param id The ID of the user to retrieve
+ * @returns the user with the given ID or null if an error occurred
+ *
+ */
+export const getUserById = async (id: ObjectId): Promise<UserResponse> => {
+  try {
+    const user: DatabaseUser | null = await UserModel.findOne({ _id: id });
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  } catch (error) {
+    return { error: `Error occurred when finding user: ${error}` };
+  }
+};
+
+export const addUserSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<UserResponse> => {
+  try {
+    const updatedUser: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      { $push: { savedQuestions: questionId } },
+      { new: true },
+    ).select('-password');
+
+    if (!updatedUser) {
+      throw Error('Error updating user');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+export const removeUserSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<UserResponse> => {
+  try {
+    const updatedUser: SafeDatabaseUser | null = await UserModel.findOneAndUpdate(
+      { username },
+      { $pull: { savedQuestions: questionId } },
+      { new: true },
+    ).select('-password');
+
+    if (!updatedUser) {
+      throw Error('Error updating user');
+    }
+
+    return updatedUser;
+  } catch (error) {
+    return { error: `Error occurred when updating user: ${error}` };
+  }
+};
+
+export const getUserWithSavedQuestions = async (username: string): Promise<UserResponse> => {
+  try {
+    const user = await UserModel.findOne({ username }).populate({
+      path: 'savedQuestions',
+      populate: [
+        { path: 'tags', model: TagModel },
+        {
+          path: 'answers',
+          model: AnswerModel,
+          populate: { path: 'comments', model: CommentModel },
+        },
+        { path: 'comments', model: CommentModel },
+      ],
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user;
+  } catch (error) {
+    return { error: `Error fetching saved questions: ${error}` };
   }
 };

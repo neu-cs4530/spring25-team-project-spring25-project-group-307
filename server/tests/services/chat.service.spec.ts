@@ -11,6 +11,7 @@ import {
 } from '../../services/chat.service';
 import { Chat, DatabaseChat } from '../../types/types';
 import { user } from '../mockData.models';
+import { saveMessage } from '../../services/message.service';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockingoose = require('mockingoose');
@@ -96,6 +97,26 @@ describe('Chat service', () => {
       if ('error' in result) {
         expect(result.error).toContain('Error saving chat:');
       }
+    });
+
+    it('should return an error if saveMessage returns an error', async () => {
+      // Mock saveMessage locally for this test
+      const saveMessageSpy = jest.spyOn({ saveMessage }, 'saveMessage');
+      saveMessageSpy.mockResolvedValueOnce({ error: 'Error saving message' });
+
+      // Call the saveChat function
+      const result = await saveChat(mockChatPayload);
+
+      // Assertions
+      expect('error' in result).toBe(true);
+      if ('error' in result) {
+        expect(result.error).toContain(
+          'Error saving chat: Error: Error when saving a message: Message sender is invalid or does not exist.',
+        );
+      }
+
+      // Restore the original implementation of saveMessage
+      saveMessageSpy.mockRestore();
     });
   });
 

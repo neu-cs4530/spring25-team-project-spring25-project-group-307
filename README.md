@@ -1,3 +1,62 @@
+# Setup Guide
+
+## Prerequisites
+Ensure MongoDB is running on your device at `mongodb://127.0.0.1:27017`
+
+## Populating the DB
+In the server directory, run `npm run populate-db` to populate the `fake_so` database with example data.
+
+## Downloading the Source Code
+Download the source code from the release.  
+Unzip the downloaded file.
+
+## Setting Up the Backend
+1. Open a terminal inside the folder where the source code was unzipped.
+2. Navigate to the server directory with:  
+   `cd server`
+3. Create the `.env` file:  
+   `touch .env`
+4. Paste the following line into the file:
+
+`MONGODB_URI=mongodb://127.0.0.1:27017`
+
+`CLIENT_URL=http://localhost:3000`
+
+`PORT=8000`
+
+5. Navigate back to the root directory with:  
+`cd ..`
+6. From the root directory run:  
+`npm install; npm run build --workspace=server`
+7. Start the server with:  
+`npm run start:prod`
+
+You should see the message: "Server is running on port 8000."
+
+## Setting Up the Front End
+1. Open a terminal inside the folder where the source code was unzipped.
+2. Navigate to the client directory with:  
+`cd client`
+3. Create the `.env` file with:  
+`touch .env`
+4. Paste the following line into the `.env` file:
+
+`REACT_APP_SERVER_URL=http://localhost:8000`
+
+5. Navigate back to the root directory with:  
+`cd ..`
+6. From the root directory run:  
+`npm install; npm run build --workspace=shared; npm run build --workspace=client`
+7. Go back to the client directory with:  
+`cd client`
+8. If not already done, install `serve` globally:  
+`npm install -g serve`
+9. Run `serve` with:  
+`serve -s build`
+
+The site should now be running.
+
+[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/fE-a_qEp)
 The individual and team project for this class are designed to mirror the experiences of a software engineer joining a new development team: you will be “onboarded” to our codebase, make several individual contributions, and then form a team to propose, develop and implement new features. The codebase that we’ll be developing on is a Fake Stack Overflow project (let’s call it HuskyFlow). You will get an opportunity to work with the starter code which provides basic skeleton for the app and then additional features will be proposed and implemented by you! All implementation will take place in the TypeScript programming language, using React for the user interface.
 
 ## Getting Started

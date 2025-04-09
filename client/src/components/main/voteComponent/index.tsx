@@ -1,9 +1,11 @@
+import { IconButton, Stack, Typography } from '@mui/material';
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
+import ThumbDownIcon from '@mui/icons-material/ThumbDown';
 import { downvoteQuestion, upvoteQuestion } from '../../../services/questionService';
-import './index.css';
 import useUserContext from '../../../hooks/useUserContext';
 import { PopulatedDatabaseQuestion } from '../../../types/types';
 import useVoteStatus from '../../../hooks/useVoteStatus';
-
+import { useAchievement } from '../../../contexts/AchievementContext';
 /**
  * Interface represents the props for the VoteComponent.
  *
@@ -21,6 +23,7 @@ interface VoteComponentProps {
 const VoteComponent = ({ question }: VoteComponentProps) => {
   const { user } = useUserContext();
   const { count, voted } = useVoteStatus({ question });
+  const { triggerAchievement } = useAchievement();
 
   /**
    * Function to handle upvoting or downvoting a question.
@@ -30,11 +33,13 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
   const handleVote = async (type: string) => {
     try {
       if (question._id) {
+        let response;
         if (type === 'upvote') {
-          await upvoteQuestion(question._id, user.username);
+          response = await upvoteQuestion(question._id, user.username);
         } else if (type === 'downvote') {
-          await downvoteQuestion(question._id, user.username);
+          response = await downvoteQuestion(question._id, user.username);
         }
+        response?.unlockedAchievements?.forEach(triggerAchievement);
       }
     } catch (error) {
       // Handle error
@@ -42,19 +47,34 @@ const VoteComponent = ({ question }: VoteComponentProps) => {
   };
 
   return (
-    <div className='vote-container'>
-      <button
-        className={`vote-button ${voted === 1 ? 'vote-button-upvoted' : ''}`}
-        onClick={() => handleVote('upvote')}>
-        Upvote
-      </button>
-      <button
-        className={`vote-button ${voted === -1 ? 'vote-button-downvoted' : ''}`}
-        onClick={() => handleVote('downvote')}>
-        Downvote
-      </button>
-      <span className='vote-count'>{count}</span>
-    </div>
+    <Stack direction='row' alignItems='center' spacing={1}>
+      {/* Upvote Button */}
+      <IconButton
+        onClick={() => handleVote('upvote')}
+        color={voted === 1 ? 'primary' : 'default'}
+        sx={{
+          'transition': '0.3s',
+          '&:hover': { color: 'primary.main' },
+        }}>
+        <ThumbUpIcon />
+      </IconButton>
+
+      {/* Vote Count */}
+      <Typography variant='h6' sx={{ fontWeight: 'bold' }}>
+        {count}
+      </Typography>
+
+      {/* Downvote Button */}
+      <IconButton
+        onClick={() => handleVote('downvote')}
+        color={voted === -1 ? 'error' : 'default'}
+        sx={{
+          'transition': '0.3s',
+          '&:hover': { color: 'error.main' },
+        }}>
+        <ThumbDownIcon />
+      </IconButton>
+    </Stack>
   );
 };
 

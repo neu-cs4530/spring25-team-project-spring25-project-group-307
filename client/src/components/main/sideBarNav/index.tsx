@@ -1,6 +1,31 @@
-import React, { useState } from 'react';
-import './index.css';
-import { NavLink, useLocation } from 'react-router-dom';
+import Divider from '@mui/material/Divider';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import { useState } from 'react';
+import Box from '@mui/material/Box';
+import CssBaseline from '@mui/material/CssBaseline';
+import Drawer from '@mui/material/Drawer';
+import QuestionMarkIcon from '@mui/icons-material/QuestionMark';
+import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';
+import TopicIcon from '@mui/icons-material/Topic';
+import PublicIcon from '@mui/icons-material/Public';
+import ForwardToInboxIcon from '@mui/icons-material/ForwardToInbox';
+import PeopleIcon from '@mui/icons-material/People';
+import CasinoIcon from '@mui/icons-material/Casino';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
+import TrendingUpIcon from '@mui/icons-material/TrendingUp';
+import ViewStreamIcon from '@mui/icons-material/ViewStream';
+import { Toolbar } from '@mui/material';
+import { NavLink } from 'react-router-dom';
+import Header from '../../header';
+
+/**
+ * The width of the drawer.
+ */
+const DRAWERWIDTH = 240;
 
 /**
  * The SideBarNav component has four menu items: "Questions", "Tags", "Messaging", and "Users".
@@ -8,64 +33,133 @@ import { NavLink, useLocation } from 'react-router-dom';
  * triggers corresponding functions when the menu items are clicked.
  */
 const SideBarNav = () => {
-  const [showOptions, setShowOptions] = useState<boolean>(false);
-  const location = useLocation();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
-  const toggleOptions = () => {
-    setShowOptions(!showOptions);
+  const handleDrawerClose = () => {
+    setIsClosing(true);
+    setMobileOpen(false);
   };
 
-  const isActiveOption = (path: string) =>
-    location.pathname === path ? 'message-option-selected ' : '';
+  const handleDrawerTransitionEnd = () => {
+    setIsClosing(false);
+  };
+
+  const handleDrawerToggle = () => {
+    if (!isClosing) {
+      setMobileOpen(!mobileOpen);
+    }
+  };
+
+  const links1 = [
+    { id: 'menu_questions', title: 'Questions', path: '/home', icon: <QuestionMarkIcon /> },
+    {
+      id: 'menu_communities',
+      title: 'Communities',
+      path: '/communities',
+      icon: <LocalLibraryIcon />,
+    },
+    { id: 'menu_tag', title: 'Tags', path: '/tags', icon: <TopicIcon /> },
+  ];
+
+  const links2 = [
+    {
+      id: 'menu_global_messaging',
+      title: 'Global Message',
+      path: '/messaging',
+      icon: <PublicIcon />,
+    },
+    {
+      id: 'menu_direct_messaging',
+      title: 'Direct Message',
+      path: '/messaging/direct-message',
+      icon: <ForwardToInboxIcon />,
+    },
+  ];
+
+  const links3 = [
+    { id: 'menu_users', title: 'Users', path: '/users', icon: <PeopleIcon /> },
+    { id: 'menu_games', title: 'Games', path: '/games', icon: <CasinoIcon /> },
+    {
+      id: 'menu_leaderboard',
+      title: 'Leaderboard',
+      path: '/leaderboard',
+      icon: <TrendingUpIcon />,
+    },
+    { id: 'menu_feed', title: 'Feed', path: '/feed', icon: <ViewStreamIcon /> },
+    { id: 'menu_saved', title: 'Saved', path: '/saved', icon: <BookmarkIcon /> },
+  ];
 
   return (
-    <div id='sideBarNav' className='sideBarNav'>
-      <NavLink
-        to='/home'
-        id='menu_questions'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
-        Questions
-      </NavLink>
-      <NavLink
-        to='/tags'
-        id='menu_tag'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
-        Tags
-      </NavLink>
-      <NavLink
-        to='/messaging'
-        id='menu_messaging'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}
-        onClick={toggleOptions}>
-        Messaging
-      </NavLink>
-      {showOptions && (
-        <div className='additional-options'>
-          <NavLink
-            to='/messaging'
-            className={`menu_button message-options ${isActiveOption('/messaging')}`}>
-            Global Messages
-          </NavLink>
-          <NavLink
-            to='/messaging/direct-message'
-            className={`menu_button message-options ${isActiveOption('/messaging/direct-message')}`}>
-            Direct Messages
-          </NavLink>
-        </div>
-      )}
-      <NavLink
-        to='/users'
-        id='menu_users'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
-        Users
-      </NavLink>
-      <NavLink
-        to='/games'
-        id='menu_games'
-        className={({ isActive }) => `menu_button ${isActive ? 'menu_selected' : ''}`}>
-        Games
-      </NavLink>
-    </div>
+    <Box sx={{ display: 'flex' }}>
+      <CssBaseline />
+      <Header handleDrawerToggle={handleDrawerToggle} />
+      <Box component='nav' aria-label='mailbox folders'>
+        <Drawer
+          variant='temporary'
+          open={mobileOpen}
+          onTransitionEnd={handleDrawerTransitionEnd}
+          onClose={handleDrawerClose}
+          sx={{
+            'display': { xs: 'block', sm: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWERWIDTH },
+          }}
+          slotProps={{
+            root: {
+              keepMounted: true, // Better open performance on mobile.
+            },
+          }}>
+          <div>
+            <Toolbar />
+            <Divider />
+            <List>
+              {links1.map(link => (
+                <ListItem key={link.id} disablePadding>
+                  <ListItemButton
+                    component={NavLink}
+                    to={link.path}
+                    selected={link.path === window.location.pathname}
+                    onClick={handleDrawerClose}>
+                    <ListItemIcon>{link.icon}</ListItemIcon>
+                    <ListItemText primary={link.title} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+            <Divider />
+            <List>
+              {links2.map(link => (
+                <ListItem key={link.id} disablePadding>
+                  <ListItemButton
+                    component={NavLink}
+                    to={link.path}
+                    selected={link.path === window.location.pathname}
+                    onClick={handleDrawerClose}>
+                    <ListItemIcon>{link.icon}</ListItemIcon>
+                    <ListItemText primary={link.title} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+            <Divider />
+            <List>
+              {links3.map(link => (
+                <ListItem key={link.id} disablePadding>
+                  <ListItemButton
+                    component={NavLink}
+                    to={link.path}
+                    selected={link.path === window.location.pathname}
+                    onClick={handleDrawerClose}>
+                    <ListItemIcon>{link.icon}</ListItemIcon>
+                    <ListItemText primary={link.title} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </div>
+        </Drawer>
+      </Box>
+    </Box>
   );
 };
 

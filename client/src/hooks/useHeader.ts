@@ -1,6 +1,7 @@
-import { ChangeEvent, useState, KeyboardEvent } from 'react';
+import React, { ChangeEvent, useState, KeyboardEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useLoginContext from './useLoginContext';
+import useUserContext from './useUserContext';
 
 /**
  * Custom hook to manage the state and logic for a header input field.
@@ -17,6 +18,8 @@ import useLoginContext from './useLoginContext';
 const useHeader = () => {
   const navigate = useNavigate();
   const { setUser } = useLoginContext();
+  const { user: currentUser } = useUserContext();
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
   const [val, setVal] = useState<string>('');
 
@@ -40,7 +43,8 @@ const useHeader = () => {
       e.preventDefault();
 
       const searchParams = new URLSearchParams();
-      searchParams.set('search', e.currentTarget.value);
+      const target = e.target as HTMLInputElement;
+      searchParams.set('search', target.value);
 
       navigate(`/home?${searchParams.toString()}`);
     }
@@ -54,12 +58,34 @@ const useHeader = () => {
     navigate('/');
   };
 
+  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleViewProfile = () => {
+    navigate(`/user/${currentUser.username}`);
+    handleClose();
+  };
+
+  const handleNavigateHome = () => {
+    navigate('/home');
+  };
+
   return {
     val,
     setVal,
+    anchorEl,
     handleInputChange,
     handleKeyDown,
     handleSignOut,
+    handleMenu,
+    handleClose,
+    handleViewProfile,
+    handleNavigateHome,
   };
 };
 

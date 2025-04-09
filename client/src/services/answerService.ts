@@ -1,4 +1,5 @@
-import { Answer, PopulatedDatabaseAnswer } from '../types/types';
+import { ObjectId } from 'mongodb';
+import { Answer, PopulatedDatabaseAnswer, VoteInterface } from '../types/types';
 import api from './config';
 
 const ANSWER_API_URL = `${process.env.REACT_APP_SERVER_URL}/answer`;
@@ -10,14 +11,72 @@ const ANSWER_API_URL = `${process.env.REACT_APP_SERVER_URL}/answer`;
  * @param ans - The answer object containing the answer details.
  * @throws Error Throws an error if the request fails or the response status is not 200.
  */
-const addAnswer = async (qid: string, ans: Answer): Promise<PopulatedDatabaseAnswer> => {
+const addAnswer = async (
+  qid: string,
+  ans: Answer,
+): Promise<{ answer: PopulatedDatabaseAnswer; unlockedAchievements: string[] }> => {
   const data = { qid, ans };
 
   const res = await api.post(`${ANSWER_API_URL}/addAnswer`, data);
   if (res.status !== 200) {
     throw new Error('Error while creating a new answer');
   }
+  return {
+    answer: res.data,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+const deleteAnswer = async (aid: ObjectId): Promise<PopulatedDatabaseAnswer> => {
+  const res = await api.delete(`${ANSWER_API_URL}/deleteAnswer/${aid}`);
+  if (res.status !== 200) {
+    throw new Error('Error while deleting an answer');
+  }
   return res.data;
 };
 
-export default addAnswer;
+/**
+ * Upvotes an answer.
+ *
+ * @param aid - The answer ID to upvote.
+ * @param username - The username of the user performing the upvote.
+ * @returns VoteInterface containing updated vote data.
+ */
+const upvoteAnswer = async (
+  aid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
+  const data = { aid, username };
+  const res = await api.post(`${ANSWER_API_URL}/upvoteAnswer`, data);
+  if (res.status !== 200) {
+    throw new Error('Error while upvoting the answer');
+  }
+  return {
+    answer: res.data.answer,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+/**
+ * Downvotes an answer.
+ *
+ * @param aid - The answer ID to downvote.
+ * @param username - The username of the user performing the downvote.
+ * @returns VoteInterface containing updated vote data.
+ */
+const downvoteAnswer = async (
+  aid: ObjectId,
+  username: string,
+): Promise<{ answer: VoteInterface; unlockedAchievements: string[] }> => {
+  const data = { aid, username };
+  const res = await api.post(`${ANSWER_API_URL}/downvoteAnswer`, data);
+  if (res.status !== 200) {
+    throw new Error('Error while downvoting the answer');
+  }
+  return {
+    answer: res.data.answer,
+    unlockedAchievements: res.data.unlockedAchievements ?? [],
+  };
+};
+
+export { addAnswer, upvoteAnswer, downvoteAnswer, deleteAnswer };

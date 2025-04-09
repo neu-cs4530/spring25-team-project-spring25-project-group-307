@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { Answer, PopulatedDatabaseAnswer } from './answer';
 import { DatabaseTag, Tag } from './tag';
 import { Comment, DatabaseComment } from './comment';
+import { DatabaseCommunity } from './community';
 
 /**
  * Type representing the possible ordering options for questions.
@@ -37,6 +38,7 @@ export interface Question {
   upVotes: string[];
   downVotes: string[];
   comments: Comment[];
+  reportedBy: User[];
 }
 
 /**
@@ -51,6 +53,7 @@ export interface DatabaseQuestion extends Omit<Question, 'tags' | 'answers' | 'c
   tags: ObjectId[];
   answers: ObjectId[];
   comments: ObjectId[];
+  reportedBy: ObjectId[];
 }
 
 /**
@@ -64,6 +67,8 @@ export interface PopulatedDatabaseQuestion
   tags: DatabaseTag[];
   answers: PopulatedDatabaseAnswer[];
   comments: DatabaseComment[];
+  community?: DatabaseCommunity;
+  askedByRank?: string;
 }
 
 /**
@@ -75,7 +80,11 @@ export type QuestionResponse = DatabaseQuestion | { error: string };
 /**
  * Type representing an object with the vote success message, updated upVotes,
  */
-export type VoteInterface = { msg: string; upVotes: string[]; downVotes: string[] };
+export type VoteInterface = {
+  msg: string;
+  upVotes: string[];
+  downVotes: string[];
+};
 
 /**
  * Type representing possible responses for a vote-related operation.
@@ -109,6 +118,12 @@ export interface FindQuestionByIdRequest extends Request {
   };
   query: {
     username: string;
+  };
+}
+
+export interface GetCommunityQuestionRequest extends Request {
+  params: {
+    qid: ObjectId;
   };
 }
 

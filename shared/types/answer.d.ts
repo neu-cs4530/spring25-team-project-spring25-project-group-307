@@ -14,6 +14,8 @@ export interface Answer {
   ansBy: string;
   ansDateTime: Date;
   comments: Comment[];
+  upVotes: string[];
+  downVotes: string[];
 }
 
 /**
@@ -32,6 +34,7 @@ export interface DatabaseAnswer extends Omit<Answer, 'comments'> {
  */
 export interface PopulatedDatabaseAnswer extends Omit<DatabaseAnswer, 'comments'> {
   comments: DatabaseComment[];
+  ansByRank?: string;
 }
 
 /**
@@ -43,6 +46,24 @@ export interface AddAnswerRequest extends Request {
   body: {
     qid: string;
     ans: Answer;
+  };
+}
+
+export interface DeleteAnswerRequest extends Request {
+  params: {
+    aid: string;
+  };
+}
+
+/**
+ * Interface for the request body when upvoting or downvoting an answer.
+ * - `aid`: The unique identifier of the answer being voted on (body).
+ * - `username`: The username of the user casting the vote (body).
+ */
+export interface AnswerVoteRequest extends Request {
+  body: {
+    aid: string;
+    username: string;
   };
 }
 

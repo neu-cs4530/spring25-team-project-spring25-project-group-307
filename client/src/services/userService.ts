@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { UserCredentials, SafeDatabaseUser } from '../types/types';
+import { ObjectId } from 'mongodb';
+import { UserCredentials, SafeDatabaseUser, PopulatedDatabaseQuestion } from '../types/types';
 import api from './config';
 
 const USER_API_URL = `${process.env.REACT_APP_SERVER_URL}/user`;
@@ -123,6 +124,48 @@ const updateBiography = async (
   return res.data;
 };
 
+const addSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/addSavedQuestion`, {
+    username,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when adding saved question');
+  }
+  return res.data;
+};
+
+const removeSavedQuestion = async (
+  username: string,
+  questionId: ObjectId,
+): Promise<SafeDatabaseUser> => {
+  const res = await api.patch(`${USER_API_URL}/removeSavedQuestion`, {
+    username,
+    questionId,
+  });
+  if (res.status !== 200) {
+    throw new Error('Error when removing saved question');
+  }
+  return res.data;
+};
+
+const getUserWithSavedQuestions = async (
+  username: string,
+): Promise<
+  Omit<SafeDatabaseUser, 'savedQuestions'> & {
+    savedQuestions: PopulatedDatabaseQuestion[];
+  }
+> => {
+  const res = await api.get(`${USER_API_URL}/getUserSavedQuestions/${username}`);
+  if (res.status !== 200) {
+    throw new Error('Error when removing saved question');
+  }
+  return res.data;
+};
+
 export {
   getUsers,
   getUserByUsername,
@@ -131,4 +174,7 @@ export {
   deleteUser,
   resetPassword,
   updateBiography,
+  addSavedQuestion,
+  removeSavedQuestion,
+  getUserWithSavedQuestions,
 };

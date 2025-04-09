@@ -8,6 +8,10 @@ import { Schema } from 'mongoose';
  * - `username`: The username of the user.
  * - `password`: The encrypted password securing the user's account.
  * - `dateJoined`: The date the user joined the platform.
+ * - `biography`: A brief biography of the user.
+ * - 'ranking': The ranking of the user.
+ * - 'score': The score of the user.
+ * - 'achievements': The achievements of the user.
  */
 const userSchema: Schema = new Schema(
   {
@@ -25,6 +29,61 @@ const userSchema: Schema = new Schema(
     biography: {
       type: String,
       default: '',
+    },
+    ranking: {
+      type: String,
+      enum: [
+        'Newcomer Newbie',
+        'Common Contributor',
+        'Skilled Solver',
+        'Expert Explorer',
+        'Mentor Maven',
+        'Master Maverick',
+      ],
+      required: true,
+      default: 'Newcomer Newbie',
+    },
+    score: {
+      type: Number,
+      default: 0,
+    },
+    questionsAsked: {
+      type: Number,
+      default: 0,
+    },
+    responsesGiven: {
+      type: Number,
+      default: 0,
+    },
+    lastLogin: {
+      type: Date,
+      default: null,
+    },
+    achievements: {
+      type: [String],
+      default: [],
+    },
+    savedQuestions: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Question',
+      },
+    ],
+    nimGameWins: {
+      type: Number,
+      default: 0,
+    },
+    upVotesGiven: {
+      type: Number,
+      default: 0,
+    },
+    downVotesGiven: {
+      type: Number,
+      default: 0,
+    },
+    commentsMade: {
+      type: Number,
+      default: 0,
     },
   },
   { collection: 'User' },

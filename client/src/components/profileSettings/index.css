@@ -3,7 +3,6 @@
    .page-container {
     width: 100%;
     min-height: 100vh;
-    background: #f7f7f7;
     display: flex;
     justify-content: center; /* horizontally center the card */
     padding: 40px 0;         /* top & bottom spacing */
@@ -135,4 +134,23 @@
   
   .toggle-password-button:hover {
     background-color: #bbb;
+  }
+
+  .floating-message {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: black;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .floating-message.hide {
+    opacity: 0;
   }

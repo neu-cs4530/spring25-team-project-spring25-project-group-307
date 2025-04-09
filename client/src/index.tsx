@@ -3,10 +3,26 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './index.css';
 import { io } from 'socket.io-client';
 import { useEffect, useState } from 'react';
+import { ThemeProvider, createTheme } from '@mui/material';
+import { AchievementProvider } from './contexts/AchievementContext';
 import FakeStackOverflow from './components/fakestackoverflow';
 import { FakeSOSocket } from './types/types';
 
 const container = document.getElementById('root');
+
+const theme = createTheme({
+  // colorSchemes: {
+  //   dark: true,
+  // },
+  palette: {
+    primary: {
+      main: '#8E735B',
+    },
+    secondary: {
+      main: '#D1B397',
+    },
+  },
+});
 
 const App = () => {
   const [socket, setSocket] = useState<FakeSOSocket | null>(null);
@@ -30,9 +46,13 @@ const App = () => {
   }, [socket, serverURL]);
 
   return (
-    <Router>
-      <FakeStackOverflow socket={socket} />
-    </Router>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <AchievementProvider>
+          <FakeStackOverflow socket={socket} />
+        </AchievementProvider>
+      </Router>
+    </ThemeProvider>
   );
 };
 

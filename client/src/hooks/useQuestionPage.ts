@@ -2,7 +2,8 @@ import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useUserContext from './useUserContext';
 import { AnswerUpdatePayload, OrderType, PopulatedDatabaseQuestion } from '../types/types';
-import { getQuestionsByFilter } from '../services/questionService';
+import { getPublicQuestion, getQuestionsByFilter } from '../services/questionService';
+import { getUserByUsername } from '../services/userService';
 
 /**
  * Custom hook for managing the question page state, filtering, and real-time updates.
@@ -19,7 +20,15 @@ const useQuestionPage = () => {
   const [search, setSearch] = useState<string>('');
   const [questionOrder, setQuestionOrder] = useState<OrderType>('newest');
   const [qlist, setQlist] = useState<PopulatedDatabaseQuestion[]>([]);
-
+  const getUserRank = async (username: string): Promise<string | null> => {
+    try {
+      const user = await getUserByUsername(username);
+      return user.ranking || null;
+    } catch (err) {
+      // error handling
+      return null;
+    }
+  };
   useEffect(() => {
     let pageTitle = 'All Questions';
     let searchString = '';
@@ -46,10 +55,25 @@ const useQuestionPage = () => {
     const fetchData = async () => {
       try {
         const res = await getQuestionsByFilter(questionOrder, search);
-        setQlist(res || []);
+
+        const publicQuestions = await Promise.all(
+          res.map(async q => {
+            const communityQuestion = await getPublicQuestion(q._id).catch(() => null);
+            if (!communityQuestion) return null;
+
+            // Fetch rank and attach it to the question
+            const rank = await getUserRank(communityQuestion.askedBy);
+            return { ...communityQuestion, askedByRank: rank };
+          }),
+        );
+
+        const filteredQuestions = publicQuestions.filter(
+          q => q !== null,
+        ) as PopulatedDatabaseQuestion[];
+
+        setQlist(filteredQuestions);
       } catch (error) {
-        // eslint-disable-next-line no-console
-        console.log(error);
+        // error handling
       }
     };
 
@@ -105,7 +129,7 @@ const useQuestionPage = () => {
     };
   }, [questionOrder, search, socket]);
 
-  return { titleText, qlist, setQuestionOrder };
+  return { questionOrder, titleText, qlist, setQuestionOrder };
 };
 
 export default useQuestionPage;

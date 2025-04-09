@@ -1,9 +1,10 @@
-import React from 'react';
 import { ObjectId } from 'mongodb';
+import PushPinIcon from '@mui/icons-material/PushPin';
+import { Box, Card, CardActions, CardContent, Chip, IconButton, Typography } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import './index.css';
 import { getMetaData } from '../../../../tool';
-import { PopulatedDatabaseQuestion } from '../../../../types/types';
+import { PopulatedDatabaseCommunity, PopulatedDatabaseQuestion } from '../../../../types/types';
 
 /**
  * Interface representing the props for the Question component.
@@ -12,6 +13,10 @@ import { PopulatedDatabaseQuestion } from '../../../../types/types';
  */
 interface QuestionProps {
   question: PopulatedDatabaseQuestion;
+  community?: PopulatedDatabaseCommunity;
+  pinnedQuestion?: boolean;
+  currentRole?: string;
+  handleTogglePinQuestion?: (question: PopulatedDatabaseQuestion) => void;
 }
 
 /**
@@ -21,7 +26,13 @@ interface QuestionProps {
  *
  * @param q - The question object containing question details.
  */
-const QuestionView = ({ question }: QuestionProps) => {
+const QuestionView = ({
+  question,
+  community,
+  pinnedQuestion,
+  currentRole,
+  handleTogglePinQuestion,
+}: QuestionProps) => {
   const navigate = useNavigate();
 
   /**
@@ -46,39 +57,109 @@ const QuestionView = ({ question }: QuestionProps) => {
   };
 
   return (
-    <div
-      className='question right_padding'
-      onClick={() => {
-        if (question._id) {
-          handleAnswer(question._id);
-        }
+    <Card
+      className='content_background'
+      sx={{
+        'display': 'flex',
+        'justifyContent': 'space-between',
+        'marginBottom': 2,
+        'borderRadius': 5,
+        'boxShadow': 3,
+        '&:hover': {
+          backgroundColor: '#F7F7F7',
+        },
       }}>
-      <div className='postStats'>
-        <div>{question.answers.length || 0} answers</div>
-        <div>{question.views.length} views</div>
-      </div>
-      <div className='question_mid'>
-        <div className='postTitle'>{question.title}</div>
-        <div className='question_tags'>
-          {question.tags.map(tag => (
-            <button
-              key={String(tag._id)}
-              className='question_tag_button'
-              onClick={e => {
-                e.stopPropagation();
-                clickTag(tag.name);
-              }}>
-              {tag.name}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className='lastActivity'>
-        <div className='question_author'>{question.askedBy}</div>
-        <div>&nbsp;</div>
-        <div className='question_meta'>asked {getMetaData(new Date(question.askDateTime))}</div>
-      </div>
-    </div>
+      <CardContent
+        sx={{
+          flexGrow: 1,
+          cursor: 'pointer',
+          display: 'flex',
+          justifyContent: 'space-between',
+          transition: 'background-color 0.3s',
+          px: 3,
+        }}
+        onClick={() => {
+          if (question._id) {
+            handleAnswer(question._id);
+          }
+        }}>
+        <Box sx={{ width: '15%' }}>
+          <Typography variant='body2'>{question.answers.length || 0} answers</Typography>
+          <Typography variant='body2'>{question.views.length} views</Typography>
+        </Box>
+        <Box sx={{ width: '65%' }}>
+          <Typography variant='h6' sx={{ fontWeight: 550, marginBottom: 2 }}>
+            {question.title}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+            {question.tags.map(tag => (
+              <Chip
+                key={String(tag._id)}
+                label={tag.name}
+                size='small'
+                onClick={e => {
+                  e.stopPropagation();
+                  clickTag(tag.name);
+                }}
+                sx={{ padding: 1 }}
+              />
+            ))}
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            width: '20%',
+            textAlign: 'right',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'flex-end',
+          }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+            <Typography variant='body2' color='primary.main' sx={{ fontWeight: 600 }}>
+              {question.askedBy}
+            </Typography>
+            {question.askedByRank && (
+              <Chip
+                label={question.askedByRank}
+                size='small'
+                variant='outlined'
+                sx={{
+                  mt: 0.5,
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  borderColor: 'primary.light',
+                  color: 'primary.dark',
+                  backgroundColor: '#e3f2fd',
+                }}
+              />
+            )}
+          </Box>
+          <Typography component='span' variant='body2' color='text.secondary'>
+            asked {getMetaData(new Date(question.askDateTime))}
+          </Typography>
+        </Box>
+        {community && (currentRole === 'ADMIN' || currentRole === 'MODERATOR') ? (
+          <CardActions>
+            <IconButton
+              onClick={event => {
+                event.stopPropagation();
+                if (handleTogglePinQuestion) {
+                  handleTogglePinQuestion(question);
+                }
+              }}
+              color={pinnedQuestion ? 'secondary' : 'default'}>
+              <PushPinIcon />
+            </IconButton>
+          </CardActions>
+        ) : (
+          pinnedQuestion && (
+            <Box sx={{ display: 'flex', alignItems: 'center', pl: 2 }}>
+              <PushPinIcon color='secondary' />
+            </Box>
+          )
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

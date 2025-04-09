@@ -18,6 +18,12 @@ import userController from './controllers/user.controller';
 import messageController from './controllers/message.controller';
 import chatController from './controllers/chat.controller';
 import gameController from './controllers/game.controller';
+import communityController from './controllers/community.controller';
+import preferencesController from './controllers/preferences.controller';
+import interestController from './controllers/interest.controller';
+import feedController from './controllers/feed.controller';
+import UserNotificationManager from './services/userNotificationManager';
+import userNotificationsController from './controllers/userNotifications.controller';
 
 dotenv.config();
 
@@ -30,6 +36,8 @@ const server = http.createServer(app);
 const socket: FakeSOSocket = new Server(server, {
   cors: { origin: '*' },
 });
+
+const userNotificationManager = UserNotificationManager.getInstance();
 
 function connectDatabase() {
   return mongoose.connect(MONGO_URL).catch(err => console.log('MongoDB connection error: ', err));
@@ -45,8 +53,17 @@ function startServer() {
 socket.on('connection', socket => {
   console.log('A user connected ->', socket.id);
 
+  userNotificationManager.addInitialConnection(socket);
+
   socket.on('disconnect', () => {
     console.log('User disconnected');
+    userNotificationManager.removeConnection(socket.id);
+  });
+
+  socket.on('loginUser', username => {
+    console.log(`${username} has logged in `);
+    userNotificationManager.updateConnectionUserLogin(username, socket.id);
+    console.log(userNotificationManager.getLoggedInUsers());
   });
 });
 
@@ -82,6 +99,12 @@ app.use('/messaging', messageController(socket));
 app.use('/user', userController(socket));
 app.use('/chat', chatController(socket));
 app.use('/games', gameController(socket));
+app.use('/community', communityController(socket));
+app.use('/preferences', preferencesController());
+app.use('/interest', interestController(socket));
+app.use('/feed', feedController(socket));
+app.use('/feedItem', feedController(socket));
+app.use('/notifications', userNotificationsController());
 
 // Export the app instance
 export { app, server, startServer };

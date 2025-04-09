@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button, Typography } from '@mui/material';
 import useNewQuestion from '../../../hooks/useNewQuestion';
 import Form from '../baseComponents/form';
 import Input from '../baseComponents/input';
@@ -50,14 +51,17 @@ const NewQuestionPage = () => {
         err={tagErr}
       />
       <div className='btn_indicator_container'>
-        <button
-          className='form_postBtn'
+        <Button
+          variant='contained'
           onClick={() => {
             postQuestion();
-          }}>
+          }}
+          sx={{ mb: 1 }}>
           Post Question
-        </button>
-        <div className='mandatory_indicator'>* indicates mandatory fields</div>
+        </Button>
+        <Typography variant='body1' color='error'>
+          * indicates mandatory fields
+        </Typography>
       </div>
     </Form>
   );

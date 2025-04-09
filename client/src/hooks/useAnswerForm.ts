@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { validateHyperlink } from '../tool';
-import addAnswer from '../services/answerService';
+import { addAnswer } from '../services/answerService';
+import { useAchievement } from '../contexts/AchievementContext';
 import useUserContext from './useUserContext';
 import { Answer } from '../types/types';
 
@@ -16,7 +17,7 @@ import { Answer } from '../types/types';
 const useAnswerForm = () => {
   const { qid } = useParams();
   const navigate = useNavigate();
-
+  const { triggerAchievement } = useAchievement();
   const { user } = useUserContext();
   const [text, setText] = useState<string>('');
   const [textErr, setTextErr] = useState<string>('');
@@ -59,13 +60,23 @@ const useAnswerForm = () => {
       ansBy: user.username,
       ansDateTime: new Date(),
       comments: [],
+      upVotes: [],
+      downVotes: [],
     };
 
-    const res = await addAnswer(questionID, answer);
+    try {
+      const res = await addAnswer(questionID, answer);
 
-    if (res && res._id) {
-      // navigate to the question that was answered
-      navigate(`/question/${questionID}`);
+      if (res.unlockedAchievements?.length > 0) {
+        res.unlockedAchievements.forEach(triggerAchievement);
+      }
+
+      if (res) {
+        navigate(`/question/${questionID}`);
+      }
+    } catch (err) {
+      // catch error
+      setTextErr('Something went wrong while submitting your answer.');
     }
   };
 
