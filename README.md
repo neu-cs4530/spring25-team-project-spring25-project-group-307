@@ -18,7 +18,11 @@ Unzip the downloaded file.
    `touch .env`
 4. Paste the following line into the file:
 
-`MONGODB_URI=mongodb://127.0.0.1:27017 CLIENT_URL=http://localhost:3000 PORT=8000`
+`MONGODB_URI=mongodb://127.0.0.1:27017`
+
+`CLIENT_URL=http://localhost:3000`
+
+`PORT=8000`
 
 5. Navigate back to the root directory with:  
 `cd ..`
